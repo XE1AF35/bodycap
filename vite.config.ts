@@ -11,7 +11,21 @@ export default defineConfig({
     alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
   },
   test: {
+    coverage: {
+      provider: 'v8',
+      // The domain logic is the part that must be fully tested; the UI is covered by its own tests
+      include: ['src/core/**/*.ts'],
+      thresholds: { lines: 95, branches: 95, functions: 95, statements: 95 },
+    },
     projects: [
+      {
+        extends: true,
+        test: {
+          name: 'core',
+          include: ['tests/core/**/*.test.ts'],
+          environment: 'node',
+        },
+      },
       {
         extends: true,
         test: {
