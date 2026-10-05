@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+
+# Build output and caches
+dist/
+*.tsbuildinfo
+
+# Test output
+coverage/
+playwright-report/
+test-results/
+blob-report/
+
+# Environment variables (never commit secrets)
+.env
+.env.*
+!.env.example
+
+# Backups exported from the app (they hold gear lists, serial numbers, and values)
+glassbox-backup-*.json
+
+# Logs
+*.log
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp

@@ -1,0 +1,20 @@
+# pnpm settings for this single-package project (pnpm reads them from here, not .npmrc).
+
+# Supply-chain safety. Only install versions that have been public for at least a day
+# (pnpm's default, kept explicit so it isn't lost), refuse a package whose publishing
+# trust has dropped since earlier releases, and block git or tarball dependencies
+# arriving through other packages.
+minimumReleaseAge: 1440
+trustPolicy: no-downgrade
+blockExoticSubdeps: true
+
+# Exact versions let past the trust check. Each one is a legitimate release that
+# looks like a trust drop only because pnpm compares publish dates, not version lines.
+trustPolicyExclude:
+  # Official 6.x backport of the CVE-2022-25883 ReDoS fix (10 Jul 2023), published by
+  # the npm CLI team without provenance after the 7.x line had it. Arrives through
+  # eslint-plugin-react-hooks > @babel/core 7.
+  - 'semver@6.3.1'
+
+# Install scripts are off unless a package is named here
+allowBuilds: {}
