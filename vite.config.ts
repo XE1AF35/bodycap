@@ -29,6 +29,16 @@ export default defineConfig({
       {
         extends: true,
         test: {
+          // Storage tests run on fake-indexeddb, passed to Dexie per test, so no browser is needed
+          name: 'data',
+          include: ['tests/data/**/*.test.ts'],
+          environment: 'node',
+          setupFiles: ['tests/setup-data.ts'],
+        },
+      },
+      {
+        extends: true,
+        test: {
           name: 'ui',
           include: ['tests/ui/**/*.test.tsx'],
           environment: 'jsdom',

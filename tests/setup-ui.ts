@@ -1,5 +1,7 @@
-// Shared setup for UI tests: DOM matchers such as toBeInTheDocument, and a clean DOM after each test.
+// Shared setup for UI tests: DOM matchers such as toBeInTheDocument, a clean DOM after each test,
+// and fake-indexeddb for components that read storage (see setup-data.ts for why it's global).
 import '@testing-library/jest-dom/vitest'
+import 'fake-indexeddb/auto'
 import { cleanup } from '@testing-library/react'
 import { afterEach } from 'vitest'
 
