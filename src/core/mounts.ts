@@ -43,6 +43,77 @@ export const MOUNT_LABELS: Record<MountId, string> = {
   'canon-fd': 'Canon FD',
 }
 
+/** Millimetres from the mount to the sensor, as the makers publish them */
+export const FLANGE_MM: Record<MountId, number> = {
+  'canon-ef': 44,
+  'canon-ef-s': 44,
+  'canon-ef-m': 18,
+  'canon-rf': 20,
+  'nikon-f': 46.5,
+  'nikon-z': 16,
+  'sony-a': 44.5,
+  'sony-e': 18,
+  'fujifilm-x': 17.7,
+  'fujifilm-g': 26.7,
+  'micro-four-thirds': 19.25,
+  'l-mount': 20,
+  'pentax-k': 45.46,
+  'leica-m': 27.8,
+  'hasselblad-xcd': 18.14,
+  m42: 45.46,
+  'canon-fd': 42,
+}
+
+// An EF-S lens would hit the mirror of a full-frame EF camera, so only EF-S cameras take both
+const ALSO_TAKES: Partial<Record<MountId, readonly MountId[]>> = {
+  'canon-ef-s': ['canon-ef'],
+}
+
+/** Whether a lens goes straight onto a camera, with no adapter. */
+export function fitsNatively(lens: MountId, camera: MountId): boolean {
+  return lens === camera || (ALSO_TAKES[camera]?.includes(lens) ?? false)
+}
+
+const MIRRORLESS: readonly MountId[] = [
+  'canon-ef-m',
+  'canon-rf',
+  'nikon-z',
+  'sony-e',
+  'fujifilm-x',
+  'fujifilm-g',
+  'micro-four-thirds',
+  'l-mount',
+  'hasselblad-xcd',
+]
+
+// An SLR lens sits far enough forward for an adapter to any mirrorless camera, Leica M included
+const FROM_SLR: readonly MountId[] = [...MIRRORLESS, 'leica-m']
+
+/**
+ * The cameras each lens mount can go on through a plain adapter, with no glass in it. Flange
+ * distance alone doesn't decide this: an RF lens sits 2 mm further out than Sony E needs, but it's
+ * too wide to fit, so the pairs are listed as the adapters actually exist.
+ */
+export const ADAPTS_TO: Record<MountId, readonly MountId[]> = {
+  'canon-ef': FROM_SLR,
+  'canon-ef-s': FROM_SLR,
+  'canon-ef-m': [],
+  'canon-rf': [],
+  'nikon-f': [...FROM_SLR, 'canon-ef', 'canon-ef-s', 'sony-a'],
+  'nikon-z': [],
+  'sony-a': FROM_SLR,
+  'sony-e': ['nikon-z'],
+  'fujifilm-x': ['nikon-z'],
+  'fujifilm-g': [],
+  'micro-four-thirds': [],
+  'l-mount': [],
+  'pentax-k': [...FROM_SLR, 'canon-ef', 'canon-ef-s'],
+  'leica-m': MIRRORLESS,
+  'hasselblad-xcd': [],
+  m42: [...FROM_SLR, 'canon-ef', 'canon-ef-s', 'pentax-k'],
+  'canon-fd': FROM_SLR,
+}
+
 /** Sensor sizes, from largest to smallest: a body's sensor, or the image circle a lens covers */
 export const SENSOR_FORMATS = ['medium-format', 'full-frame', 'aps-c', 'micro-four-thirds'] as const
 

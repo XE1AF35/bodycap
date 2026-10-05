@@ -1,0 +1,189 @@
+// Lens and camera compatibility: native fits, crop mode, adapters you own, and adapters you'd need.
+import { describe, expect, it } from 'vitest'
+import { checkCompatibility, type Adapter, type Body, type Lens } from '@/core/compatibility'
+
+const ftz: Adapter = {
+  id: 'ftz',
+  adapterFrom: 'nikon-f',
+  adapterTo: 'nikon-z',
+  adapterAutofocus: true,
+}
+const m42ToEf: Adapter = { id: 'm42-ef', adapterFrom: 'm42', adapterTo: 'canon-ef' }
+const efToRf: Adapter = {
+  id: 'ef-rf',
+  adapterFrom: 'canon-ef',
+  adapterTo: 'canon-rf',
+  adapterAutofocus: true,
+}
+
+describe('checkCompatibility', () => {
+  it.each<[string, boolean, Lens, Body]>([
+    [
+      'an RF lens on an RF camera',
+      false,
+      { mount: 'canon-rf', lensCoverage: 'full-frame' },
+      { mount: 'canon-rf', sensorFormat: 'full-frame' },
+    ],
+    [
+      'a full-frame lens on an APS-C camera',
+      false,
+      { mount: 'sony-e', lensCoverage: 'full-frame' },
+      { mount: 'sony-e', sensorFormat: 'aps-c' },
+    ],
+    [
+      'an EF lens on an EF-S camera',
+      false,
+      { mount: 'canon-ef', lensCoverage: 'full-frame' },
+      { mount: 'canon-ef-s', sensorFormat: 'aps-c' },
+    ],
+    [
+      'an RF-S lens on a full-frame RF camera',
+      true,
+      { mount: 'canon-rf', lensCoverage: 'aps-c' },
+      { mount: 'canon-rf', sensorFormat: 'full-frame' },
+    ],
+    [
+      'a DX lens on a full-frame Nikon Z camera',
+      true,
+      { mount: 'nikon-z', lensCoverage: 'aps-c' },
+      { mount: 'nikon-z', sensorFormat: 'full-frame' },
+    ],
+    [
+      'a lens whose coverage is unknown',
+      false,
+      { mount: 'nikon-z' },
+      { mount: 'nikon-z', sensorFormat: 'full-frame' },
+    ],
+    [
+      'a camera whose sensor is unknown',
+      false,
+      { mount: 'nikon-z', lensCoverage: 'aps-c' },
+      { mount: 'nikon-z' },
+    ],
+  ])('fits %s natively, cropping: %s', (_name, crop, lens, body) => {
+    expect(checkCompatibility(lens, body, [ftz])).toEqual({ fit: 'native', crop })
+  })
+
+  it.each<[string, Lens, Body, readonly Adapter[], Adapter, boolean]>([
+    [
+      'an F lens on a Z camera with an FTZ',
+      { mount: 'nikon-f', lensCoverage: 'full-frame' },
+      { mount: 'nikon-z', sensorFormat: 'full-frame' },
+      [m42ToEf, ftz],
+      ftz,
+      false,
+    ],
+    [
+      'an M42 lens on an EF-S camera with a manual focus adapter',
+      { mount: 'm42' },
+      { mount: 'canon-ef-s', sensorFormat: 'aps-c' },
+      [m42ToEf],
+      m42ToEf,
+      false,
+    ],
+    [
+      'an EF-S lens on a full-frame RF camera with an EF adapter',
+      { mount: 'canon-ef-s', lensCoverage: 'aps-c' },
+      { mount: 'canon-rf', sensorFormat: 'full-frame' },
+      [efToRf],
+      efToRf,
+      true,
+    ],
+  ])('works with %s', (_name, lens, body, adapters, adapter, crop) => {
+    expect(checkCompatibility(lens, body, adapters)).toEqual({
+      fit: 'adapter',
+      adapterId: adapter.id,
+      autofocus: adapter.adapterAutofocus ?? false,
+      crop,
+    })
+  })
+
+  it('suggests an adapter that keeps autofocus over one that does not', () => {
+    const manualFtz: Adapter = { id: 'manual-ftz', adapterFrom: 'nikon-f', adapterTo: 'nikon-z' }
+    expect(
+      checkCompatibility({ mount: 'nikon-f' }, { mount: 'nikon-z' }, [manualFtz, ftz]),
+    ).toEqual({ fit: 'adapter', adapterId: 'ftz', autofocus: true, crop: false })
+  })
+
+  it('uses an adapter you own even for a pair that usually needs glass', () => {
+    const fdToEf: Adapter = { id: 'fd-ef', adapterFrom: 'canon-fd', adapterTo: 'canon-ef' }
+    expect(checkCompatibility({ mount: 'canon-fd' }, { mount: 'canon-ef' }, [fdToEf])).toEqual({
+      fit: 'adapter',
+      adapterId: 'fd-ef',
+      autofocus: false,
+      crop: false,
+    })
+  })
+
+  it('ignores adapters whose mounts are missing or do not match', () => {
+    const halfRecorded: Adapter = { id: 'half', adapterFrom: 'nikon-f' }
+    const otherWay: Adapter = { id: 'other-way', adapterFrom: 'nikon-z', adapterTo: 'nikon-f' }
+    expect(
+      checkCompatibility({ mount: 'nikon-f' }, { mount: 'nikon-z' }, [halfRecorded, otherWay]),
+    ).toEqual({ fit: 'needs-adapter', crop: false })
+  })
+
+  it.each<[string, boolean, Lens, Body]>([
+    [
+      'an F lens on a Z camera',
+      false,
+      { mount: 'nikon-f', lensCoverage: 'full-frame' },
+      { mount: 'nikon-z', sensorFormat: 'full-frame' },
+    ],
+    [
+      'an EF lens on a Sony E camera',
+      false,
+      { mount: 'canon-ef', lensCoverage: 'full-frame' },
+      { mount: 'sony-e', sensorFormat: 'full-frame' },
+    ],
+    [
+      'an EF-S lens on a full-frame Sony E camera',
+      true,
+      { mount: 'canon-ef-s', lensCoverage: 'aps-c' },
+      { mount: 'sony-e', sensorFormat: 'full-frame' },
+    ],
+    [
+      'a Leica M lens on a Micro Four Thirds camera',
+      false,
+      { mount: 'leica-m' },
+      { mount: 'micro-four-thirds' },
+    ],
+    ['a Sony E lens on a Nikon Z camera', false, { mount: 'sony-e' }, { mount: 'nikon-z' }],
+    ['a Fujifilm X lens on a Nikon Z camera', false, { mount: 'fujifilm-x' }, { mount: 'nikon-z' }],
+    ['an M42 lens on a Pentax K camera', false, { mount: 'm42' }, { mount: 'pentax-k' }],
+    ['a Pentax K lens on an EF camera', false, { mount: 'pentax-k' }, { mount: 'canon-ef' }],
+    [
+      'a Canon FD lens on a Fujifilm G camera',
+      false,
+      { mount: 'canon-fd' },
+      { mount: 'fujifilm-g' },
+    ],
+  ])('needs an adapter for %s, cropping: %s', (_name, crop, lens, body) => {
+    expect(checkCompatibility(lens, body, [efToRf])).toEqual({ fit: 'needs-adapter', crop })
+  })
+
+  it.each<[string, Lens, Body]>([
+    ['an EF-S lens on a full-frame EF camera', { mount: 'canon-ef-s' }, { mount: 'canon-ef' }],
+    ['an RF lens on a Sony E camera', { mount: 'canon-rf' }, { mount: 'sony-e' }],
+    ['an L-Mount lens on a Sony E camera', { mount: 'l-mount' }, { mount: 'sony-e' }],
+    ['an RF lens on an EF-M camera', { mount: 'canon-rf' }, { mount: 'canon-ef-m' }],
+    ['a Nikon Z lens on a Canon RF camera', { mount: 'nikon-z' }, { mount: 'canon-rf' }],
+    ['a Canon FD lens on an EF camera', { mount: 'canon-fd' }, { mount: 'canon-ef' }],
+    ['a Sony A lens on an EF camera', { mount: 'sony-a' }, { mount: 'canon-ef' }],
+    ['a Fujifilm G lens on a Sony E camera', { mount: 'fujifilm-g' }, { mount: 'sony-e' }],
+    [
+      'a Hasselblad XCD lens on a Nikon Z camera',
+      { mount: 'hasselblad-xcd' },
+      { mount: 'nikon-z' },
+    ],
+  ])('rules out %s', (_name, lens, body) => {
+    expect(checkCompatibility(lens, body, [ftz, efToRf])).toEqual({ fit: 'incompatible' })
+  })
+
+  it.each<[string, Lens, Body]>([
+    ['the lens', { lensCoverage: 'full-frame' }, { mount: 'sony-e' }],
+    ['the camera', { mount: 'sony-e' }, { sensorFormat: 'full-frame' }],
+  ])("can't tell without the mount of %s", (_name, lens, body) => {
+    expect(checkCompatibility(lens, body, [ftz])).toEqual({ fit: 'unknown' })
+  })
+})
