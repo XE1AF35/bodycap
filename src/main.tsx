@@ -4,7 +4,7 @@ import { App } from '@/ui/App'
 
 const root = document.getElementById('root')
 if (!root) {
-  throw new Error('Glassbox could not start: index.html has no #root element.')
+  throw new Error('Bodycap could not start: index.html has no #root element.')
 }
 
 createRoot(root).render(

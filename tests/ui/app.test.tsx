@@ -4,8 +4,8 @@ import { describe, expect, it } from 'vitest'
 import { App } from '@/ui/App'
 
 describe('App', () => {
-  it('shows the Glassbox heading', () => {
+  it('shows the Bodycap heading', () => {
     render(<App />)
-    expect(screen.getByRole('heading', { level: 1, name: 'Glassbox' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 1, name: 'Bodycap' })).toBeInTheDocument()
   })
 })

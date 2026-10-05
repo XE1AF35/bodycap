@@ -17,7 +17,7 @@ blob-report/
 !.env.example
 
 # Backups exported from the app (they hold gear lists, serial numbers, and values)
-glassbox-backup-*.json
+bodycap-backup-*.json
 
 # Logs
 *.log

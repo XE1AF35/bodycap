@@ -3,8 +3,8 @@ import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
-  // GitHub Pages serves the app from /glassbox/. BASE_PATH lets another host use its own path.
-  base: process.env.BASE_PATH ?? '/glassbox/',
+  // GitHub Pages serves the app from /bodycap/. BASE_PATH lets another host use its own path.
+  base: process.env.BASE_PATH ?? '/bodycap/',
   plugins: [react()],
   resolve: {
     // Same @/ alias as tsconfig.app.json
