@@ -62,6 +62,13 @@ export const STATUS_LABELS: Record<Status, string> = {
   lost: 'Lost',
 }
 
+const HELD: ReadonlySet<Status> = new Set(['owned', 'lent-out', 'in-repair'])
+
+/** Whether you have the item, even while it's lent out or being repaired. */
+export function isHeld(status: Status): boolean {
+  return HELD.has(status)
+}
+
 export const CONDITIONS = [
   'new',
   'like-new',
