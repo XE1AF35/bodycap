@@ -40,7 +40,7 @@ function SortableHead({ sortKey, label, sort, descending, onSort }: SortableHead
     >
       <button
         type="button"
-        className="inline-flex items-center gap-1 rounded-sm hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+        className="inline-flex items-center gap-1 rounded-sm hover:underline"
         onClick={() => {
           onSort(sortKey)
         }}

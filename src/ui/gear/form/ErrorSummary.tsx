@@ -28,7 +28,7 @@ export function ErrorSummary({
       role="alert"
       tabIndex={-1}
       aria-labelledby="error-summary-title"
-      className="mb-6 rounded-lg border-2 border-destructive p-4 outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className="mb-6 rounded-lg border-2 border-destructive p-4"
     >
       <h2 id="error-summary-title" className="mb-2 text-lg font-semibold">
         There's a problem

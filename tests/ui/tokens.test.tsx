@@ -66,6 +66,7 @@ const PAIRS = [
   ['input', 'card', NON_TEXT],
   ['ring', 'background', NON_TEXT],
   ['ring', 'card', NON_TEXT],
+  ['ring', 'popover', NON_TEXT],
   ['signal', 'background', NON_TEXT],
   ['signal', 'card', NON_TEXT],
 ] as const

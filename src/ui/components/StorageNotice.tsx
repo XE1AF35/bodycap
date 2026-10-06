@@ -19,9 +19,11 @@ export function StorageNotice() {
   return (
     <div
       role="alert"
-      className="mb-6 flex flex-wrap items-center gap-3 rounded-lg border border-destructive/50 bg-destructive/10 px-4 py-3"
+      className="mb-6 flex flex-wrap items-start gap-x-3 gap-y-2 rounded-lg border border-border bg-card px-4 py-3 text-card-foreground motion-safe:animate-rise-in"
     >
-      <p>{MESSAGES[problem]}</p>
+      {/* The red dot that marks alerts, beside the first line */}
+      <span className="mt-2 size-2 shrink-0 rounded-full bg-signal" />
+      <p className="min-w-0 flex-1">{MESSAGES[problem]}</p>
       {problem === 'updated-elsewhere' && (
         <Button
           variant="outline"

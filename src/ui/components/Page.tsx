@@ -23,7 +23,11 @@ export function Page({ title, children }: PageProps) {
   return (
     <>
       {/* Focusable from script only, so it isn't an extra tab stop */}
-      <h1 ref={headingRef} tabIndex={-1} className="mb-4 text-2xl font-semibold outline-none">
+      <h1
+        ref={headingRef}
+        tabIndex={-1}
+        className="mb-6 border-b border-border pb-3 text-title font-semibold tracking-tight outline-none"
+      >
         {title}
       </h1>
       {children}

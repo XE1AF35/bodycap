@@ -17,7 +17,7 @@ export function StatusCounts({ items }: { readonly items: readonly Gear[] }) {
             <Link
               to="/gear"
               search={{ status }}
-              className="block rounded-lg border border-border p-4 hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+              className="block rounded-lg border border-border p-4 hover:bg-muted"
             >
               <span className="block text-2xl font-semibold tabular-nums">{counts[status]}</span>{' '}
               <span className="text-muted-foreground">{STATUS_LABELS[status]}</span>

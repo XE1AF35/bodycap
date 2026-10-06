@@ -25,6 +25,8 @@ describe('app shell', () => {
     const links = within(screen.getByRole('navigation', { name: 'Main' })).getAllByRole('link')
     const current = links.filter((item) => item.getAttribute('aria-current') === 'page')
     expect(current.map((item) => item.textContent)).toEqual([link])
+    // The red dot sits beside the current page's link and no other
+    expect(links.filter((item) => item.querySelector('.bg-signal') !== null)).toEqual(current)
     expect(document.title).toBe(`${title} | Bodycap`)
   })
 

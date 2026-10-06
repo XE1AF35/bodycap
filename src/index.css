@@ -185,6 +185,21 @@
     /* Full strength, since a faded outline can drop below the 3:1 a focus indicator needs */
     @apply border-border outline-ring;
   }
+  /*
+   * One focus outline for everything, just outside the edge. Components don't draw their own: the
+   * box-shadow rings shadcn ships with are half strength and vanish in Windows high contrast mode.
+   */
+  /* A date field's focus sits on its day, month, or year inside it, which :focus-visible misses */
+  :focus-visible,
+  input[type='date']:focus {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
+  }
+  /* Chrome's calendar button inside a date field takes focus too, with a faint ring of its own */
+  input[type='date']::-webkit-calendar-picker-indicator:focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 1px;
+  }
   body {
     @apply bg-background text-foreground;
   }
