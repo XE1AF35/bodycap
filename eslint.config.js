@@ -45,6 +45,12 @@ export default defineConfig([
   },
 
   {
+    // Plain scripts copied as they are into the build, such as theme-init.js, run in the browser
+    files: ['public/**/*.js'],
+    languageOptions: { globals: globals.browser, sourceType: 'script' },
+  },
+
+  {
     // The domain logic stays pure so it can be tested on its own and reused by any UI or store
     files: ['src/core/**/*.ts'],
     rules: {

@@ -1,0 +1,53 @@
+// The app's pages and their addresses. The app uses hash history (#/gear), because GitHub Pages
+// can't send app addresses back to index.html. Each page loads its own code on first visit.
+import {
+  createRootRoute,
+  createRoute,
+  createRouter,
+  lazyRouteComponent,
+  type RouterHistory,
+} from '@tanstack/react-router'
+import { Layout } from '@/ui/Layout'
+import { ErrorPage } from '@/ui/pages/ErrorPage'
+import { NotFoundPage } from '@/ui/pages/NotFoundPage'
+
+const rootRoute = createRootRoute({ component: Layout })
+
+const dashboardRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/',
+  component: lazyRouteComponent(() => import('@/ui/pages/DashboardPage'), 'DashboardPage'),
+})
+
+const gearRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: 'gear',
+  component: lazyRouteComponent(() => import('@/ui/pages/GearPage'), 'GearPage'),
+})
+
+const settingsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: 'settings',
+  component: lazyRouteComponent(() => import('@/ui/pages/SettingsPage'), 'SettingsPage'),
+})
+
+const routeTree = rootRoute.addChildren([dashboardRoute, gearRoute, settingsRoute])
+
+/** The browser gets hash history; tests pass in memory history. */
+export function createAppRouter(history: RouterHistory) {
+  return createRouter({
+    routeTree,
+    history,
+    // Rendered inside the layout, so the header and navigation stay usable
+    defaultErrorComponent: ErrorPage,
+    defaultNotFoundComponent: NotFoundPage,
+  })
+}
+
+export type AppRouter = ReturnType<typeof createAppRouter>
+
+declare module '@tanstack/react-router' {
+  interface Register {
+    router: AppRouter
+  }
+}

@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
+import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vitest/config'
 
@@ -12,7 +13,7 @@ const { version } = JSON.parse(
 export default defineConfig({
   // GitHub Pages serves the app from /bodycap/. BASE_PATH lets another host use its own path.
   base: process.env.BASE_PATH ?? '/bodycap/',
-  plugins: [react()],
+  plugins: [react(), tailwindcss()],
   // Backups record which version of the app made them
   define: { __APP_VERSION__: JSON.stringify(version) },
   resolve: {
