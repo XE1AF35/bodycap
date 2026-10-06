@@ -10,6 +10,7 @@ import { createRepositories } from '@/data/dexie-repositories'
 import { createStorageHelpers } from '@/data/storage'
 import { createAppRouter } from '@/router'
 import { App } from '@/ui/App'
+import { createUpdateOffer } from '@/ui/pwa/update-offer'
 import type { Services } from '@/ui/services'
 
 /** A connection status whose problems the test reports by hand */
@@ -43,7 +44,12 @@ export function testServices({
   storage = createStorageHelpers(undefined),
 }: Partial<Pick<Services, 'connection' | 'storage'>> = {}): Services {
   const db = new BodycapDatabase({ indexedDB: new IDBFactory(), IDBKeyRange })
-  return { repositories: createRepositories(db), connection, storage }
+  return {
+    repositories: createRepositories(db),
+    connection,
+    storage,
+    updates: createUpdateOffer(),
+  }
 }
 
 /** Renders the app at a path, as if typed into the address bar */

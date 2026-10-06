@@ -18,3 +18,12 @@ trustPolicyExclude:
 
 # Install scripts are off unless a package is named here
 allowBuilds: {}
+
+# Reviewed replacements for versions that dependencies ask for
+overrides:
+  # workbox-build 7.4.1 asks for 3.0.0-pre1 of this fork of @surma/rollup-plugin-off-main-thread,
+  # which was published without provenance. Its runnable code (index.js and loader.ejs) is the same
+  # as 2.5.0, published 33 minutes earlier with GitHub Actions provenance: only line endings,
+  # devDependencies, and committed test output differ (checked 6 Oct 2026). So the build that can
+  # be verified is used instead. Look again when Workbox next updates.
+  '@trickfilm400/rollup-plugin-off-main-thread': '2.5.0'

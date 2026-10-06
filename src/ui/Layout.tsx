@@ -5,6 +5,7 @@ import { SiteHeader } from '@/ui/components/SiteHeader'
 import { MAIN_ID, SkipLink } from '@/ui/components/SkipLink'
 import { StorageNotice } from '@/ui/components/StorageNotice'
 import { NavigationCountContext } from '@/ui/navigation-focus'
+import { UpdatePrompt } from '@/ui/pwa/UpdatePrompt'
 
 export function Layout() {
   const router = useRouter()
@@ -30,6 +31,7 @@ export function Layout() {
         <StorageNotice />
         <Outlet />
       </main>
+      <UpdatePrompt />
     </NavigationCountContext>
   )
 }

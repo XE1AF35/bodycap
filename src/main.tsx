@@ -1,4 +1,6 @@
 // Starts Bodycap: opens storage, builds the router, and renders the app.
+// First, before anything that creates a Zod schema
+import './zod-config'
 import { createHashHistory } from '@tanstack/react-router'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
@@ -8,6 +10,8 @@ import { createRepositories } from '@/data/dexie-repositories'
 import { createStorageHelpers } from '@/data/storage'
 import { createAppRouter } from '@/router'
 import { App } from '@/ui/App'
+import { registerServiceWorker } from '@/ui/pwa/register'
+import { createUpdateOffer } from '@/ui/pwa/update-offer'
 import './index.css'
 
 const root = document.getElementById('root')
@@ -20,8 +24,12 @@ const services = {
   repositories: createRepositories(db),
   connection: watchConnection(db),
   storage: createStorageHelpers(navigator.storage),
+  updates: createUpdateOffer(),
 }
 const router = createAppRouter(createHashHistory())
+
+// The development server has no service worker, so it's only registered in the built app
+if (import.meta.env.PROD) registerServiceWorker(services.updates)
 
 createRoot(root).render(
   <StrictMode>

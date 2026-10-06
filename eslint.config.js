@@ -39,8 +39,8 @@ export default defineConfig([
   },
 
   {
-    // Config files at the project root run in Node
-    files: ['*.{js,ts}'],
+    // Config files at the project root, and the build helpers they use, run in Node
+    files: ['*.{js,ts}', 'build/**/*.ts'],
     languageOptions: { globals: globals.node },
   },
 
