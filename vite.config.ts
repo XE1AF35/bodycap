@@ -16,8 +16,8 @@ const { version } = JSON.parse(
 // GitHub Pages serves the app from /bodycap/. BASE_PATH lets another host use its own path.
 const base = process.env.BASE_PATH ?? '/bodycap/'
 const outDir = 'dist'
-// The dark theme's background, which is the default
-const DARK = '#0a0a0a'
+// The dark theme's background (--background in index.css), which is the default
+const DARK = '#0d0e11'
 
 export default defineConfig({
   base,
@@ -60,8 +60,8 @@ export default defineConfig({
         ],
       },
       workbox: {
-        // Everything is precached, icons included, so the whole app works offline
-        globPatterns: ['**/*.{js,css,html,svg,png,ico}'],
+        // Everything is precached, icons and the data font included, so the whole app works offline
+        globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
       },
     }),
     securityMeta(),
@@ -109,6 +109,8 @@ export default defineConfig({
           // the worker warms up, and more under coverage. A test that truly hangs still fails.
           testTimeout: 15_000,
           setupFiles: ['tests/setup-ui.ts'],
+          // Vitest empties CSS imports unless asked, and the token test reads index.css as text
+          css: { include: [/src\/index\.css/] },
         },
       },
     ],
