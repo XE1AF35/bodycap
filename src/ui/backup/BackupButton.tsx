@@ -6,7 +6,8 @@ import { saveFile } from '@/ui/backup/save-file'
 import { Button } from '@/ui/components/ui/button'
 import { useServices } from '@/ui/services'
 
-export function BackupButton() {
+/** The label can say more where that helps, such as before a restore */
+export function BackupButton({ label = 'Back up now' }: { readonly label?: string }) {
   const { repositories } = useServices()
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState('')
@@ -37,7 +38,7 @@ export function BackupButton() {
           void backUp()
         }}
       >
-        Back up now
+        {label}
       </Button>
       <p role="status" className="text-sm text-muted-foreground">
         {message}

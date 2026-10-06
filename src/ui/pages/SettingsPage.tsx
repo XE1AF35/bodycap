@@ -1,10 +1,21 @@
-// Settings. Backup, restore, storage, and the theme arrive in step 15.
+// Settings: backup and restore, storage, the theme, and About.
 import { Page } from '@/ui/components/Page'
+import { AboutSection } from '@/ui/settings/AboutSection'
+import { BackupSection } from '@/ui/settings/BackupSection'
+import { RestoreSection } from '@/ui/settings/RestoreSection'
+import { StorageSection } from '@/ui/settings/StorageSection'
+import { ThemeSection } from '@/ui/settings/ThemeSection'
 
 export function SettingsPage() {
   return (
     <Page title="Settings">
-      <p className="text-muted-foreground">Backup, restore, and other settings will be here.</p>
+      <div className="grid gap-10">
+        <BackupSection />
+        <RestoreSection />
+        <StorageSection />
+        <ThemeSection />
+        <AboutSection />
+      </div>
     </Page>
   )
 }

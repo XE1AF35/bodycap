@@ -7,7 +7,7 @@ import { readBackup } from '@/core/backup/read'
 import { addDays, toIsoDate } from '@/core/dates'
 import type { GearFields } from '@/core/gear'
 import type { StorageHelpers } from '@/data/storage'
-import { renderApp, testServices } from './support'
+import { renderApp, stubDownloads, testServices } from './support'
 
 const nzd = (dollars: number) => ({ amountMinor: dollars * 100, currency: 'NZD' })
 const usd = (dollars: number) => ({ amountMinor: dollars * 100, currency: 'USD' })
@@ -120,18 +120,7 @@ describe('dashboard', () => {
   })
 
   it('reminds about a backup that has never been made, and makes one on request', async () => {
-    const saved: { name: string; blob: Blob }[] = []
-    let lastBlob: Blob | undefined
-    vi.spyOn(URL, 'createObjectURL').mockImplementation((blob) => {
-      if (blob instanceof Blob) lastBlob = blob
-      return 'blob:bodycap-test'
-    })
-    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined)
-    vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function (
-      this: HTMLAnchorElement,
-    ) {
-      if (lastBlob !== undefined) saved.push({ name: this.download, blob: lastBlob })
-    })
+    const saved = stubDownloads()
 
     const { user } = await renderDashboard([lens])
     const attention = within(section('Needs attention'))
