@@ -39,3 +39,20 @@ export function useLive<T>(live: Live<T>): LiveState<T> {
   const store = useMemo(() => createStore(live), [live])
   return useSyncExternalStore(store.subscribe, store.getSnapshot)
 }
+
+/**
+ * Passes on only the first value. A form uses this so a change made elsewhere, even a delete,
+ * never replaces what someone is in the middle of typing.
+ */
+export function firstValue<T>(live: Live<T>): Live<T> {
+  return {
+    subscribe(next, error) {
+      let delivered = false
+      return live.subscribe((value) => {
+        if (delivered) return
+        delivered = true
+        next(value)
+      }, error)
+    },
+  }
+}

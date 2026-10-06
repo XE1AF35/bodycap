@@ -27,6 +27,18 @@ const gearRoute = createRoute({
   component: lazyRouteComponent(() => import('@/ui/pages/GearPage'), 'GearPage'),
 })
 
+const addGearRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: 'gear/new',
+  component: lazyRouteComponent(() => import('@/ui/pages/AddGearPage'), 'AddGearPage'),
+})
+
+const editGearRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: 'gear/$gearId/edit',
+  component: lazyRouteComponent(() => import('@/ui/pages/EditGearPage'), 'EditGearPage'),
+})
+
 const gearDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: 'gear/$gearId',
@@ -39,7 +51,14 @@ const settingsRoute = createRoute({
   component: lazyRouteComponent(() => import('@/ui/pages/SettingsPage'), 'SettingsPage'),
 })
 
-const routeTree = rootRoute.addChildren([dashboardRoute, gearRoute, gearDetailRoute, settingsRoute])
+const routeTree = rootRoute.addChildren([
+  dashboardRoute,
+  gearRoute,
+  addGearRoute,
+  gearDetailRoute,
+  editGearRoute,
+  settingsRoute,
+])
 
 /** The browser gets hash history; tests pass in memory history. */
 export function createAppRouter(history: RouterHistory) {

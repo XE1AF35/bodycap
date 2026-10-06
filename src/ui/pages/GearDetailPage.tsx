@@ -1,7 +1,8 @@
-// One item's page: everything recorded about it, and Delete. Edit arrives with the form in step 13.
+// One item's page: everything recorded about it, with Edit and Delete.
 import { Link, useParams } from '@tanstack/react-router'
 import { useMemo } from 'react'
 import { Page } from '@/ui/components/Page'
+import { buttonVariants } from '@/ui/components/ui/button-variants'
 import { DeleteGearButton } from '@/ui/gear/DeleteGearButton'
 import { GearDetails } from '@/ui/gear/GearDetails'
 import { gearName } from '@/ui/gear/labels'
@@ -53,6 +54,13 @@ export function GearDetailPage() {
         <p className="-mt-2 mb-4 text-muted-foreground">{item.nickname}</p>
       )}
       <div className="mb-6 flex flex-wrap items-center gap-4">
+        <Link
+          to="/gear/$gearId/edit"
+          params={{ gearId: item.id }}
+          className={buttonVariants({ variant: 'outline' })}
+        >
+          Edit
+        </Link>
         <DeleteGearButton item={item} />
         <BackToGear />
       </div>

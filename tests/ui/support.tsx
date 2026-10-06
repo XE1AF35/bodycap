@@ -6,6 +6,7 @@ import { IDBFactory, IDBKeyRange } from 'fake-indexeddb'
 import type { ConnectionProblem, ConnectionStatus } from '@/data/connection'
 import { BodycapDatabase } from '@/data/db'
 import { createRepositories } from '@/data/dexie-repositories'
+import { createStorageHelpers } from '@/data/storage'
 import { createAppRouter } from '@/router'
 import { App } from '@/ui/App'
 import type { Services } from '@/ui/services'
@@ -32,10 +33,16 @@ export function fakeConnection(initial?: ConnectionProblem) {
   }
 }
 
-/** Services on a new, empty database, which a test can fill before rendering */
-export function testServices(connection: ConnectionStatus = fakeConnection().status): Services {
+/**
+ * Services on a new, empty database, which a test can fill before rendering. Storage starts with
+ * no storage manager, as in an insecure context, unless the test passes its own.
+ */
+export function testServices({
+  connection = fakeConnection().status,
+  storage = createStorageHelpers(undefined),
+}: Partial<Pick<Services, 'connection' | 'storage'>> = {}): Services {
   const db = new BodycapDatabase({ indexedDB: new IDBFactory(), IDBKeyRange })
-  return { repositories: createRepositories(db), connection }
+  return { repositories: createRepositories(db), connection, storage }
 }
 
 /** Renders the app at a path, as if typed into the address bar */

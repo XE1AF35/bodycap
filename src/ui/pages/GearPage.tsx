@@ -1,11 +1,12 @@
 // The gear list: search, filters, and sort from the address, a count read out politely as it
 // changes, and the matching items as a table or cards.
-import { useNavigate, useSearch } from '@tanstack/react-router'
+import { Link, useNavigate, useSearch } from '@tanstack/react-router'
 import { useMemo } from 'react'
 import type { Gear } from '@/core/gear'
 import { LOCALE } from '@/core/locale'
 import { filterAndSortGear, type SortKey } from '@/core/search'
 import { Page } from '@/ui/components/Page'
+import { buttonVariants } from '@/ui/components/ui/button-variants'
 import { GearCards } from '@/ui/gear/GearCards'
 import { GearFilters } from '@/ui/gear/GearFilters'
 import { GearTable } from '@/ui/gear/GearTable'
@@ -65,9 +66,16 @@ export function GearPage() {
       </Page>
     )
   }
+  const addGear = (
+    <Link to="/gear/new" className={buttonVariants({ className: 'mb-4' })}>
+      Add gear
+    </Link>
+  )
+
   if (all.length === 0) {
     return (
       <Page title="Gear">
+        {addGear}
         <p className="text-muted-foreground">You haven't added any gear yet.</p>
       </Page>
     )
@@ -75,6 +83,7 @@ export function GearPage() {
 
   return (
     <Page title="Gear">
+      {addGear}
       <GearFilters search={search} sort={sort} descending={descending} onChange={update} />
       <p role="status" className="mb-3 text-sm text-muted-foreground">
         Showing {counts.format(shown.length)} of {counts.format(all.length)}

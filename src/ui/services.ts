@@ -1,12 +1,14 @@
-// What components reach storage through: the repositories and the connection status, provided
-// once by App. Components never see Dexie itself.
+// What components reach storage through: the repositories, the connection status, and the
+// browser's storage manager, provided once by App. Components never see Dexie itself.
 import { createContext, use } from 'react'
 import type { ConnectionStatus } from '@/data/connection'
 import type { Repositories } from '@/data/repositories'
+import type { StorageHelpers } from '@/data/storage'
 
 export interface Services {
   readonly repositories: Repositories
   readonly connection: ConnectionStatus
+  readonly storage: StorageHelpers
 }
 
 export const ServicesContext = createContext<Services | null>(null)

@@ -52,6 +52,9 @@ export default defineConfig({
           name: 'ui',
           include: ['tests/ui/**/*.test.tsx'],
           environment: 'jsdom',
+          // A whole app in jsdom, typing key by key, can take a few seconds on its first test while
+          // the worker warms up, and more under coverage. A test that truly hangs still fails.
+          testTimeout: 15_000,
           setupFiles: ['tests/setup-ui.ts'],
         },
       },

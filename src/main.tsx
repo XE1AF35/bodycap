@@ -5,6 +5,7 @@ import { createRoot } from 'react-dom/client'
 import { watchConnection } from '@/data/connection'
 import { BodycapDatabase } from '@/data/db'
 import { createRepositories } from '@/data/dexie-repositories'
+import { createStorageHelpers } from '@/data/storage'
 import { createAppRouter } from '@/router'
 import { App } from '@/ui/App'
 import './index.css'
@@ -15,7 +16,11 @@ if (!root) {
 }
 
 const db = new BodycapDatabase()
-const services = { repositories: createRepositories(db), connection: watchConnection(db) }
+const services = {
+  repositories: createRepositories(db),
+  connection: watchConnection(db),
+  storage: createStorageHelpers(navigator.storage),
+}
 const router = createAppRouter(createHashHistory())
 
 createRoot(root).render(

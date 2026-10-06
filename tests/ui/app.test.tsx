@@ -82,19 +82,19 @@ describe('storage problems', () => {
     ['updated-elsewhere', 'Bodycap was updated in another tab. Reload to carry on.'],
     ['update-blocked', 'Close other Bodycap tabs to finish updating.'],
   ] as const)('explains a %s problem as an alert', async (problem, message) => {
-    renderApp('/', testServices(fakeConnection(problem).status))
+    renderApp('/', testServices({ connection: fakeConnection(problem).status }))
     expect(await screen.findByRole('alert')).toHaveTextContent(message)
   })
 
   it('offers a reload once another tab has updated Bodycap', async () => {
-    renderApp('/', testServices(fakeConnection('updated-elsewhere').status))
+    renderApp('/', testServices({ connection: fakeConnection('updated-elsewhere').status }))
     const alert = await screen.findByRole('alert')
     expect(within(alert).getByRole('button', { name: 'Reload' })).toBeInTheDocument()
   })
 
   it('says nothing while storage is fine, and speaks up as soon as a problem starts', async () => {
     const connection = fakeConnection()
-    renderApp('/', testServices(connection.status))
+    renderApp('/', testServices({ connection: connection.status }))
     await heading('Dashboard')
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
     act(() => {
