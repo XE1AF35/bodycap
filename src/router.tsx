@@ -7,6 +7,7 @@ import {
   lazyRouteComponent,
   type RouterHistory,
 } from '@tanstack/react-router'
+import { gearSearchSchema } from '@/ui/gear/gear-search'
 import { Layout } from '@/ui/Layout'
 import { ErrorPage } from '@/ui/pages/ErrorPage'
 import { NotFoundPage } from '@/ui/pages/NotFoundPage'
@@ -22,7 +23,14 @@ const dashboardRoute = createRoute({
 const gearRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: 'gear',
+  validateSearch: gearSearchSchema,
   component: lazyRouteComponent(() => import('@/ui/pages/GearPage'), 'GearPage'),
+})
+
+const gearDetailRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: 'gear/$gearId',
+  component: lazyRouteComponent(() => import('@/ui/pages/GearDetailPage'), 'GearDetailPage'),
 })
 
 const settingsRoute = createRoute({
@@ -31,7 +39,7 @@ const settingsRoute = createRoute({
   component: lazyRouteComponent(() => import('@/ui/pages/SettingsPage'), 'SettingsPage'),
 })
 
-const routeTree = rootRoute.addChildren([dashboardRoute, gearRoute, settingsRoute])
+const routeTree = rootRoute.addChildren([dashboardRoute, gearRoute, gearDetailRoute, settingsRoute])
 
 /** The browser gets hash history; tests pass in memory history. */
 export function createAppRouter(history: RouterHistory) {

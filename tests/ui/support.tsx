@@ -8,6 +8,7 @@ import { BodycapDatabase } from '@/data/db'
 import { createRepositories } from '@/data/dexie-repositories'
 import { createAppRouter } from '@/router'
 import { App } from '@/ui/App'
+import type { Services } from '@/ui/services'
 
 /** A connection status whose problems the test reports by hand */
 export function fakeConnection(initial?: ConnectionProblem) {
@@ -31,12 +32,15 @@ export function fakeConnection(initial?: ConnectionProblem) {
   }
 }
 
-/** Renders the app at a path, with its own empty database */
-export function renderApp(path = '/', connection: ConnectionStatus = fakeConnection().status) {
+/** Services on a new, empty database, which a test can fill before rendering */
+export function testServices(connection: ConnectionStatus = fakeConnection().status): Services {
   const db = new BodycapDatabase({ indexedDB: new IDBFactory(), IDBKeyRange })
+  return { repositories: createRepositories(db), connection }
+}
+
+/** Renders the app at a path, as if typed into the address bar */
+export function renderApp(path = '/', services: Services = testServices()) {
   const router = createAppRouter(createMemoryHistory({ initialEntries: [path] }))
-  const view = render(
-    <App router={router} services={{ repositories: createRepositories(db), connection }} />,
-  )
-  return { ...view, router, db }
+  const view = render(<App router={router} services={services} />)
+  return { ...view, router, services }
 }
