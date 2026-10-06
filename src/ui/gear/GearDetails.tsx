@@ -1,47 +1,39 @@
-// Everything recorded about an item, in the same groups as the form. Details never filled in are
-// left out, and so is a group with nothing in it.
-import { Fragment } from 'react'
+// Everything recorded about an item, in the same groups as the form, each as a spec readout. Details
+// never filled in are left out, and so is a group with nothing in it. On wide screens the groups
+// flow down two columns, so the reading order stays the same as the page's.
 import { formatDate, toIsoDate, type IsoDate } from '@/core/dates'
-import {
-  CATEGORY_LABELS,
-  CONDITION_LABELS,
-  STATUS_LABELS,
-  type Gear,
-  type GearFields,
-} from '@/core/gear'
+import { CATEGORY_LABELS, CONDITION_LABELS, type Gear, type GearFields } from '@/core/gear'
 import { formatMoney, type Money } from '@/core/money'
 import { MOUNT_LABELS, SENSOR_FORMAT_LABELS } from '@/core/mounts'
+import { Readout, type ReadoutRow } from '@/ui/components/Readout'
+import { StatusDot } from '@/ui/gear/StatusDot'
 import { FIELD_LABELS } from '@/ui/gear/labels'
-
-type Row = readonly [label: string, value: string | undefined]
 
 const date = (value?: IsoDate) => (value === undefined ? undefined : formatDate(value))
 const money = (value?: Money) => (value === undefined ? undefined : formatMoney(value))
 // Timestamps are UTC, but people think of when they added something in their own time zone
 const day = (timestamp: string) => formatDate(toIsoDate(new Date(timestamp)))
 
-function DetailSection({ title, rows }: { readonly title: string; readonly rows: readonly Row[] }) {
-  const filled = rows.filter((row): row is readonly [string, string] => row[1] !== undefined)
-  if (filled.length === 0) return null
+function DetailSection({ title, rows }: { readonly title: string; readonly rows: ReadoutRow[] }) {
+  if (rows.every((row) => row.value === undefined)) return null
   return (
-    <section className="mb-6">
-      <h2 className="mb-2 text-lg font-semibold">{title}</h2>
-      <dl className="grid grid-cols-[minmax(8rem,auto)_1fr] gap-x-6 gap-y-2">
-        {filled.map(([label, value]) => (
-          <Fragment key={label}>
-            <dt className="text-muted-foreground">{label}</dt>
-            <dd>{value}</dd>
-          </Fragment>
-        ))}
-      </dl>
+    <section className="mb-8 break-inside-avoid">
+      <h2 className="mb-3 text-base font-semibold">{title}</h2>
+      <Readout rows={rows} />
     </section>
   )
 }
 
-const row = (field: keyof GearFields, value: string | undefined): Row => [
-  FIELD_LABELS[field],
+const row = (field: keyof GearFields, value: ReadoutRow['value']): ReadoutRow => ({
+  label: FIELD_LABELS[field],
   value,
-]
+})
+
+/** A row of numbers, dates, or codes, set in the data font */
+const dataRow = (field: keyof GearFields, value: string | undefined): ReadoutRow => ({
+  ...row(field, value),
+  data: true,
+})
 
 export function GearDetails({ item }: { readonly item: Gear }) {
   const mount = (value: Gear['mount']) => (value === undefined ? undefined : MOUNT_LABELS[value])
@@ -51,7 +43,7 @@ export function GearDetails({ item }: { readonly item: Gear }) {
     item.adapterAutofocus === undefined ? undefined : item.adapterAutofocus ? 'Yes' : 'No'
 
   return (
-    <>
+    <div className="lg:columns-2 lg:gap-10">
       <DetailSection
         title="Basics"
         rows={[
@@ -59,7 +51,7 @@ export function GearDetails({ item }: { readonly item: Gear }) {
           row('brand', item.brand),
           row('model', item.model),
           row('nickname', item.nickname),
-          row('serialNumber', item.serialNumber),
+          dataRow('serialNumber', item.serialNumber),
           row('mount', mount(item.mount)),
           row('sensorFormat', format(item.sensorFormat)),
           row('lensCoverage', format(item.lensCoverage)),
@@ -71,8 +63,8 @@ export function GearDetails({ item }: { readonly item: Gear }) {
       <DetailSection
         title="Purchase"
         rows={[
-          row('purchaseDate', date(item.purchaseDate)),
-          row('purchasePrice', money(item.purchasePrice)),
+          dataRow('purchaseDate', date(item.purchaseDate)),
+          dataRow('purchasePrice', money(item.purchasePrice)),
           row('whereBought', item.whereBought),
           row(
             'condition',
@@ -83,34 +75,36 @@ export function GearDetails({ item }: { readonly item: Gear }) {
       <DetailSection
         title="Status and location"
         rows={[
-          row('status', STATUS_LABELS[item.status]),
+          row('status', <StatusDot status={item.status} />),
           row('currentLocation', item.currentLocation),
-          row('saleDate', date(item.saleDate)),
-          row('salePrice', money(item.salePrice)),
-          row('lostDate', date(item.lostDate)),
+          dataRow('saleDate', date(item.saleDate)),
+          dataRow('salePrice', money(item.salePrice)),
+          dataRow('lostDate', date(item.lostDate)),
         ]}
       />
       <DetailSection
         title="Warranty and insurance"
         rows={[
-          row('warrantyExpiry', date(item.warrantyExpiry)),
-          row('insuredValue', money(item.insuredValue)),
+          dataRow('warrantyExpiry', date(item.warrantyExpiry)),
+          dataRow('insuredValue', money(item.insuredValue)),
         ]}
       />
       {item.notes !== undefined && (
-        <section className="mb-6">
-          <h2 className="mb-2 text-lg font-semibold">{FIELD_LABELS.notes}</h2>
+        <section className="mb-8 break-inside-avoid">
+          <h2 className="mb-3 text-base font-semibold">{FIELD_LABELS.notes}</h2>
           {/* pre-wrap keeps the line breaks people typed, while the text stays plain text */}
-          <p className="whitespace-pre-wrap">{item.notes}</p>
+          <p className="rounded-lg border border-border bg-card p-4 whitespace-pre-wrap">
+            {item.notes}
+          </p>
         </section>
       )}
       <DetailSection
         title="Record"
         rows={[
-          ['Added', day(item.createdAt)],
-          ['Last changed', day(item.updatedAt)],
+          { label: 'Added', value: day(item.createdAt), data: true },
+          { label: 'Last changed', value: day(item.updatedAt), data: true },
         ]}
       />
-    </>
+    </div>
   )
 }

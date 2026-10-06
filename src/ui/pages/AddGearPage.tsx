@@ -4,6 +4,7 @@ import { useMemo } from 'react'
 import { emptyGearInput } from '@/core/gear'
 import { DEFAULT_CURRENCY } from '@/core/money'
 import { Page } from '@/ui/components/Page'
+import { buttonVariants } from '@/ui/components/ui/button-variants'
 import { GearForm } from '@/ui/gear/form/GearForm'
 import { firstValue, useLive } from '@/ui/hooks/useLive'
 import { useServices } from '@/ui/services'
@@ -27,7 +28,7 @@ export function AddGearPage() {
         initial={emptyGearInput(currency)}
         onSave={(fields) => repositories.gear.add(fields)}
         cancel={
-          <Link to="/gear" className="underline underline-offset-4">
+          <Link to="/gear" className={buttonVariants({ variant: 'ghost' })}>
             Cancel
           </Link>
         }

@@ -5,6 +5,7 @@ import { useMemo } from 'react'
 import { toGearInput } from '@/core/gear'
 import { DEFAULT_CURRENCY } from '@/core/money'
 import { Page } from '@/ui/components/Page'
+import { buttonVariants } from '@/ui/components/ui/button-variants'
 import { GearForm } from '@/ui/gear/form/GearForm'
 import { gearName } from '@/ui/gear/labels'
 import { firstValue, useLive } from '@/ui/hooks/useLive'
@@ -51,7 +52,7 @@ export function EditGearPage() {
           <Link
             to="/gear/$gearId"
             params={{ gearId: saved.id }}
-            className="underline underline-offset-4"
+            className={buttonVariants({ variant: 'ghost' })}
           >
             Cancel
           </Link>

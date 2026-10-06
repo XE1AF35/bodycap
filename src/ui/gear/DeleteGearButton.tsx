@@ -1,6 +1,7 @@
 // Deleting an item, only after the person confirms in a dialog. The dialog keeps focus inside it,
 // closes on Escape, and gives focus back to the button.
 import { useNavigate } from '@tanstack/react-router'
+import { Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import type { Gear } from '@/core/gear'
 import { isStorageFull } from '@/data/storage'
@@ -12,6 +13,7 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
+  AlertDialogMedia,
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/ui/components/ui/alert-dialog'
@@ -47,9 +49,15 @@ export function DeleteGearButton({ item }: { readonly item: Gear }) {
         setProblem(undefined)
       }}
     >
-      <AlertDialogTrigger render={<Button variant="destructive" />}>Delete</AlertDialogTrigger>
+      <AlertDialogTrigger render={<Button variant="destructive" />}>
+        <Trash2 aria-hidden="true" />
+        Delete
+      </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
+          <AlertDialogMedia className="bg-destructive/10 text-destructive">
+            <Trash2 aria-hidden="true" />
+          </AlertDialogMedia>
           <AlertDialogTitle>Delete {gearName(item)}?</AlertDialogTitle>
           <AlertDialogDescription>
             It goes from Bodycap for good. Only a backup made before now could bring it back.

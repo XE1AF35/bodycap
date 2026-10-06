@@ -80,6 +80,32 @@ describe('gear detail', () => {
     )
   })
 
+  it('sums the item up under its name, at a glance', async () => {
+    await renderDetail(lens)
+    const glance = screen.getByRole('list', { name: 'At a glance' })
+    expect(
+      within(glance)
+        .getAllByRole('listitem')
+        .map((item) => item.textContent),
+    ).toEqual(['Workhorse', 'Owned', 'Lens', 'EMount: Sony E (including FE)'])
+    expect(within(glance).getByText('E')).toHaveAttribute('aria-hidden', 'true')
+  })
+
+  it('leaves the mount out of the summary for gear without one', async () => {
+    await renderDetail({
+      category: 'bag',
+      brand: 'Peak Design',
+      model: 'Sling 6L',
+      status: 'owned',
+    })
+    const glance = screen.getByRole('list', { name: 'At a glance' })
+    expect(
+      within(glance)
+        .getAllByRole('listitem')
+        .map((item) => item.textContent),
+    ).toEqual(['Owned', 'Bag'])
+  })
+
   it.each<[string, GearFields, [string, string][]]>([
     [
       'the sale of a sold item',

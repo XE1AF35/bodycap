@@ -1,16 +1,18 @@
-// Every page's frame: its one h1 with any actions beside it, the window title ("Gear | Bodycap"),
-// and focus on the heading after moving to it from another page.
+// Every page's frame: its one h1 with a line under it and any actions beside it, the window title
+// ("Gear | Bodycap"), and focus on the heading after moving to it from another page.
 import { use, useEffect, useRef, type ReactNode } from 'react'
 import { NavigationCountContext } from '@/ui/navigation-focus'
 
 interface PageProps {
   readonly title: string
+  /** A short line under the heading, such as an item's status and mount */
+  readonly description?: ReactNode
   /** The page's main buttons or links, such as Add gear, shown beside the heading */
   readonly actions?: ReactNode
   readonly children?: ReactNode
 }
 
-export function Page({ title, actions, children }: PageProps) {
+export function Page({ title, description, actions, children }: PageProps) {
   const headingRef = useRef<HTMLHeadingElement>(null)
   const navigations = use(NavigationCountContext)
 
@@ -24,15 +26,18 @@ export function Page({ title, actions, children }: PageProps) {
 
   return (
     <>
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-border pb-3">
-        {/* Focusable from script only, so it isn't an extra tab stop */}
-        <h1
-          ref={headingRef}
-          tabIndex={-1}
-          className="text-title font-semibold tracking-tight outline-none"
-        >
-          {title}
-        </h1>
+      <div className="mb-6 flex flex-wrap items-end justify-between gap-3 border-b border-border pb-3">
+        <div className="grid min-w-0 gap-2">
+          {/* Focusable from script only, so it isn't an extra tab stop */}
+          <h1
+            ref={headingRef}
+            tabIndex={-1}
+            className="text-title font-semibold tracking-tight break-words outline-none"
+          >
+            {title}
+          </h1>
+          {description}
+        </div>
         {actions !== undefined && <div className="flex flex-wrap gap-2">{actions}</div>}
       </div>
       {children}

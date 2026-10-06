@@ -223,7 +223,7 @@ export function GearForm({ initial, saved, onSave, cancel }: GearFormProps) {
       <ErrorSummary problems={failedSaves > 0 ? problems : []} ref={summaryRef} />
 
       <fieldset className="grid gap-4">
-        <legend className="mb-2 text-lg font-semibold">Basics</legend>
+        <legend className="label-engraved mb-4 w-full border-b border-border pb-2">Basics</legend>
         <SelectField
           {...props('category')}
           required
@@ -242,6 +242,7 @@ export function GearForm({ initial, saved, onSave, cancel }: GearFormProps) {
         {applies.has('serialNumber') && (
           <TextField
             {...text('serialNumber')}
+            data
             hint="Often on the bottom of a body, or near the mount on a lens."
             describedById={clashes.length > 0 ? 'gear-serialNumber-warning' : undefined}
           >
@@ -308,7 +309,7 @@ export function GearForm({ initial, saved, onSave, cancel }: GearFormProps) {
       </fieldset>
 
       <fieldset className="grid gap-4">
-        <legend className="mb-2 text-lg font-semibold">Purchase</legend>
+        <legend className="label-engraved mb-4 w-full border-b border-border pb-2">Purchase</legend>
         {applies.has('purchaseDate') && <DateField {...text('purchaseDate')} />}
         <MoneyField
           {...money('purchasePrice')}
@@ -323,7 +324,9 @@ export function GearForm({ initial, saved, onSave, cancel }: GearFormProps) {
       </fieldset>
 
       <fieldset className="grid gap-4">
-        <legend className="mb-2 text-lg font-semibold">Status and location</legend>
+        <legend className="label-engraved mb-4 w-full border-b border-border pb-2">
+          Status and location
+        </legend>
         <SelectField {...text('status')} choices={statusChoices} />
         <TextField {...text('currentLocation')} hint="Where it's kept, or who has it." />
         {applies.has('saleDate') && <DateField {...text('saleDate')} />}
@@ -333,14 +336,16 @@ export function GearForm({ initial, saved, onSave, cancel }: GearFormProps) {
 
       {applies.has('warrantyExpiry') && (
         <fieldset className="grid gap-4">
-          <legend className="mb-2 text-lg font-semibold">Warranty and insurance</legend>
+          <legend className="label-engraved mb-4 w-full border-b border-border pb-2">
+            Warranty and insurance
+          </legend>
           <DateField {...text('warrantyExpiry')} />
           <MoneyField {...money('insuredValue')} hint="What it's insured for, if it has cover." />
         </fieldset>
       )}
 
       <fieldset className="grid gap-4">
-        <legend className="mb-2 text-lg font-semibold">Notes</legend>
+        <legend className="label-engraved mb-4 w-full border-b border-border pb-2">Notes</legend>
         <NotesField {...text('notes')} />
       </fieldset>
 
@@ -350,7 +355,7 @@ export function GearForm({ initial, saved, onSave, cancel }: GearFormProps) {
         </p>
       )}
 
-      <div className="flex flex-wrap items-center gap-4">
+      <div className="flex flex-wrap items-center gap-3 border-t border-border pt-6">
         <Button type="submit" disabled={saving}>
           Save
         </Button>

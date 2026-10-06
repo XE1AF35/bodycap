@@ -72,12 +72,15 @@ function aria({ id, hint, error, required }: FieldProps, extra?: string) {
 interface TextFieldProps extends FieldProps {
   readonly value: string
   readonly onChange: (value: string) => void
+  /** Typed in the data font, for codes such as serial numbers */
+  readonly data?: boolean
   /** The id of something else that describes the field, such as a warning */
   readonly describedById?: string | undefined
   readonly children?: ReactNode
 }
 
-export function TextField({ value, onChange, describedById, children, ...field }: TextFieldProps) {
+export function TextField(props: TextFieldProps) {
+  const { value, onChange, data = false, describedById, children, ...field } = props
   return (
     <div className="grid gap-1.5">
       <FieldLabel {...field} />
@@ -85,6 +88,7 @@ export function TextField({ value, onChange, describedById, children, ...field }
       <Input
         id={field.id}
         value={value}
+        className={data ? 'font-mono' : undefined}
         onChange={(event) => {
           onChange(event.target.value)
         }}
@@ -181,7 +185,7 @@ export function MoneyField({ value, onChange, ...field }: MoneyFieldProps) {
             id={id}
             inputMode="decimal"
             value={value.amount}
-            className="w-36"
+            className="w-36 font-mono tabular-nums"
             onChange={(event) => {
               onChange({ ...value, amount: event.target.value })
             }}
