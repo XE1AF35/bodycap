@@ -10,28 +10,28 @@ const heading = (name: string) => screen.findByRole('heading', { level: 1, name 
 describe('app shell', () => {
   it('shows the Bodycap name and the dashboard first', async () => {
     renderApp()
-    expect(await heading('Dashboard')).toBeInTheDocument()
+    expect(await heading('Welcome to Bodycap')).toBeInTheDocument()
     expect(screen.getByRole('banner')).toHaveTextContent('Bodycap')
     expect(screen.getByRole('main')).toBeInTheDocument()
   })
 
   it.each([
-    ['/', 'Dashboard'],
-    ['/gear', 'Gear'],
-    ['/settings', 'Settings'],
-  ])('marks %s as the current page, and titles the window after it', async (path, name) => {
+    ['/', 'Dashboard', 'Welcome to Bodycap'],
+    ['/gear', 'Gear', 'Gear'],
+    ['/settings', 'Settings', 'Settings'],
+  ])('marks %s as the current page, and titles the window after it', async (path, link, title) => {
     renderApp(path)
-    await heading(name)
+    await heading(title)
     const links = within(screen.getByRole('navigation', { name: 'Main' })).getAllByRole('link')
-    const current = links.filter((link) => link.getAttribute('aria-current') === 'page')
-    expect(current.map((link) => link.textContent)).toEqual([name])
-    expect(document.title).toBe(`${name} | Bodycap`)
+    const current = links.filter((item) => item.getAttribute('aria-current') === 'page')
+    expect(current.map((item) => item.textContent)).toEqual([link])
+    expect(document.title).toBe(`${title} | Bodycap`)
   })
 
   it('moves focus to the new heading after navigating, but leaves it alone on first load', async () => {
     const user = userEvent.setup()
     renderApp()
-    expect(await heading('Dashboard')).not.toHaveFocus()
+    expect(await heading('Welcome to Bodycap')).not.toHaveFocus()
     await user.click(screen.getByRole('link', { name: 'Gear' }))
     const gear = await heading('Gear')
     await waitFor(() => {
@@ -53,7 +53,7 @@ describe('app shell', () => {
   it('opens the menu, and closes it after choosing a page', async () => {
     const user = userEvent.setup()
     renderApp()
-    await heading('Dashboard')
+    await heading('Welcome to Bodycap')
     const menu = screen.getByRole('button', { name: 'Menu' })
     expect(menu).toHaveAttribute('aria-expanded', 'false')
     await user.click(menu)
@@ -69,7 +69,7 @@ describe('app shell', () => {
     expect(await heading('Page not found')).toBeInTheDocument()
     expect(document.title).toBe('Page not found | Bodycap')
     await user.click(screen.getByRole('link', { name: 'Go to the dashboard' }))
-    expect(await heading('Dashboard')).toBeInTheDocument()
+    expect(await heading('Welcome to Bodycap')).toBeInTheDocument()
   })
 })
 
@@ -95,7 +95,7 @@ describe('storage problems', () => {
   it('says nothing while storage is fine, and speaks up as soon as a problem starts', async () => {
     const connection = fakeConnection()
     renderApp('/', testServices({ connection: connection.status }))
-    await heading('Dashboard')
+    await heading('Welcome to Bodycap')
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
     act(() => {
       connection.report('updated-elsewhere')

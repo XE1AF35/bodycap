@@ -1,6 +1,6 @@
 // Value totals: gear you have per currency and category, the wishlist apart, and unpriced items.
 import { describe, expect, it } from 'vitest'
-import { summariseValue, type ValuedItem } from '@/core/value'
+import { countByStatus, summariseValue, type ValuedItem } from '@/core/value'
 
 const nzd = (dollars: number) => ({ amountMinor: dollars * 100, currency: 'NZD' })
 const usd = (dollars: number) => ({ amountMinor: dollars * 100, currency: 'USD' })
@@ -57,6 +57,27 @@ describe('summariseValue', () => {
       byCategory: [],
       unpriced: 0,
       wishlist: [],
+    })
+  })
+})
+
+describe('countByStatus', () => {
+  it('counts items in each status, including the ones with none', () => {
+    expect(countByStatus(items)).toEqual({
+      owned: 2,
+      wishlist: 3,
+      'lent-out': 1,
+      'in-repair': 1,
+      sold: 1,
+      lost: 1,
+    })
+    expect(countByStatus([])).toEqual({
+      owned: 0,
+      wishlist: 0,
+      'lent-out': 0,
+      'in-repair': 0,
+      sold: 0,
+      lost: 0,
     })
   })
 })

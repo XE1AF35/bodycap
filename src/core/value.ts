@@ -1,5 +1,5 @@
 // What your gear adds up to. Each currency is totalled on its own, so no exchange rates are needed.
-import { CATEGORIES, isHeld, type Category, type GearFields } from './gear'
+import { CATEGORIES, isHeld, type Category, type GearFields, type Status } from './gear'
 import { DEFAULT_CURRENCY, sumByCurrency, type CurrencyCode, type Money } from './money'
 
 /** Whether totals use what you paid or what the gear is insured for */
@@ -63,4 +63,19 @@ export function summariseValue(
     unpriced,
     wishlist: sumByCurrency(wishlist, first),
   }
+}
+
+/** How many items are in each status, with every status present even when it has none. */
+export function countByStatus(items: Iterable<Pick<GearFields, 'status'>>): Record<Status, number> {
+  // Written out, so the type checker confirms every status is here
+  const counts: Record<Status, number> = {
+    owned: 0,
+    wishlist: 0,
+    'lent-out': 0,
+    'in-repair': 0,
+    sold: 0,
+    lost: 0,
+  }
+  for (const { status } of items) counts[status] += 1
+  return counts
 }

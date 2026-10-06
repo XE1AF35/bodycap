@@ -229,13 +229,17 @@ describe('adding gear', () => {
     await user.click(screen.getByRole('link', { name: 'Dashboard' }))
     const again = await screen.findByRole('alertdialog', { name: 'Leave without saving?' })
     await user.click(within(again).getByRole('button', { name: 'Leave' }))
-    expect(await screen.findByRole('heading', { level: 1, name: 'Dashboard' })).toBeInTheDocument()
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Welcome to Bodycap' }),
+    ).toBeInTheDocument()
   })
 
   it('leaves without asking when nothing has changed', async () => {
     const { user } = await renderAdd()
     await user.click(screen.getByRole('link', { name: 'Dashboard' }))
-    expect(await screen.findByRole('heading', { level: 1, name: 'Dashboard' })).toBeInTheDocument()
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Welcome to Bodycap' }),
+    ).toBeInTheDocument()
     expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument()
   })
 })
