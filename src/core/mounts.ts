@@ -43,6 +43,27 @@ export const MOUNT_LABELS: Record<MountId, string> = {
   'canon-fd': 'Canon FD',
 }
 
+/** The short names engraved on gear and used in shops, for badges where the full name won't fit */
+export const MOUNT_CODES: Record<MountId, string> = {
+  'canon-ef': 'EF',
+  'canon-ef-s': 'EF-S',
+  'canon-ef-m': 'EF-M',
+  'canon-rf': 'RF',
+  'nikon-f': 'F',
+  'nikon-z': 'Z',
+  'sony-a': 'A',
+  'sony-e': 'E',
+  'fujifilm-x': 'X',
+  'fujifilm-g': 'G',
+  'micro-four-thirds': 'MFT',
+  'l-mount': 'L',
+  'pentax-k': 'K',
+  'leica-m': 'M',
+  'hasselblad-xcd': 'XCD',
+  m42: 'M42',
+  'canon-fd': 'FD',
+}
+
 /** Millimetres from the mount to the sensor, as the makers publish them */
 export const FLANGE_MM: Record<MountId, number> = {
   'canon-ef': 44,

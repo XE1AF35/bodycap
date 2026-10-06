@@ -72,6 +72,21 @@
 }
 
 /*
+ * Motion is quick and small: transitions keep Tailwind's 150ms, and things that appear rise 4px as
+ * they fade in. Always add it with motion-safe:, such as motion-safe:animate-rise-in.
+ */
+@theme {
+  --animate-rise-in: rise-in 150ms cubic-bezier(0, 0, 0.2, 1) both;
+
+  @keyframes rise-in {
+    from {
+      opacity: 0;
+      translate: 0 0.25rem;
+    }
+  }
+}
+
+/*
  * The Top plate palette: graphite like a camera body, with the red dot from the icon as the one
  * accent. --signal only marks things (the current page, alerts, a mount's index), never a button
  * fill or text, so it can't be mistaken for Delete. --border is for decorative lines; --input is
@@ -175,5 +190,21 @@
   }
   html {
     @apply font-sans;
+  }
+}
+
+/*
+ * For anyone who has asked their device for less motion, everything moves at once, including the
+ * animations inside shadcn components. The duration is tiny rather than zero, so code waiting for
+ * an animation to end still hears that it has.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

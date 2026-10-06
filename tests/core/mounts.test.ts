@@ -4,6 +4,7 @@ import {
   ADAPTS_TO,
   FLANGE_MM,
   fitsNatively,
+  MOUNT_CODES,
   MOUNT_LABELS,
   MOUNTS,
   SENSOR_FORMAT_LABELS,
@@ -14,6 +15,12 @@ describe('mounts', () => {
   it('has unique mount IDs, each with a label', () => {
     expect(new Set(MOUNTS).size).toBe(MOUNTS.length)
     for (const mount of MOUNTS) expect(MOUNT_LABELS[mount], mount).toBeTruthy()
+  })
+
+  it('gives each mount a short code of its own, for badges', () => {
+    const codes = MOUNTS.map((mount) => MOUNT_CODES[mount])
+    expect(new Set(codes).size).toBe(MOUNTS.length)
+    for (const code of codes) expect(code).toMatch(/^[A-Z0-9-]{1,4}$/)
   })
 
   it('has unique sensor formats, each with a label', () => {
