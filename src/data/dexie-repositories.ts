@@ -2,15 +2,14 @@
 // run in one transaction, so they're always saved together or not at all.
 import { liveQuery } from 'dexie'
 import type { Gear } from '@/core/gear'
-import { isCurrencyCode } from '@/core/money'
-import { normaliseSerial } from '@/core/serials'
-import type { BodycapDatabase, GearRecord, SettingRecord } from './db'
+import type { BodycapDatabase } from './db'
+import { createBackupStore } from './dexie-backup'
+import { countChange, SETTING, toGear, toRecord, toSettings } from './records'
 import {
   GearNotFoundError,
   type GearRepository,
   type Live,
   type Repositories,
-  type Settings,
   type SettingsRepository,
 } from './repositories'
 
@@ -18,6 +17,10 @@ export interface RepositoryOptions {
   /** The clock and ID source, which tests replace to get fixed values */
   readonly now?: () => Date
   readonly newId?: () => string
+  /** Recorded in backups. The build sets it from package.json. */
+  readonly appVersion?: string
+  /** For the date in a backup's file name. The browser's own time zone by default. */
+  readonly timeZone?: string
 }
 
 function live<T>(query: () => Promise<T>): Live<T> {
@@ -32,47 +35,14 @@ function live<T>(query: () => Promise<T>): Live<T> {
   }
 }
 
-function toRecord(gear: Gear): GearRecord {
-  const serialKey = normaliseSerial(gear.serialNumber ?? '')
-  return serialKey === '' ? { ...gear } : { ...gear, serialKey }
-}
-
-// The serial key only serves the index, so the rest of the app never sees it
-function toGear(record: GearRecord): Gear {
-  const gear = { ...record }
-  delete gear.serialKey
-  return gear
-}
-
-const CHANGES = 'changesSinceBackup'
-
-/** A stored count, or 0 if what's stored isn't a count */
-function changeCount(value: unknown): number {
-  return typeof value === 'number' && Number.isSafeInteger(value) && value >= 0 ? value : 0
-}
-
-async function countChange(db: BodycapDatabase): Promise<void> {
-  const stored = await db.settings.get(CHANGES)
-  await db.settings.put({ key: CHANGES, value: changeCount(stored?.value) + 1 })
-}
-
-// Settings are stored as loose key and value pairs, so each value is checked as it's read
-function toSettings(records: readonly SettingRecord[]): Settings {
-  const values = new Map(records.map(({ key, value }) => [key, value]))
-  const lastBackupAt = values.get('lastBackupAt')
-  const lastUsedCurrency = values.get('lastUsedCurrency')
-  return {
-    changesSinceBackup: changeCount(values.get(CHANGES)),
-    ...(typeof lastBackupAt === 'string' ? { lastBackupAt } : {}),
-    ...(typeof lastUsedCurrency === 'string' && isCurrencyCode(lastUsedCurrency)
-      ? { lastUsedCurrency }
-      : {}),
-  }
-}
-
 export function createRepositories(
   db: BodycapDatabase,
-  { now = () => new Date(), newId = () => crypto.randomUUID() }: RepositoryOptions = {},
+  {
+    now = () => new Date(),
+    newId = () => crypto.randomUUID(),
+    appVersion = __APP_VERSION__,
+    timeZone,
+  }: RepositoryOptions = {},
 ): Repositories {
   const gear: GearRepository = {
     list: () => live(async () => (await db.gear.toArray()).map(toGear)),
@@ -120,9 +90,11 @@ export function createRepositories(
     get: () => live(async () => toSettings(await db.settings.toArray())),
 
     setLastUsedCurrency: async (currency) => {
-      await db.settings.put({ key: 'lastUsedCurrency', value: currency })
+      await db.settings.put({ key: SETTING.lastUsedCurrency, value: currency })
     },
   }
 
-  return { gear, settings }
+  const backup = createBackupStore(db, { now, appVersion, timeZone })
+
+  return { gear, settings, backup }
 }

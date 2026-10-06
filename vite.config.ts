@@ -1,11 +1,20 @@
+import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vitest/config'
+
+const { version } = JSON.parse(
+  readFileSync(new URL('./package.json', import.meta.url), 'utf8'),
+) as {
+  version: string
+}
 
 export default defineConfig({
   // GitHub Pages serves the app from /bodycap/. BASE_PATH lets another host use its own path.
   base: process.env.BASE_PATH ?? '/bodycap/',
   plugins: [react()],
+  // Backups record which version of the app made them
+  define: { __APP_VERSION__: JSON.stringify(version) },
   resolve: {
     // Same @/ alias as tsconfig.app.json
     alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
