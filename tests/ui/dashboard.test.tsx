@@ -64,6 +64,10 @@ async function renderDashboard(items: readonly GearFields[], storage = quietStor
 
 const section = (name: string) => screen.getByRole('region', { name })
 
+/** What a readout in a section shows next to a label */
+const reading = (name: string, label: string) =>
+  within(section(name)).getByText(label, { selector: 'dt' }).nextElementSibling?.textContent
+
 describe('first run', () => {
   it('welcomes someone with no gear, with ways to start', async () => {
     const user = userEvent.setup()
@@ -71,6 +75,7 @@ describe('first run', () => {
     expect(
       await screen.findByRole('heading', { level: 1, name: 'Welcome to Bodycap' }),
     ).toBeInTheDocument()
+    expect(screen.getByText('Every kit starts with one body.')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Restore from a backup' })).toBeInTheDocument()
     await user.click(screen.getByRole('link', { name: 'Add your first item' }))
     expect(await screen.findByRole('heading', { level: 1, name: 'Add gear' })).toBeInTheDocument()
@@ -179,6 +184,23 @@ describe('dashboard', () => {
     const storage: StorageHelpers = { ...quietStorage, storageState: () => Promise.resolve(state) }
     await renderDashboard([lens], storage)
     expect(await within(section('Needs attention')).findByText(message)).toBeInTheDocument()
+  })
+
+  it('shows when the last backup was, and how much has changed since', async () => {
+    const services = testServices({ storage: quietStorage })
+    await services.repositories.gear.add(lens)
+    await services.repositories.backup.create()
+    await services.repositories.gear.add(bag)
+    renderApp('/', services)
+    await screen.findByRole('heading', { level: 1, name: 'Dashboard' })
+    expect(reading('Backup', 'Last backup')).toBe('today')
+    expect(reading('Backup', 'Changes since')).toBe('1')
+  })
+
+  it('says there has never been a backup, with nothing to count changes from', async () => {
+    await renderDashboard([lens])
+    expect(reading('Backup', 'Last backup')).toBe('Never')
+    expect(within(section('Backup')).queryByText('Changes since')).not.toBeInTheDocument()
   })
 
   it('has nothing that needs attention when everything is in order', async () => {

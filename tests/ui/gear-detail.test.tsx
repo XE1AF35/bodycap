@@ -196,6 +196,7 @@ describe('gear detail', () => {
     expect(
       await screen.findByRole('heading', { level: 1, name: 'Item not found' }),
     ).toBeInTheDocument()
+    expect(screen.getByText("This item isn't here.")).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Back to your gear' })).toBeInTheDocument()
   })
 })

@@ -9,8 +9,11 @@ const THEMES: readonly (readonly [Theme, string])[] = [
 export function ThemeSection() {
   const theme = useTheme()
   return (
-    <section aria-labelledby="theme-title" className="grid gap-3">
-      <h2 id="theme-title" className="text-lg font-semibold">
+    <section
+      aria-labelledby="theme-title"
+      className="grid gap-3 rounded-lg border border-border bg-card p-4 sm:p-6"
+    >
+      <h2 id="theme-title" className="text-base font-semibold">
         Theme
       </h2>
       <fieldset className="flex flex-wrap gap-4">

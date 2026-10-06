@@ -4,6 +4,7 @@ import { Link, useParams } from '@tanstack/react-router'
 import { ArrowLeft, Pencil } from 'lucide-react'
 import { useMemo } from 'react'
 import { CATEGORY_LABELS, type Gear } from '@/core/gear'
+import { EmptyState } from '@/ui/components/EmptyState'
 import { Page } from '@/ui/components/Page'
 import { buttonVariants } from '@/ui/components/ui/button-variants'
 import { DeleteGearButton } from '@/ui/gear/DeleteGearButton'
@@ -65,10 +66,9 @@ export function GearDetailPage() {
   if (state.value === undefined) {
     return (
       <Page title="Item not found">
-        <p className="mb-4 text-muted-foreground">
-          There's no item here. It may have been deleted, perhaps in another tab.
-        </p>
-        <BackToGear />
+        <EmptyState drawing="out-of-focus" title="This item isn't here." actions={<BackToGear />}>
+          It may have been deleted, perhaps in another tab.
+        </EmptyState>
       </Page>
     )
   }

@@ -4,6 +4,7 @@ import { Link, useParams } from '@tanstack/react-router'
 import { useMemo } from 'react'
 import { toGearInput } from '@/core/gear'
 import { DEFAULT_CURRENCY } from '@/core/money'
+import { EmptyState } from '@/ui/components/EmptyState'
 import { Page } from '@/ui/components/Page'
 import { buttonVariants } from '@/ui/components/ui/button-variants'
 import { GearForm } from '@/ui/gear/form/GearForm'
@@ -25,12 +26,17 @@ export function EditGearPage() {
   if (item.status === 'error' || item.value === undefined) {
     return (
       <Page title="Item not found">
-        <p className="mb-4 text-muted-foreground">
-          There's no item here to edit. It may have been deleted, perhaps in another tab.
-        </p>
-        <Link to="/gear" className="text-sm underline underline-offset-4">
-          Back to your gear
-        </Link>
+        <EmptyState
+          drawing="out-of-focus"
+          title="This item isn't here to edit."
+          actions={
+            <Link to="/gear" className="text-sm underline underline-offset-4">
+              Back to your gear
+            </Link>
+          }
+        >
+          It may have been deleted, perhaps in another tab.
+        </EmptyState>
       </Page>
     )
   }

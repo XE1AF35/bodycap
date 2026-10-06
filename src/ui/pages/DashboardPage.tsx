@@ -1,13 +1,14 @@
-// The dashboard: what needs attention, quick actions, counts by status, and value. With no gear
+// The dashboard: what needs attention, counts by status, value, and the last backup. With no gear
 // yet, a welcome takes its place.
 import { Link } from '@tanstack/react-router'
+import { Plus } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { collectAlerts, type StorageState } from '@/core/alerts'
 import { toIsoDate } from '@/core/dates'
-import { BackupButton } from '@/ui/backup/BackupButton'
 import { Page } from '@/ui/components/Page'
 import { buttonVariants } from '@/ui/components/ui/button-variants'
 import { AttentionList } from '@/ui/dashboard/AttentionList'
+import { BackupStatus } from '@/ui/dashboard/BackupStatus'
 import { StatusCounts } from '@/ui/dashboard/StatusCounts'
 import { ValueSummary } from '@/ui/dashboard/ValueSummary'
 import { Welcome } from '@/ui/dashboard/Welcome'
@@ -54,16 +55,25 @@ export function DashboardPage() {
   )
 
   return (
-    <Page title="Dashboard">
-      <div className="mb-8 flex flex-wrap items-center gap-3">
+    <Page
+      title="Dashboard"
+      actions={
         <Link to="/gear/new" className={buttonVariants()}>
+          <Plus aria-hidden="true" />
           Add gear
         </Link>
-        <BackupButton />
-      </div>
+      }
+    >
       {alerts.length > 0 && <AttentionList alerts={alerts} items={gear.value} />}
       <StatusCounts items={gear.value} />
-      <ValueSummary items={gear.value} first={lastUsedCurrency} />
+      <div className="grid gap-x-10 lg:grid-cols-[3fr_2fr]">
+        <ValueSummary items={gear.value} first={lastUsedCurrency} />
+        <BackupStatus
+          lastBackupOn={lastBackupOn}
+          changesSinceBackup={changesSinceBackup}
+          today={today}
+        />
+      </div>
     </Page>
   )
 }

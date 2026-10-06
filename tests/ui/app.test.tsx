@@ -69,6 +69,7 @@ describe('app shell', () => {
     const user = userEvent.setup()
     renderApp('/lenses-i-dream-of')
     expect(await heading('Page not found')).toBeInTheDocument()
+    expect(screen.getByText('This page is out of focus.')).toBeInTheDocument()
     expect(document.title).toBe('Page not found | Bodycap')
     await user.click(screen.getByRole('link', { name: 'Go to the dashboard' }))
     expect(await heading('Welcome to Bodycap')).toBeInTheDocument()

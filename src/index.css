@@ -203,6 +203,37 @@
   body {
     @apply bg-background text-foreground;
   }
+  /*
+   * The storage meter in the palette, rather than each browser's own green bar. The track uses the
+   * control border colour, which stands out from a card at 3:1 or more.
+   */
+  meter {
+    appearance: none;
+    height: 0.5rem;
+    border-radius: 9999px;
+    background: var(--color-input);
+  }
+  meter::-webkit-meter-bar {
+    height: 0.5rem;
+    border: 0;
+    border-radius: 9999px;
+    background: var(--color-input);
+  }
+  meter::-webkit-meter-optimum-value {
+    border-radius: 9999px;
+    background: var(--color-foreground);
+  }
+  meter::-webkit-meter-suboptimum-value {
+    border-radius: 9999px;
+    background: var(--color-signal);
+  }
+  meter::-moz-meter-bar {
+    border-radius: 9999px;
+    background: var(--color-foreground);
+  }
+  meter:-moz-meter-sub-optimum::-moz-meter-bar {
+    background: var(--color-signal);
+  }
   html {
     @apply font-sans;
   }

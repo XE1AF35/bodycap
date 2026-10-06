@@ -79,8 +79,7 @@ export function GearPage() {
     return (
       <Page title="Gear" actions={addGear}>
         <EmptyState drawing="body-cap" title="Nothing on the shelf yet.">
-          Every kit starts with one piece. Add your first camera, lens, or bag and it will show up
-          here.
+          Add your first camera, lens, or bag, and it will show up here.
         </EmptyState>
       </Page>
     )

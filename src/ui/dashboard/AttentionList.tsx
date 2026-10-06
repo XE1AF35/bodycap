@@ -6,6 +6,7 @@ import type { Alert } from '@/core/alerts'
 import type { Gear } from '@/core/gear'
 import { LOCALE } from '@/core/locale'
 import { gearName } from '@/ui/gear/labels'
+import { cn } from '@/ui/lib/utils'
 
 const days = new Intl.RelativeTimeFormat(LOCALE, { numeric: 'auto' })
 const percent = new Intl.NumberFormat(LOCALE, { style: 'percent', maximumFractionDigits: 0 })
@@ -85,13 +86,23 @@ export function AttentionList({
   const byId = new Map(items.map((item) => [item.id, item]))
   return (
     <section aria-labelledby="attention-title" className="mb-8">
-      <h2 id="attention-title" className="mb-3 text-lg font-semibold">
+      <h2 id="attention-title" className="mb-3 text-base font-semibold">
         Needs attention
       </h2>
       <ul className="grid gap-2">
         {alerts.map((alert) => (
-          <li key={alertKey(alert)} className="rounded-lg border border-border px-4 py-3">
-            {describe(alert, byId)}
+          <li
+            key={alertKey(alert)}
+            className="flex items-start gap-3 rounded-lg border border-border bg-card px-4 py-3"
+          >
+            {/* Red marks what needs doing. Unpromised storage is normal at first, so it's grey. */}
+            <span
+              className={cn(
+                'mt-2 size-2 shrink-0 rounded-full',
+                alert.kind === 'storage-not-persisted' ? 'bg-muted-foreground' : 'bg-signal',
+              )}
+            />
+            <div className="min-w-0">{describe(alert, byId)}</div>
           </li>
         ))}
       </ul>

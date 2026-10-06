@@ -71,7 +71,7 @@ export function EmptyState({
       </svg>
       <p className="font-medium">{title}</p>
       {children !== undefined && (
-        <div className="max-w-sm text-sm text-muted-foreground">{children}</div>
+        <div className="grid max-w-sm gap-2 text-sm text-muted-foreground">{children}</div>
       )}
       {actions !== undefined && (
         <div className="mt-2 flex flex-wrap justify-center gap-2">{actions}</div>

@@ -32,8 +32,11 @@ export function BackupSection() {
   }
 
   return (
-    <section aria-labelledby="backup-title" className="grid gap-3">
-      <h2 id="backup-title" className="text-lg font-semibold">
+    <section
+      aria-labelledby="backup-title"
+      className="grid gap-3 rounded-lg border border-border bg-card p-4 sm:p-6"
+    >
+      <h2 id="backup-title" className="text-base font-semibold">
         Backup
       </h2>
       <p className="max-w-prose text-muted-foreground">

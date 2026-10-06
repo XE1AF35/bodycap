@@ -36,7 +36,7 @@ export function ValueSummary({ items, first }: ValueSummaryProps) {
 
   return (
     <section aria-labelledby="value-title" className="mb-8">
-      <h2 id="value-title" className="mb-3 text-lg font-semibold">
+      <h2 id="value-title" className="mb-3 text-base font-semibold">
         Value
       </h2>
       <fieldset className="mb-4 flex flex-wrap gap-4">
@@ -61,7 +61,7 @@ export function ValueSummary({ items, first }: ValueSummaryProps) {
       {summary.totals.length === 0 ? (
         <p className="mb-4 text-muted-foreground">None of the gear you have has a {missing} yet.</p>
       ) : (
-        <ul className="mb-2 grid gap-1 text-2xl font-semibold tabular-nums">
+        <ul className="mb-2 grid gap-1 font-mono text-title font-medium tabular-nums">
           {summary.totals.map((total) => (
             <li key={total.currency}>{formatMoney(total)}</li>
           ))}
@@ -76,29 +76,33 @@ export function ValueSummary({ items, first }: ValueSummaryProps) {
       )}
 
       {summary.byCategory.length > 0 && (
-        <Table className="mb-4 max-w-md">
-          <TableCaption className="sr-only">Value by category</TableCaption>
-          <TableHeader>
-            <TableRow>
-              <TableHead scope="col">Category</TableHead>
-              <TableHead scope="col" className="text-right">
-                Total
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {summary.byCategory.map(({ category, totals }) => (
-              <TableRow key={category}>
-                <th scope="row" className="p-2 text-left font-normal">
-                  {CATEGORY_LABELS[category]}
-                </th>
-                <TableCell className="text-right tabular-nums">
-                  {totals.map(formatMoney).join(', ')}
-                </TableCell>
+        <div className="mb-4 max-w-md overflow-hidden rounded-lg border border-border bg-card">
+          <Table>
+            <TableCaption className="sr-only">Value by category</TableCaption>
+            <TableHeader>
+              <TableRow>
+                <TableHead scope="col">
+                  <span className="label-engraved">Category</span>
+                </TableHead>
+                <TableHead scope="col" className="text-right">
+                  <span className="label-engraved">Total</span>
+                </TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {summary.byCategory.map(({ category, totals }) => (
+                <TableRow key={category}>
+                  <th scope="row" className="p-2 text-left font-normal">
+                    {CATEGORY_LABELS[category]}
+                  </th>
+                  <TableCell className="text-right font-mono tabular-nums">
+                    {totals.map(formatMoney).join(', ')}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       )}
 
       {summary.wishlist.length > 0 && (

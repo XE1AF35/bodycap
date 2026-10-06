@@ -59,8 +59,11 @@ export function StorageSection() {
   }
 
   return (
-    <section aria-labelledby="storage-title" className="grid gap-3">
-      <h2 id="storage-title" className="text-lg font-semibold">
+    <section
+      aria-labelledby="storage-title"
+      className="grid gap-3 rounded-lg border border-border bg-card p-4 sm:p-6"
+    >
+      <h2 id="storage-title" className="text-base font-semibold">
         Storage
       </h2>
       {state === undefined ? (

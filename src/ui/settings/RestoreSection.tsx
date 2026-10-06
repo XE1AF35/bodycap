@@ -78,8 +78,11 @@ export function RestoreSection() {
       : `It replaces the ${itemCount(here)} here now, and can't be undone, so you may want a backup of what's here first.`
 
   return (
-    <section aria-labelledby="restore-title" className="grid gap-3">
-      <h2 id="restore-title" className="text-lg font-semibold">
+    <section
+      aria-labelledby="restore-title"
+      className="grid gap-3 rounded-lg border border-border bg-card p-4 sm:p-6"
+    >
+      <h2 id="restore-title" className="text-base font-semibold">
         Restore
       </h2>
       <p className="max-w-prose text-muted-foreground">
@@ -93,7 +96,7 @@ export function RestoreSection() {
           id="restore-file"
           type="file"
           accept=".json,application/json"
-          className="text-sm file:mr-3 file:rounded-md file:border file:border-border file:bg-transparent file:px-3 file:py-1.5 file:text-sm file:text-foreground"
+          className="text-sm file:mr-3 file:rounded-md file:border file:border-input file:bg-transparent file:px-3 file:py-1.5 file:text-sm file:text-foreground"
           onChange={(event) => {
             void choose(event.target.files?.[0])
           }}
@@ -108,7 +111,7 @@ export function RestoreSection() {
       <p role="status">{done}</p>
 
       {chosen !== undefined && (
-        <div className="grid max-w-prose gap-3 rounded-lg border border-border p-4">
+        <div className="grid max-w-prose gap-3 rounded-lg border border-border bg-background p-4">
           <p>
             This backup was made on {madeOn(chosen)} and holds {itemCount(chosen.counts.gear)}.
           </p>

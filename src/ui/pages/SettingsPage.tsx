@@ -9,7 +9,7 @@ import { ThemeSection } from '@/ui/settings/ThemeSection'
 export function SettingsPage() {
   return (
     <Page title="Settings">
-      <div className="grid gap-10">
+      <div className="grid max-w-3xl gap-6">
         <BackupSection />
         <RestoreSection />
         <StorageSection />
