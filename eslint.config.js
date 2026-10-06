@@ -39,8 +39,9 @@ export default defineConfig([
   },
 
   {
-    // Config files at the project root, and the build helpers they use, run in Node
-    files: ['*.{js,ts}', 'build/**/*.ts'],
+    // Config files at the project root, the build helpers they use, and the end-to-end tests run
+    // in Node
+    files: ['*.{js,ts}', 'build/**/*.ts', 'e2e/**/*.ts'],
     languageOptions: { globals: globals.node },
   },
 
