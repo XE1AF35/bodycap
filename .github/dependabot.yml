@@ -10,6 +10,11 @@ updates:
     cooldown:
       default-days: 7
     open-pull-requests-limit: 5
+    ignore:
+      # Node's types follow the Node version Bodycap runs on (.nvmrc and CI), not the newest Node,
+      # so they move up a major only together with those
+      - dependency-name: '@types/node'
+        update-types: ['version-update:semver-major']
     groups:
       # Small updates come together, one pull request for each kind
       runtime-minor:
