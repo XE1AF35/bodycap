@@ -42,7 +42,7 @@ test('adds, edits, and deletes an item using only the keyboard', async ({ page }
   await tabTo(page, dialog.getByRole('button', { name: 'Delete' }))
   await keyboard.press('Enter')
   await expect(page.getByRole('heading', { level: 1, name: 'Gear' })).toBeFocused()
-  await expect(page.getByText("You haven't added any gear yet.")).toBeVisible()
+  await expect(page.getByText('Nothing on the shelf yet.')).toBeVisible()
 })
 
 test('skips to the main content from the first Tab', async ({ page }) => {

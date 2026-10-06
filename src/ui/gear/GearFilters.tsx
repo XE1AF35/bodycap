@@ -1,6 +1,7 @@
 // Search, filters, and the sort menu above the gear list. Every change goes straight into the
 // address, replacing the current history entry so Back still leaves the list.
-import { useState } from 'react'
+import { Search } from 'lucide-react'
+import { useState, type ReactNode } from 'react'
 import { CATEGORIES, CATEGORY_LABELS, STATUSES, STATUS_LABELS } from '@/core/gear'
 import { MOUNTS, MOUNT_LABELS } from '@/core/mounts'
 import { SORT_KEYS, type SortKey } from '@/core/search'
@@ -10,6 +11,21 @@ import { Label } from '@/ui/components/ui/label'
 import { NativeSelect, NativeSelectOption } from '@/ui/components/ui/native-select'
 import type { GearSearch } from '@/ui/gear/gear-search'
 import { SORT_LABELS } from '@/ui/gear/labels'
+
+/** A filter's name, engraved like the markings on a lens */
+function FilterLabel({
+  htmlFor,
+  children,
+}: {
+  readonly htmlFor: string
+  readonly children: ReactNode
+}) {
+  return (
+    <Label htmlFor={htmlFor}>
+      <span className="label-engraved">{children}</span>
+    </Label>
+  )
+}
 
 interface FilterSelectProps<T extends string> {
   readonly id: string
@@ -24,7 +40,7 @@ function FilterSelect<T extends string>(props: FilterSelectProps<T>) {
   const { id, label, anyLabel, value, choices, onChange } = props
   return (
     <div className="grid gap-1.5">
-      <Label htmlFor={id}>{label}</Label>
+      <FilterLabel htmlFor={id}>{label}</FilterLabel>
       <NativeSelect
         id={id}
         value={value ?? ''}
@@ -71,23 +87,29 @@ export function GearFilters({ search, sort, descending, onChange }: GearFiltersP
   return (
     <form
       role="search"
-      className="mb-4 flex flex-wrap items-end gap-3"
+      className="mb-4 flex flex-wrap items-end gap-3 rounded-lg border border-border bg-card p-3"
       onSubmit={(event) => {
         event.preventDefault()
       }}
     >
       <div className="grid gap-1.5">
-        <Label htmlFor="gear-search">Search</Label>
-        <Input
-          id="gear-search"
-          type="search"
-          value={text}
-          className="w-56"
-          onChange={(event) => {
-            setText(event.target.value)
-            onChange({ q: event.target.value.trim() === '' ? undefined : event.target.value })
-          }}
-        />
+        <FilterLabel htmlFor="gear-search">Search</FilterLabel>
+        <div className="relative">
+          <Search
+            aria-hidden="true"
+            className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground"
+          />
+          <Input
+            id="gear-search"
+            type="search"
+            value={text}
+            className="w-56 pl-8"
+            onChange={(event) => {
+              setText(event.target.value)
+              onChange({ q: event.target.value.trim() === '' ? undefined : event.target.value })
+            }}
+          />
+        </div>
       </div>
       <FilterSelect
         id="gear-category"
@@ -120,7 +142,7 @@ export function GearFilters({ search, sort, descending, onChange }: GearFiltersP
         }}
       />
       <div className="grid gap-1.5">
-        <Label htmlFor="gear-sort">Sort by</Label>
+        <FilterLabel htmlFor="gear-sort">Sort by</FilterLabel>
         <NativeSelect
           id="gear-sort"
           value={descending ? `${sort}-desc` : sort}

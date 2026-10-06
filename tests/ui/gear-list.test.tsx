@@ -52,6 +52,14 @@ function tableOrder(): string[] {
 
 const count = () => screen.getByRole('status')
 
+/** The card for an item, in the list shown on small screens */
+function card(name: string): HTMLElement {
+  const list = screen.getByRole('list', { name: 'Your gear' })
+  const item = within(list).getByRole('link', { name }).closest('li')
+  if (item === null) throw new Error(`There's no card for ${name}`)
+  return item
+}
+
 describe('gear list', () => {
   it('lists every item in a table, in name order, with its details', async () => {
     await renderList()
@@ -64,10 +72,25 @@ describe('gear list', () => {
     expect(within(row).getByRole('rowheader')).toHaveTextContent(
       'Sony FE 24-70mm F2.8 GM IIWorkhorse',
     )
-    const cells = within(row)
-      .getAllByRole('cell')
-      .map((cell) => cell.textContent)
-    expect(cells).toEqual(['Lens', 'Owned', 'Sony E (including FE)', '1 Mar 2026', '$3,899.00'])
+    // What a screen reader hears in each cell, which for the mount is more than the badge shows
+    const cells = within(row).getAllByRole('cell')
+    const heard = ['Lens', 'Owned', 'Mount: Sony E (including FE)', '1 Mar 2026', '$3,899.00']
+    expect(cells).toHaveLength(heard.length)
+    heard.forEach((name, index) => {
+      expect(cells[index]).toHaveAccessibleName(name)
+    })
+  })
+
+  it('shows mounts as badges in rows and on cards, and none for gear without a mount', async () => {
+    await renderList()
+    const lensRow = screen.getByRole('row', { name: /Sony FE 24-70mm/ })
+    expect(within(lensRow).getByText('E')).toBeVisible()
+    expect(within(card('Sony FE 24-70mm F2.8 GM II')).getByText('E')).toBeVisible()
+    const bagRow = screen.getByRole('row', { name: /Peak Design/ })
+    expect(within(bagRow).queryByText(/^Mount:/)).not.toBeInTheDocument()
+    expect(
+      within(card('Peak Design Everyday Backpack 20L')).queryByText(/^Mount:/),
+    ).not.toBeInTheDocument()
   })
 
   it('shows the same items as cards for small screens', async () => {
@@ -174,7 +197,8 @@ describe('gear list', () => {
     const user = userEvent.setup()
     await renderList()
     await user.type(screen.getByRole('searchbox', { name: 'Search' }), 'hasselblad')
-    expect(screen.getByText('No gear matches these filters.')).toBeInTheDocument()
+    expect(screen.getByText('Nothing in frame.')).toBeInTheDocument()
+    expect(screen.getByText(/No gear matches these filters/)).toBeInTheDocument()
     expect(screen.queryByRole('table')).not.toBeInTheDocument()
     expect(count()).toHaveTextContent('Showing 0 of 3')
     await user.click(screen.getByRole('button', { name: 'Clear filters' }))
@@ -183,7 +207,8 @@ describe('gear list', () => {
 
   it('explains when there is no gear yet', async () => {
     renderApp('/gear')
-    expect(await screen.findByText("You haven't added any gear yet.")).toBeInTheDocument()
+    expect(await screen.findByText('Nothing on the shelf yet.')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Add gear' })).toBeInTheDocument()
     expect(screen.queryByRole('table')).not.toBeInTheDocument()
   })
 

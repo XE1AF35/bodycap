@@ -1,10 +1,12 @@
 // The gear list: search, filters, and sort from the address, a count read out politely as it
 // changes, and the matching items as a table or cards.
 import { Link, useNavigate, useSearch } from '@tanstack/react-router'
+import { Plus } from 'lucide-react'
 import { useMemo } from 'react'
 import type { Gear } from '@/core/gear'
 import { LOCALE } from '@/core/locale'
 import { filterAndSortGear, type SortKey } from '@/core/search'
+import { EmptyState } from '@/ui/components/EmptyState'
 import { Page } from '@/ui/components/Page'
 import { buttonVariants } from '@/ui/components/ui/button-variants'
 import { GearCards } from '@/ui/gear/GearCards'
@@ -67,29 +69,34 @@ export function GearPage() {
     )
   }
   const addGear = (
-    <Link to="/gear/new" className={buttonVariants({ className: 'mb-4' })}>
+    <Link to="/gear/new" className={buttonVariants()}>
+      <Plus aria-hidden="true" />
       Add gear
     </Link>
   )
 
   if (all.length === 0) {
     return (
-      <Page title="Gear">
-        {addGear}
-        <p className="text-muted-foreground">You haven't added any gear yet.</p>
+      <Page title="Gear" actions={addGear}>
+        <EmptyState drawing="body-cap" title="Nothing on the shelf yet.">
+          Every kit starts with one piece. Add your first camera, lens, or bag and it will show up
+          here.
+        </EmptyState>
       </Page>
     )
   }
 
   return (
-    <Page title="Gear">
-      {addGear}
+    <Page title="Gear" actions={addGear}>
       <GearFilters search={search} sort={sort} descending={descending} onChange={update} />
       <p role="status" className="mb-3 text-sm text-muted-foreground">
-        Showing {counts.format(shown.length)} of {counts.format(all.length)}
+        Showing <span className="font-mono tabular-nums">{counts.format(shown.length)}</span> of{' '}
+        <span className="font-mono tabular-nums">{counts.format(all.length)}</span>
       </p>
       {shown.length === 0 ? (
-        <p>No gear matches these filters.</p>
+        <EmptyState drawing="viewfinder" title="Nothing in frame.">
+          No gear matches these filters. Try fewer filters or a shorter search.
+        </EmptyState>
       ) : (
         <>
           <GearTable items={shown} sort={sort} descending={descending} onSort={sortBy} />

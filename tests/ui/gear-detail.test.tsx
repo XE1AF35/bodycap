@@ -150,7 +150,7 @@ describe('gear detail', () => {
     })
     await user.click(within(dialog).getByRole('button', { name: 'Delete' }))
     expect(await screen.findByRole('heading', { level: 1, name: 'Gear' })).toBeInTheDocument()
-    expect(await screen.findByText("You haven't added any gear yet.")).toBeInTheDocument()
+    expect(await screen.findByText('Nothing on the shelf yet.')).toBeInTheDocument()
     expect(await current(services.repositories.gear.list())).toEqual([])
   })
 
