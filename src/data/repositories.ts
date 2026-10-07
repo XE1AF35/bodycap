@@ -19,6 +19,8 @@ export interface GearRepository {
   get(id: string): Live<Gear | undefined>
   /** Saves a new item, giving it an ID and timestamps */
   add(fields: GearFields): Promise<Gear>
+  /** Saves several new items at once: all of them, or none if any can't be saved */
+  addAll(list: readonly GearFields[]): Promise<readonly Gear[]>
   /** Replaces an item's details. Rejects with GearNotFoundError if it's gone. */
   update(id: string, fields: GearFields): Promise<Gear>
   /**

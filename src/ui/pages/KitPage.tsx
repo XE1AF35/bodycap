@@ -1,4 +1,4 @@
-// One kit's page: its gear, adding more, and, with the packing checklist on, ticking things off as
+// One kit's page: its gear, adding more, sharing it as a link, and, with the packing checklist on, ticking things off as
 // they're packed and unpacking everything for the next trip.
 import { Link, useParams } from '@tanstack/react-router'
 import { ArrowLeft } from 'lucide-react'
@@ -13,6 +13,7 @@ import { AddGearDialog } from '@/ui/kits/AddGearDialog'
 import { DeleteKitButton } from '@/ui/kits/DeleteKitButton'
 import { KitContents } from '@/ui/kits/KitContents'
 import { KitDialog } from '@/ui/kits/KitDialog'
+import { ShareKitDialog } from '@/ui/kits/ShareKitDialog'
 import { useKitChanges } from '@/ui/kits/use-kit-changes'
 import { useServices } from '@/ui/services'
 
@@ -73,6 +74,7 @@ function KitView({ saved, gear }: { readonly saved: Kit; readonly gear: readonly
         }
         actions={
           <>
+            <ShareKitDialog kit={saved} gear={gear} />
             <KitDialog kit={saved} />
             <DeleteKitButton kit={saved} />
           </>

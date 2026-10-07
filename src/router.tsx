@@ -57,6 +57,13 @@ const kitRoute = createRoute({
   component: lazyRouteComponent(() => import('@/ui/pages/KitPage'), 'KitPage'),
 })
 
+// A kit someone shared, carried in the address itself
+const sharedKitRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: 'shared/$kit',
+  component: lazyRouteComponent(() => import('@/ui/pages/SharedKitPage'), 'SharedKitPage'),
+})
+
 const settingsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: 'settings',
@@ -71,6 +78,7 @@ const routeTree = rootRoute.addChildren([
   editGearRoute,
   kitsRoute,
   kitRoute,
+  sharedKitRoute,
   settingsRoute,
 ])
 

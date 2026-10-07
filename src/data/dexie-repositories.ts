@@ -54,6 +54,20 @@ export function createRepositories(
         return item
       }),
 
+    addAll: (list) =>
+      db.transaction('rw', db.gear, db.settings, async () => {
+        const at = now().toISOString()
+        const items = list.map((fields): Gear => ({
+          ...fields,
+          id: newId(),
+          createdAt: at,
+          updatedAt: at,
+        }))
+        await db.gear.bulkAdd(items.map(toRecord))
+        await countChange(db, items.length)
+        return items
+      }),
+
     update: (id, fields) =>
       db.transaction('rw', db.gear, db.settings, async () => {
         const existing = await db.gear.get(id)

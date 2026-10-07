@@ -113,6 +113,34 @@ describe('gear repository', () => {
     expect(await changesSinceBackup()).toBe(1)
   })
 
+  it('adds several items at once, each with its own ID, counting each as a change', async () => {
+    const body: GearFields = {
+      category: 'camera-body',
+      brand: 'Sony',
+      model: 'A7 IV',
+      status: 'owned',
+    }
+    const added = await repos.gear.addAll([lensFields, body])
+    expect(added).toEqual([
+      { ...lensFields, id: firstId, createdAt: START, updatedAt: START },
+      { ...body, id: '00000000-0000-4000-8000-000000000002', createdAt: START, updatedAt: START },
+    ])
+    const list = watch(repos.gear.list())
+    await vi.waitFor(() => {
+      expect(list.latest()).toHaveLength(2)
+    })
+    expect(await db.gear.get(firstId)).toMatchObject({ serialKey: 'AB1234' })
+    expect(await changesSinceBackup()).toBe(2)
+  })
+
+  it('adds none of several items if any one fails', async () => {
+    // Two items given the same ID: the second can't be saved, so neither is
+    repos = createRepositories(db, { now: () => new Date(clock), newId: () => firstId })
+    await expect(repos.gear.addAll([lens, lensFields])).rejects.toThrow()
+    expect(await db.gear.count()).toBe(0)
+    expect(await changesSinceBackup()).toBe(0)
+  })
+
   it('stores a normalised serial for the index, without handing it back', async () => {
     await repos.gear.add(lensFields)
     expect(await db.gear.get(firstId)).toMatchObject({ serialKey: 'AB1234' })

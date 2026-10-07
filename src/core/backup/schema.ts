@@ -27,8 +27,9 @@ const number = z.number()
 const recordShape = { id: z.uuid(), createdAt: timestamp, updatedAt: timestamp }
 
 // Listing every key of each record here means a field added to one can't be left out of backups by
-// mistake: the `satisfies` fails until it's listed
-const gearShape = {
+// mistake: the `satisfies` fails until it's listed. Shared kit links check their items with the
+// same rules.
+export const gearShape = {
   ...recordShape,
   category: z.enum(CATEGORIES),
   brand: shortText,
