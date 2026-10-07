@@ -48,9 +48,12 @@ const localDate = (timestamp: string) => formatDate(toIsoDate(new Date(timestamp
 describe('gear detail', () => {
   it('shows every detail of an item, in groups', async () => {
     const { item } = await renderDetail(lens)
+    // The compatibility panel shows once the rest of the gear has loaded
+    await screen.findByRole('heading', { level: 2, name: 'Works with your cameras' })
     expect(
       screen.getAllByRole('heading', { level: 2 }).map((heading) => heading.textContent),
     ).toEqual([
+      'Works with your cameras',
       'Basics',
       'Purchase',
       'Status and location',

@@ -1,6 +1,14 @@
-// Lens and camera compatibility: native fits, crop mode, adapters you own, and adapters you'd need.
+// Lens and camera compatibility: native fits, crop mode, adapters you own, and adapters you'd need,
+// and each lens or body checked against the other kind you have, best fits first.
 import { describe, expect, it } from 'vitest'
-import { checkCompatibility, type Adapter, type Body, type Lens } from '@/core/compatibility'
+import {
+  checkCompatibility,
+  compatibleGear,
+  type Adapter,
+  type Body,
+  type Lens,
+} from '@/core/compatibility'
+import type { Gear, GearFields } from '@/core/gear'
 
 const ftz: Adapter = {
   id: 'ftz',
@@ -185,5 +193,111 @@ describe('checkCompatibility', () => {
     ['the camera', { mount: 'sony-e' }, { sensorFormat: 'full-frame' }],
   ])("can't tell without the mount of %s", (_name, lens, body) => {
     expect(checkCompatibility(lens, body, [ftz])).toEqual({ fit: 'unknown' })
+  })
+})
+
+describe('compatibleGear', () => {
+  let ids = 0
+  const gear = (fields: Partial<GearFields> & Pick<GearFields, 'category' | 'model'>): Gear => {
+    ids += 1
+    return {
+      id: `g${String(ids)}`,
+      createdAt: '2026-01-01T00:00:00.000Z',
+      updatedAt: '2026-01-01T00:00:00.000Z',
+      brand: 'Brand',
+      status: 'owned',
+      ...fields,
+    }
+  }
+
+  const zLens = gear({
+    category: 'lens',
+    model: 'Z 24-70mm',
+    mount: 'nikon-z',
+    lensCoverage: 'full-frame',
+  })
+  const dxLens = gear({
+    category: 'lens',
+    model: 'Z DX 16-50mm',
+    mount: 'nikon-z',
+    lensCoverage: 'aps-c',
+  })
+  const fLens = gear({ category: 'lens', model: 'AF-S 50mm', mount: 'nikon-f' })
+  const z6 = gear({
+    category: 'camera-body',
+    model: 'Z6 III',
+    mount: 'nikon-z',
+    sensorFormat: 'full-frame',
+  })
+  const z50 = gear({
+    category: 'camera-body',
+    model: 'Z50 II',
+    mount: 'nikon-z',
+    sensorFormat: 'aps-c',
+  })
+  const sony = gear({ category: 'camera-body', model: 'A7 IV', mount: 'sony-e' })
+  const rf = gear({ category: 'camera-body', model: 'EOS R8', mount: 'canon-rf' })
+  const noMount = gear({ category: 'camera-body', model: 'Mystery' })
+  const ftzII = gear({
+    category: 'mount-adapter',
+    model: 'FTZ II',
+    adapterFrom: 'nikon-f',
+    adapterTo: 'nikon-z',
+    adapterAutofocus: true,
+  })
+  const sold = gear({ category: 'camera-body', model: 'Z5', mount: 'nikon-z', status: 'sold' })
+  const wanted = gear({
+    category: 'camera-body',
+    model: 'Z8',
+    mount: 'nikon-z',
+    status: 'wishlist',
+  })
+  const everything = [zLens, dxLens, fLens, z6, z50, sony, rf, noMount, ftzII, sold, wanted]
+
+  const summary = (item: Gear) =>
+    compatibleGear(item, everything)?.map(({ gear: other, result }) => [other.model, result])
+
+  it('checks a lens against every body you have, the best fits first', () => {
+    expect(summary(fLens)).toEqual([
+      ['Z50 II', { fit: 'adapter', adapterId: ftzII.id, autofocus: true, crop: false }],
+      ['Z6 III', { fit: 'adapter', adapterId: ftzII.id, autofocus: true, crop: false }],
+      ['A7 IV', { fit: 'needs-adapter', crop: false }],
+      ['EOS R8', { fit: 'needs-adapter', crop: false }],
+      ['Mystery', { fit: 'unknown' }],
+    ])
+  })
+
+  it('notes when a lens covers a smaller sensor than the body, so it crops', () => {
+    expect(summary(dxLens)?.slice(0, 2)).toEqual([
+      ['Z50 II', { fit: 'native', crop: false }],
+      ['Z6 III', { fit: 'native', crop: true }],
+    ])
+  })
+
+  it('checks a body against every lens you have', () => {
+    expect(summary(z6)).toEqual([
+      ['Z 24-70mm', { fit: 'native', crop: false }],
+      ['Z DX 16-50mm', { fit: 'native', crop: true }],
+      ['AF-S 50mm', { fit: 'adapter', adapterId: ftzII.id, autofocus: true, crop: false }],
+    ])
+  })
+
+  it('rules out a body nothing can join', () => {
+    expect(summary(zLens)?.find(([model]) => model === 'EOS R8')).toEqual([
+      'EOS R8',
+      { fit: 'incompatible' },
+    ])
+  })
+
+  it('checks a lens on the wishlist too, against the bodies you have', () => {
+    const wantedLens = { ...zLens, id: 'w', status: 'wishlist' as const }
+    expect(summary(wantedLens)?.map(([model]) => model)).toContain('Z6 III')
+  })
+
+  it.each<[string, Gear]>([
+    ['an adapter', ftzII],
+    ['a bag', gear({ category: 'bag', model: 'Everyday 20L' })],
+  ])('has nothing to check for %s', (_name, item) => {
+    expect(compatibleGear(item, everything)).toBeUndefined()
   })
 })

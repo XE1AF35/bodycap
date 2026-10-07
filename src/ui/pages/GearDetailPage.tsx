@@ -15,6 +15,7 @@ import { StatusDot } from '@/ui/gear/StatusDot'
 import { ItemLoans } from '@/ui/gear/loans/ItemLoans'
 import { ItemMaintenance } from '@/ui/gear/maintenance/ItemMaintenance'
 import { ItemKits } from '@/ui/kits/ItemKits'
+import { CompatibilityPanel } from '@/ui/gear/CompatibilityPanel'
 import { StatusActions } from '@/ui/gear/status/StatusActions'
 import { gearName, mountText } from '@/ui/gear/labels'
 import { useLive } from '@/ui/hooks/useLive'
@@ -111,6 +112,7 @@ export function GearDetailPage() {
         <StatusActions item={item} />
         <ItemLoans item={item} />
         <ItemKits item={item} />
+        <CompatibilityPanel item={item} />
         <GearDetails item={item} />
         <ItemMaintenance item={item} />
       </Page>
