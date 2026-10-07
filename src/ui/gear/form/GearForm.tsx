@@ -21,8 +21,6 @@ import {
 import { canChangeStatus } from '@/core/lifecycle'
 import { MOUNTS, MOUNT_LABELS, SENSOR_FORMATS, SENSOR_FORMAT_LABELS } from '@/core/mounts'
 import { findSerialClashes } from '@/core/serials'
-import { GearNotFoundError } from '@/data/repositories'
-import { isStorageFull } from '@/data/storage'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -44,6 +42,7 @@ import {
   TextField,
 } from '@/ui/gear/form/fields'
 import { FIELD_LABELS, gearName } from '@/ui/gear/labels'
+import { saveProblem } from '@/ui/gear/save-problem'
 import { useLive } from '@/ui/hooks/useLive'
 import { useServices } from '@/ui/services'
 
@@ -94,15 +93,10 @@ function usedCurrency({ purchasePrice, insuredValue, salePrice }: GearFields) {
   return (purchasePrice ?? insuredValue ?? salePrice)?.currency
 }
 
-function saveProblem(error: unknown): string {
-  if (error instanceof GearNotFoundError) {
-    return "This item was deleted, perhaps in another tab, so your changes weren't saved."
-  }
-  if (isStorageFull(error)) {
-    return "The browser has run out of space, so this wasn't saved. Free up some space, then try again."
-  }
-  return "This couldn't be saved. Try again."
-}
+// Lending and returning also record the loan, so once an item is saved they're done with the
+// buttons on its page, never by picking a status here
+const viaStatusButtons = (from: Status, to: Status) =>
+  to === 'lent-out' || (from === 'lent-out' && to === 'owned')
 
 interface GearFormProps {
   readonly initial: GearInput
@@ -145,7 +139,9 @@ export function GearForm({ initial, saved, onSave, cancel }: GearFormProps) {
 
   const statusChoices = STATUSES.filter(
     (choice: Status) =>
-      saved === undefined || choice === saved.status || canChangeStatus(saved.status, choice),
+      saved === undefined ||
+      choice === saved.status ||
+      (canChangeStatus(saved.status, choice) && !viaStatusButtons(saved.status, choice)),
   ).map((choice) => [choice, STATUS_LABELS[choice]] as const)
 
   const clashes =
@@ -358,7 +354,15 @@ export function GearForm({ initial, saved, onSave, cancel }: GearFormProps) {
         <legend className="label-engraved mb-4 w-full border-b border-border pb-2">
           Status and location
         </legend>
-        <SelectField {...text('status')} choices={statusChoices} />
+        <SelectField
+          {...text('status')}
+          hint={
+            saved === undefined
+              ? undefined
+              : "To lend it or mark it returned, use the buttons on the item's page."
+          }
+          choices={statusChoices}
+        />
         <TextField {...text('currentLocation')} hint="Where it's kept, or who has it." />
         {applies.has('saleDate') && <DateField {...text('saleDate')} />}
         {applies.has('salePrice') && <MoneyField {...money('salePrice')} />}

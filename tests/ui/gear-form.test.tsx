@@ -336,9 +336,11 @@ describe('editing gear', () => {
     expect(field('Widest aperture at the long end')).toHaveValue('')
   })
 
+  // Lending and returning also record the loan, so they're done with the item's status buttons
   it.each<[GearFields['status'], string[]]>([
     ['sold', ['Owned', 'Sold']],
-    ['owned', ['Owned', 'Lent out', 'In repair', 'Sold', 'Lost']],
+    ['owned', ['Owned', 'In repair', 'Sold', 'Lost']],
+    ['lent-out', ['Lent out', 'Lost']],
     ['wishlist', ['Owned', 'Wishlist']],
   ])('offers only the changes the lifecycle allows from %s', async (status, choices) => {
     const fields: GearFields =
