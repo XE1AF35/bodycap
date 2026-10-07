@@ -1,4 +1,6 @@
-// The install manifest and its icons, and the security policy, as the built app serves them.
+// The install manifest and its icons, version.json, and the security policy, as the built app
+// serves them.
+import { SCHEMA_VERSION } from '../src/data/schema-version'
 import { expect, open, test } from './fixtures'
 
 test('serves a manifest that can be installed, with every icon it names', async ({ page }) => {
@@ -31,6 +33,16 @@ test('serves a manifest that can be installed, with every icon it names', async 
     expect(icon.ok(), src).toBe(true)
     expect(icon.headers()['content-type'], src).toBe('image/png')
   }
+})
+
+test('serves the database schema in version.json, kept out of the precache', async ({ page }) => {
+  await open(page)
+  const response = await page.request.get('version.json')
+  expect(response.ok()).toBe(true)
+  expect(await response.json()).toEqual({ app: expect.any(String), schema: SCHEMA_VERSION })
+  // A precached copy would be this version's, so an update would never look new
+  const worker = await page.request.get('sw.js')
+  expect(await worker.text()).not.toContain('version.json')
 })
 
 test.describe('the security policy', () => {

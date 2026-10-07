@@ -68,20 +68,31 @@ export interface SeedItem {
   readonly [field: string]: unknown
 }
 
+/** Records for each table. Each gets an ID and timestamps unless it brings its own. */
+export interface Seed {
+  readonly gear: readonly SeedItem[]
+  readonly kits?: readonly Record<string, unknown>[]
+  readonly loans?: readonly Record<string, unknown>[]
+  readonly maintenance?: readonly Record<string, unknown>[]
+}
+
 /**
- * Saves gear straight into the app's database, then reloads so the app reads it. Faster than
- * typing each item in, for tests about something else.
+ * Saves records straight into the app's database, then reloads so the app reads them. Faster than
+ * typing each one in, for tests about something else.
  */
-export async function seedGear(page: Page, items: readonly SeedItem[]): Promise<void> {
+export async function seed(page: Page, tables: Seed): Promise<void> {
+  // The app opens the database first, so it's at the current version with every table
   await open(page)
   const now = new Date().toISOString()
-  const records = items.map((item) => ({
-    ...item,
-    id: crypto.randomUUID(),
-    createdAt: now,
-    updatedAt: now,
-  }))
-  await page.evaluate(async (gear) => {
+  const stamp = (rows: readonly object[] = []) =>
+    rows.map((row) => ({ id: crypto.randomUUID(), createdAt: now, updatedAt: now, ...row }))
+  const records = {
+    gear: stamp(tables.gear),
+    kits: stamp(tables.kits),
+    loans: stamp(tables.loans),
+    maintenance: stamp(tables.maintenance),
+  }
+  await page.evaluate(async (byTable) => {
     const db = await new Promise<IDBDatabase>((resolve, reject) => {
       const request = indexedDB.open('bodycap')
       request.onsuccess = () => {
@@ -92,19 +103,25 @@ export async function seedGear(page: Page, items: readonly SeedItem[]): Promise<
       }
     })
     await new Promise<void>((resolve, reject) => {
-      const transaction = db.transaction('gear', 'readwrite')
-      for (const record of gear) transaction.objectStore('gear').put(record)
+      const transaction = db.transaction(Object.keys(byTable), 'readwrite')
+      for (const [table, rows] of Object.entries(byTable)) {
+        for (const row of rows) transaction.objectStore(table).put(row)
+      }
       transaction.oncomplete = () => {
         resolve()
       }
       transaction.onerror = () => {
-        reject(transaction.error ?? new Error('The gear was not saved'))
+        reject(transaction.error ?? new Error('The records were not saved'))
       }
     })
     db.close()
   }, records)
   await page.reload()
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
+}
+
+export function seedGear(page: Page, items: readonly SeedItem[]): Promise<void> {
+  return seed(page, { gear: items })
 }
 
 export const SAMPLE_GEAR: readonly SeedItem[] = [
@@ -128,3 +145,86 @@ export const SAMPLE_GEAR: readonly SeedItem[] = [
   },
   { category: 'bag', brand: 'Peak Design', model: 'Everyday Backpack 20L', status: 'owned' },
 ]
+
+/** A local calendar date some days from today, as the app stores dates */
+export function daysFromToday(days: number): string {
+  const date = new Date()
+  date.setDate(date.getDate() + days)
+  return date.toLocaleDateString('en-CA')
+}
+
+const X_T5 = '6f1c7a52-3b8e-4f0a-9d2c-5e4b1a7c8d90'
+const XF_33 = '0b7e2d14-8c3a-4e6f-a1d9-2f5c8b3e7a60'
+const BACKPACK = '9d4a6c21-5e7b-4f80-b3c2-1a8e6d5f4b37'
+
+/**
+ * Gear with everything M2 added: the X-T5 out on an overdue loan, with a sensor clean logged, and
+ * a wedding kit used as a packing checklist, with the X-T5 packed
+ */
+export const SAMPLE_COLLECTION: Seed = {
+  gear: [
+    {
+      id: X_T5,
+      category: 'camera-body',
+      brand: 'Fujifilm',
+      model: 'X-T5',
+      mount: 'fujifilm-x',
+      sensorFormat: 'aps-c',
+      purchasePrice: { amountMinor: 299900, currency: 'NZD' },
+      status: 'lent-out',
+    },
+    {
+      id: XF_33,
+      category: 'lens',
+      brand: 'Fujifilm',
+      model: 'XF 33mm F1.4 R LM WR',
+      mount: 'fujifilm-x',
+      lensCoverage: 'aps-c',
+      focalLengthMin: 33,
+      focalLengthMax: 33,
+      maxAperture: 1.4,
+      status: 'owned',
+    },
+    {
+      category: 'lens',
+      brand: 'Sony',
+      model: 'FE 24-70mm F2.8 GM II',
+      mount: 'sony-e',
+      status: 'owned',
+    },
+    {
+      id: BACKPACK,
+      category: 'bag',
+      brand: 'Peak Design',
+      model: 'Everyday Backpack 20L',
+      status: 'owned',
+    },
+  ],
+  kits: [
+    {
+      name: 'Wedding kit',
+      description: 'For the long days',
+      gearIds: [X_T5, XF_33, BACKPACK],
+      checklist: true,
+      packedGearIds: [X_T5],
+    },
+  ],
+  loans: [
+    {
+      gearId: X_T5,
+      borrower: 'Aroha',
+      contact: '021 555 0199',
+      dateOut: daysFromToday(-20),
+      dueDate: daysFromToday(-3),
+    },
+  ],
+  maintenance: [
+    {
+      gearId: X_T5,
+      type: 'sensor-clean',
+      date: daysFromToday(-60),
+      cost: { amountMinor: 8900, currency: 'NZD' },
+      provider: 'Camera Clinic',
+    },
+  ],
+}

@@ -1,7 +1,7 @@
 // Focus: every stop on the way through a screen draws the same solid outline. An outline, unlike a
 // box-shadow ring, stays visible in Windows high contrast mode.
 import type { Page } from '@playwright/test'
-import { expect, open, SAMPLE_GEAR, seedGear, test } from './fixtures'
+import { expect, open, SAMPLE_COLLECTION, SAMPLE_GEAR, seed, seedGear, test } from './fixtures'
 
 /** Tabs through the screen, describing each stop whose focus isn't a solid outline of 2px or more */
 async function stopsWithoutOutline(page: Page, stops: number): Promise<string[]> {
@@ -40,5 +40,23 @@ test('outlines every stop on the gear list', async ({ page }) => {
 test('outlines every field and button on the add form', async ({ page }) => {
   await open(page, '#/gear/new')
   await expect(page.getByRole('heading', { level: 1, name: 'Add gear' })).toBeVisible()
+  expect(await stopsWithoutOutline(page, 40)).toEqual([])
+})
+
+test('outlines every stop on a kit used as a packing checklist', async ({ page }) => {
+  await seed(page, SAMPLE_COLLECTION)
+  await open(page, '#/kits')
+  await page.getByRole('link', { name: 'Wedding kit' }).click()
+  await page.reload()
+  await expect(page.getByRole('heading', { level: 1, name: 'Wedding kit' })).toBeVisible()
+  expect(await stopsWithoutOutline(page, 30)).toEqual([])
+})
+
+test('outlines every stop on an item with a loan, kits, and maintenance', async ({ page }) => {
+  await seed(page, SAMPLE_COLLECTION)
+  await open(page, '#/gear')
+  await page.getByRole('table').getByRole('link', { name: 'Fujifilm X-T5' }).click()
+  await page.reload()
+  await expect(page.getByRole('region', { name: 'Maintenance' })).toBeVisible()
   expect(await stopsWithoutOutline(page, 40)).toEqual([])
 })
