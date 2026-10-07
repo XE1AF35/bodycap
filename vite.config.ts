@@ -4,10 +4,10 @@ import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 import { defineConfig } from 'vitest/config'
-import { checkOutput } from './build/check-output'
-import { securityMeta } from './build/security'
-import { versionFile } from './build/version-file'
-import { SCHEMA_VERSION } from './src/data/schema-version'
+import { checkOutput } from './build/check-output.ts'
+import { securityMeta } from './build/security.ts'
+import { versionFile } from './build/version-file.ts'
+import { SCHEMA_VERSION } from './src/data/schema-version.ts'
 
 const { version } = JSON.parse(
   readFileSync(new URL('./package.json', import.meta.url), 'utf8'),

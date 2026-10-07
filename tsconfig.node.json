@@ -8,6 +8,8 @@
     "moduleDetection": "force",
     "types": ["node"],
     "noEmit": true,
+    // Vite's native config loader runs the config in Node, which needs imports to name .ts files
+    "allowImportingTsExtensions": true,
     "skipLibCheck": true,
 
     "strict": true,
