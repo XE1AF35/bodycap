@@ -19,6 +19,7 @@ describe('app shell', () => {
     ['/', 'Dashboard', 'Welcome to Bodycap'],
     ['/gear', 'Gear', 'Gear'],
     ['/kits', 'Kits', 'Kits'],
+    ['/system', 'System', 'System map'],
     ['/settings', 'Settings', 'Settings'],
   ])('marks %s as the current page, and titles the window after it', async (path, link, title) => {
     renderApp(path)

@@ -146,3 +146,14 @@ export const SENSOR_FORMAT_LABELS: Record<SensorFormat, string> = {
   'aps-c': 'APS-C',
   'micro-four-thirds': 'Micro Four Thirds',
 }
+
+/**
+ * How much smaller each format is than full frame, across the diagonal. A lens frames like one this
+ * many times longer would on full frame. Medium format and APS-C vary by maker, so these are typical.
+ */
+export const CROP_FACTORS: Record<SensorFormat, number> = {
+  'medium-format': 0.79,
+  'full-frame': 1,
+  'aps-c': 1.5,
+  'micro-four-thirds': 2,
+}

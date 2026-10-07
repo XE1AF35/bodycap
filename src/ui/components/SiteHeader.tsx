@@ -16,6 +16,7 @@ const PAGES = [
   { to: '/', label: 'Dashboard', exact: true },
   { to: '/gear', label: 'Gear', exact: false },
   { to: '/kits', label: 'Kits', exact: false },
+  { to: '/system', label: 'System', exact: false },
   { to: '/settings', label: 'Settings', exact: false },
 ] as const
 

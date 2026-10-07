@@ -133,14 +133,19 @@ export function toOpticsInput(optics: LensOptics): OpticsInput {
 const millimetres = new Intl.NumberFormat(LOCALE, { maximumFractionDigits: 1, useGrouping: false })
 const fNumber = new Intl.NumberFormat(LOCALE, { maximumFractionDigits: 2, useGrouping: false })
 
+/** Such as "50mm" */
+export function formatMillimetres(value: number): string {
+  return `${millimetres.format(value)}mm`
+}
+
 /** Such as "50mm" for a prime or "24-70mm" for a zoom, as lenses are named */
 export function formatFocalLength({
   focalLengthMin: min,
   focalLengthMax: max,
 }: LensOptics): string | undefined {
   if (min === undefined || max === undefined) return undefined
-  if (min === max) return `${millimetres.format(min)}mm`
-  return `${millimetres.format(min)}-${millimetres.format(max)}mm`
+  if (min === max) return formatMillimetres(min)
+  return `${millimetres.format(min)}-${formatMillimetres(max)}`
 }
 
 /** Such as "f/2.8", or "f/3.5-5.6" for a zoom that opens less wide at the long end */
