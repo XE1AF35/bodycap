@@ -1,5 +1,4 @@
 // What every status change dialog is given by the status bar.
-import type { RefObject } from 'react'
 import type { IsoDate } from '@/core/dates'
 import type { Gear, GearErrors } from '@/core/gear'
 import { RuleError } from '@/data/repositories'
@@ -7,10 +6,10 @@ import { RuleError } from '@/data/repositories'
 export interface ChangeProps {
   readonly item: Gear
   readonly today: IsoDate
-  /** Where focus goes once the dialog closes, since the button that opened it may be gone */
-  readonly finalFocus: RefObject<HTMLElement | null>
-  /** Says what changed, in the status bar's status line */
+  /** Closes the dialog after a change, saying what changed in the status bar's status line */
   readonly onDone: (message: string) => void
+  /** Closes the dialog with nothing changed */
+  readonly onCancel: () => void
 }
 
 /**

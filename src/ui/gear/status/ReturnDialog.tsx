@@ -1,12 +1,12 @@
 // Marking a lent item as back. With a loan recorded, the day it came back closes the loan as the
 // item goes back to owned. Items marked lent out before loans were recorded just change status.
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { formatDate } from '@/core/dates'
-import { activeLoan, returnLoan } from '@/core/loans'
+import { activeLoan, returnLoan, type Loan } from '@/core/loans'
 import { RuleError } from '@/data/repositories'
 import { DateField } from '@/ui/gear/form/fields'
 import { gearName } from '@/ui/gear/labels'
-import { useLive } from '@/ui/hooks/useLive'
+import type { LiveState } from '@/ui/hooks/useLive'
 import { useServices } from '@/ui/services'
 import type { ChangeProps } from './change-props'
 import { FormDialog } from './FormDialog'
@@ -14,16 +14,20 @@ import { saveStatusChange } from './status-change'
 
 const DATE_ID = 'return-date'
 
-export function ReturnDialog({ item, today, finalFocus, onDone }: ChangeProps) {
+export function ReturnDialog({
+  item,
+  today,
+  onDone,
+  onCancel,
+  loans,
+}: ChangeProps & { readonly loans: LiveState<readonly Loan[]> }) {
   const { repositories } = useServices()
-  const loans = useLive(useMemo(() => repositories.loans.forGear(item.id), [repositories, item.id]))
   const loan = loans.status === 'ready' ? activeLoan(loans.value, item.id) : undefined
   const [returnedOn, setReturnedOn] = useState(today)
   const [error, setError] = useState<string>()
 
   return (
     <FormDialog
-      trigger="Returned"
       title={`${gearName(item)} is back`}
       description={
         loan === undefined
@@ -31,12 +35,9 @@ export function ReturnDialog({ item, today, finalFocus, onDone }: ChangeProps) {
           : `Lent to ${loan.borrower} on ${formatDate(loan.dateOut)}.`
       }
       submit="Mark as returned"
-      finalFocus={finalFocus}
+      returnFocus={false}
       ready={loans.status !== 'loading'}
-      onOpen={() => {
-        setReturnedOn(today)
-        setError(undefined)
-      }}
+      onCancel={onCancel}
       onSubmit={async () => {
         if (loan === undefined) {
           const errors = await saveStatusChange(repositories.gear, item, { to: 'owned' }, today)
@@ -46,12 +47,11 @@ export function ReturnDialog({ item, today, finalFocus, onDone }: ChangeProps) {
           if (!checked.ok) {
             setError(checked.error)
             document.getElementById(DATE_ID)?.focus()
-            return false
+            return
           }
           await repositories.loans.giveBack(loan.id, returnedOn)
         }
         onDone('Marked as returned.')
-        return true
       }}
     >
       {loan !== undefined && (

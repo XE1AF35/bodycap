@@ -15,7 +15,7 @@ const PRICE_ID = 'sold-salePrice'
 // A message goes once its field is changed, so each can be cleared
 type SaleErrors = Partial<Record<'saleDate' | 'salePrice', string | undefined>>
 
-export function SoldDialog({ item, today, finalFocus, onDone }: ChangeProps) {
+export function SoldDialog({ item, today, onDone, onCancel }: ChangeProps) {
   const { repositories } = useServices()
   // A sale is usually in the currency it was bought in
   const blank = (): MoneyInput => ({
@@ -28,26 +28,20 @@ export function SoldDialog({ item, today, finalFocus, onDone }: ChangeProps) {
 
   return (
     <FormDialog
-      trigger="Sold"
       title={`Sell ${gearName(item)}`}
       submit="Mark as sold"
-      finalFocus={finalFocus}
-      onOpen={() => {
-        setSaleDate(today)
-        setSalePrice(blank())
-        setErrors({})
-      }}
+      returnFocus={false}
+      onCancel={onCancel}
       onSubmit={async () => {
         const change = { to: 'sold', saleDate, salePrice } as const
         const found = await saveStatusChange(repositories.gear, item, change, today)
         if (found === undefined) {
           onDone('Marked as sold.')
-          return true
+          return
         }
         const mine = forFields(found, ['saleDate', 'salePrice'])
         setErrors(mine)
         focusFirst([DATE_ID, PRICE_ID], { [DATE_ID]: mine.saleDate, [PRICE_ID]: mine.salePrice })
-        return false
       }}
     >
       <DateField

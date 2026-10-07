@@ -9,32 +9,27 @@ import { saveStatusChange } from './status-change'
 
 const DATE_ID = 'lost-lostDate'
 
-export function LostDialog({ item, today, finalFocus, onDone }: ChangeProps) {
+export function LostDialog({ item, today, onDone, onCancel }: ChangeProps) {
   const { repositories } = useServices()
   const [lostDate, setLostDate] = useState(today)
   const [error, setError] = useState<string>()
 
   return (
     <FormDialog
-      trigger="Lost"
       title={`${gearName(item)} is lost`}
       description="It stays in your records, marked as lost, in case it turns up."
       submit="Mark as lost"
-      finalFocus={finalFocus}
-      onOpen={() => {
-        setLostDate(today)
-        setError(undefined)
-      }}
+      returnFocus={false}
+      onCancel={onCancel}
       onSubmit={async () => {
         const change = { to: 'lost', lostDate } as const
         const found = await saveStatusChange(repositories.gear, item, change, today)
         if (found === undefined) {
           onDone('Marked as lost.')
-          return true
+          return
         }
         setError(forFields(found, ['lostDate']).lostDate)
         document.getElementById(DATE_ID)?.focus()
-        return false
       }}
     >
       <DateField

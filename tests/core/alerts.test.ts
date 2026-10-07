@@ -1,4 +1,5 @@
-// Dashboard alerts: warranty windows, backup reminders, storage space, and duplicate serials.
+// Dashboard alerts: warranty windows, backup reminders, storage space, duplicate serials, and
+// overdue loans.
 import { describe, expect, it } from 'vitest'
 import {
   backupReminder,
@@ -8,6 +9,7 @@ import {
   type AlertItem,
 } from '@/core/alerts'
 import { addDays } from '@/core/dates'
+import type { Loan } from '@/core/loans'
 
 const TODAY = '2026-10-05'
 const daysFromToday = (days: number) => addDays(TODAY, days)
@@ -93,13 +95,30 @@ describe('collectAlerts', () => {
     { id: 'a', brand: 'Canon', status: 'owned', serialNumber: '01-234', warrantyExpiry: TODAY },
     { id: 'b', brand: 'Canon', status: 'sold', serialNumber: '01234' },
     { id: 'c', brand: 'Nikon', status: 'owned', warrantyExpiry: daysFromToday(-3) },
+    { id: 'd', brand: 'Sony', status: 'lent-out' },
+    { id: 'e', brand: 'Sony', status: 'lent-out' },
+    { id: 'f', brand: 'Sony', status: 'lost' },
   ]
 
-  it('lists backup, storage, warranty, and duplicate serial alerts in that order', () => {
+  const loan = (id: string, gearId: string, dueInDays: number, returnedOn?: string): Loan => ({
+    id,
+    createdAt: '2026-09-01T00:00:00.000Z',
+    updatedAt: '2026-09-01T00:00:00.000Z',
+    gearId,
+    borrower: `Borrower ${id}`,
+    dateOut: '2026-09-01',
+    dueDate: daysFromToday(dueInDays),
+    ...(returnedOn === undefined ? {} : { returnedOn }),
+  })
+
+  const quiet = { lastBackupOn: TODAY, changesSinceBackup: 0 }
+
+  it('lists backup, storage, overdue loan, warranty, and duplicate serial alerts in that order', () => {
     expect(
       collectAlerts(
         {
           items,
+          loans: [loan('l1', 'd', -2)],
           backup: { changesSinceBackup: 3 },
           storage: { usage: 90, quota: 100, persisted: false },
         },
@@ -109,18 +128,40 @@ describe('collectAlerts', () => {
       { kind: 'backup', reason: 'never', changes: 3 },
       { kind: 'storage-nearly-full', usedFraction: 0.9 },
       { kind: 'storage-not-persisted' },
+      {
+        kind: 'overdue-loan',
+        loanId: 'l1',
+        gearId: 'd',
+        borrower: 'Borrower l1',
+        daysOverdue: 2,
+      },
       { kind: 'warranty', id: 'c', warrantyExpiry: daysFromToday(-3), daysLeft: -3 },
       { kind: 'warranty', id: 'a', warrantyExpiry: TODAY, daysLeft: 0 },
       { kind: 'duplicate-serial', serialKey: '01234', ids: ['a', 'b'] },
     ])
   })
 
+  it('flags loans past due for gear still lent out, the longest overdue first', () => {
+    const loans = [
+      loan('due-today', 'd', 0),
+      loan('late', 'd', -2),
+      loan('later', 'e', -9),
+      loan('back', 'e', -20, daysFromToday(-15)),
+      // Lost while lent, so chasing the loan won't help
+      loan('lost', 'f', -30),
+      loan('gone', 'z', -30),
+    ]
+    const alerts = collectAlerts({ items, loans, backup: quiet, storage: {} }, TODAY)
+    expect(
+      alerts.map((alert) => (alert.kind === 'overdue-loan' ? alert.loanId : alert.kind)),
+    ).toEqual(['later', 'late', 'warranty', 'warranty', 'duplicate-serial'])
+  })
+
   it('has nothing to say when all is well, or when the browser gives no storage details', () => {
-    const backup = { lastBackupOn: TODAY, changesSinceBackup: 0 }
-    expect(collectAlerts({ items: [], backup, storage: {} }, TODAY)).toEqual([])
+    expect(collectAlerts({ items: [], loans: [], backup: quiet, storage: {} }, TODAY)).toEqual([])
     expect(
       collectAlerts(
-        { items: [], backup, storage: { usage: 1, quota: 100, persisted: true } },
+        { items: [], loans: [], backup: quiet, storage: { usage: 1, quota: 100, persisted: true } },
         TODAY,
       ),
     ).toEqual([])

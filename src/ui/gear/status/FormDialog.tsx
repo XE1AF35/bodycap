@@ -1,6 +1,7 @@
-// A status change that needs details, such as who's borrowing an item, as a form in a dialog. The
-// dialog stays open until the details are saved, and says what went wrong if they can't be.
-import { useState, type ReactNode, type RefObject } from 'react'
+// A change that needs details, such as who's borrowing an item, as a form in a dialog. It's open
+// for as long as it's rendered: the page shows it, and takes it away on Cancel or after saving. It
+// stays open until the details are saved, and says what went wrong if they can't be.
+import { useState, type ReactNode } from 'react'
 import {
   Dialog,
   DialogClose,
@@ -9,40 +10,39 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/ui/components/ui/dialog'
 import { Button } from '@/ui/components/ui/button'
 import { saveProblem } from '@/ui/gear/save-problem'
 
 interface FormDialogProps {
-  /** The button that opens it */
-  readonly trigger: string
   readonly title: string
   readonly description?: ReactNode
   /** The button that saves */
   readonly submit: string
-  readonly finalFocus: RefObject<HTMLElement | null>
-  /** Starts the fields afresh each time the dialog opens */
-  readonly onOpen: () => void
-  /** Checks and saves: true once saved, or false to stay open with the fields saying what to fix */
-  readonly onSubmit: () => Promise<boolean>
+  /** Checks and saves, or leaves the fields saying what to fix. The page closes it once saved. */
+  readonly onSubmit: () => Promise<void>
+  /** Cancel, Escape, or a click outside */
+  readonly onCancel: () => void
+  /**
+   * False when the page moves focus itself once the dialog has gone, since the button that opened
+   * it may have gone too. Otherwise focus goes back to that button.
+   */
+  readonly returnFocus?: boolean
   /** False while what the dialog needs is still loading */
   readonly ready?: boolean
   readonly children?: ReactNode
 }
 
 export function FormDialog({
-  trigger,
   title,
   description,
   submit,
-  finalFocus,
-  onOpen,
   onSubmit,
+  onCancel,
+  returnFocus = true,
   ready = true,
   children,
 }: FormDialogProps) {
-  const [open, setOpen] = useState(false)
   const [problem, setProblem] = useState<string>()
   const [busy, setBusy] = useState(false)
 
@@ -50,7 +50,7 @@ export function FormDialog({
     setBusy(true)
     setProblem(undefined)
     try {
-      if (await onSubmit()) setOpen(false)
+      await onSubmit()
     } catch (error) {
       setProblem(saveProblem(error))
     } finally {
@@ -60,17 +60,12 @@ export function FormDialog({
 
   return (
     <Dialog
-      open={open}
-      onOpenChange={(next) => {
-        setOpen(next)
-        if (next) {
-          setProblem(undefined)
-          onOpen()
-        }
+      open
+      onOpenChange={(open) => {
+        if (!open) onCancel()
       }}
     >
-      <DialogTrigger render={<Button variant="outline" size="sm" />}>{trigger}</DialogTrigger>
-      <DialogContent finalFocus={finalFocus}>
+      <DialogContent finalFocus={returnFocus}>
         <form
           noValidate
           className="grid gap-4"

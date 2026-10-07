@@ -12,6 +12,7 @@ import { DeleteGearButton } from '@/ui/gear/DeleteGearButton'
 import { GearDetails } from '@/ui/gear/GearDetails'
 import { MountBadge } from '@/ui/gear/MountBadge'
 import { StatusDot } from '@/ui/gear/StatusDot'
+import { ItemLoans } from '@/ui/gear/loans/ItemLoans'
 import { StatusActions } from '@/ui/gear/status/StatusActions'
 import { gearName, mountText } from '@/ui/gear/labels'
 import { useLive } from '@/ui/hooks/useLive'
@@ -106,6 +107,7 @@ export function GearDetailPage() {
         }
       >
         <StatusActions item={item} />
+        <ItemLoans item={item} />
         <GearDetails item={item} />
       </Page>
     </>

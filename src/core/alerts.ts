@@ -1,7 +1,8 @@
-// What the dashboard flags: warranties running out, backups falling behind, storage filling up, and
-// items entered twice. Each check is pure, so the dashboard just reads the list.
+// What the dashboard flags: warranties running out, backups falling behind, storage filling up,
+// loans past due, and items entered twice. Each check is pure, so the dashboard just reads the list.
 import { daysBetween, type IsoDate } from './dates'
 import { isHeld, type Gear } from './gear'
+import { daysOverdue, overdueLoans, type LoanFields } from './loans'
 import { findDuplicateSerials, type DuplicateSerial } from './serials'
 
 export const WARRANTY_DAYS_AHEAD = 60
@@ -69,21 +70,55 @@ export function storageNearlyFull({ usage, quota }: StorageState): number | unde
   return usedFraction >= STORAGE_NEARLY_FULL ? usedFraction : undefined
 }
 
+export interface OverdueLoanAlert {
+  readonly loanId: string
+  readonly gearId: string
+  readonly borrower: string
+  readonly daysOverdue: number
+}
+
+export type AlertLoan = LoanFields & { readonly id: string }
+
+/**
+ * Loans past their due date, the longest overdue first. Only gear still lent out counts: an item
+ * lost while lent, say, won't come back by chasing the loan.
+ */
+export function overdueLoanAlerts(
+  loans: readonly AlertLoan[],
+  items: readonly AlertItem[],
+  today: IsoDate,
+): OverdueLoanAlert[] {
+  const lent = new Set(items.filter(({ status }) => status === 'lent-out').map(({ id }) => id))
+  return overdueLoans(loans, today)
+    .filter(({ gearId }) => lent.has(gearId))
+    .map((loan) => ({
+      loanId: loan.id,
+      gearId: loan.gearId,
+      borrower: loan.borrower,
+      daysOverdue: daysOverdue(loan, today),
+    }))
+}
+
 export type Alert =
   | ({ readonly kind: 'backup' } & BackupReminder)
   | { readonly kind: 'storage-nearly-full'; readonly usedFraction: number }
   | { readonly kind: 'storage-not-persisted' }
+  | ({ readonly kind: 'overdue-loan' } & OverdueLoanAlert)
   | ({ readonly kind: 'warranty' } & WarrantyAlert)
   | ({ readonly kind: 'duplicate-serial' } & DuplicateSerial)
 
 export interface AlertInput {
   readonly items: readonly AlertItem[]
+  readonly loans: readonly AlertLoan[]
   readonly backup: BackupState
   readonly storage: StorageState
 }
 
 /** Every alert, with the ones that protect your data first. */
-export function collectAlerts({ items, backup, storage }: AlertInput, today: IsoDate): Alert[] {
+export function collectAlerts(
+  { items, loans, backup, storage }: AlertInput,
+  today: IsoDate,
+): Alert[] {
   const alerts: Alert[] = []
   const reminder = backupReminder(backup, today)
   if (reminder) alerts.push({ kind: 'backup', ...reminder })
@@ -91,6 +126,9 @@ export function collectAlerts({ items, backup, storage }: AlertInput, today: Iso
   if (usedFraction !== undefined) alerts.push({ kind: 'storage-nearly-full', usedFraction })
   // Browsers decide this quietly, so not being persisted yet is normal and only worth a gentle note
   if (storage.persisted === false) alerts.push({ kind: 'storage-not-persisted' })
+  for (const overdue of overdueLoanAlerts(loans, items, today)) {
+    alerts.push({ kind: 'overdue-loan', ...overdue })
+  }
   for (const warranty of expiringWarranties(items, today)) {
     alerts.push({ kind: 'warranty', ...warranty })
   }

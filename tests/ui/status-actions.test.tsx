@@ -1,6 +1,6 @@
 // Status buttons on an item's page: only the changes the lifecycle allows, each with its dialog,
 // the change saved with any loan, and the messages when something doesn't fit.
-import { fireEvent, screen, within } from '@testing-library/react'
+import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 import { addDays, toIsoDate } from '@/core/dates'
@@ -87,10 +87,10 @@ describe('status buttons', () => {
 
     expect(await announced('Lent to Aroha.')).toBeInTheDocument()
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
-    // Focus comes back to the bar, landing on its first button, Returned, as Lend has gone
-    expect(screen.getByRole('group', { name: 'Change status' })).toContainElement(
-      document.activeElement as HTMLElement | null,
-    )
+    // Lend has gone, so focus moves to the bar itself
+    await waitFor(() => {
+      expect(screen.getByRole('group', { name: 'Change status' })).toHaveFocus()
+    })
     expect(await saved(services, item.id)).toMatchObject({ status: 'lent-out' })
     expect(await current(services.repositories.loans.forGear(item.id))).toMatchObject([
       { borrower: 'Aroha', contact: '021 123 4567', dateOut: TODAY, dueDate: addDays(TODAY, 7) },
@@ -206,12 +206,15 @@ describe('status buttons', () => {
     expect(after).not.toHaveProperty('lostDate')
   })
 
-  it('changes nothing when the dialog is cancelled', async () => {
+  it('changes nothing when the dialog is cancelled, and puts focus back on the button', async () => {
     const { user, services, item } = await renderItem()
     await user.click(bar().getByRole('button', { name: 'Lost' }))
     const dialog = within(await screen.findByRole('dialog'))
     await user.click(dialog.getByRole('button', { name: 'Cancel' }))
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    await waitFor(() => {
+      expect(bar().getByRole('button', { name: 'Lost' })).toHaveFocus()
+    })
     expect(await saved(services, item.id)).toMatchObject({ status: 'owned' })
   })
 })

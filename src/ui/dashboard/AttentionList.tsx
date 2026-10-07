@@ -1,5 +1,5 @@
-// The dashboard's alerts in plain words: backups falling behind, storage, warranties, and serials
-// entered twice. Each item it mentions links to that item.
+// The dashboard's alerts in plain words: backups falling behind, storage, overdue loans, warranties,
+// and serials entered twice. Each item it mentions links to that item.
 import { Link } from '@tanstack/react-router'
 import { Fragment, type ReactNode } from 'react'
 import type { Alert } from '@/core/alerts'
@@ -43,6 +43,16 @@ function describe(alert: Alert, byId: ReadonlyMap<string, Gear>): ReactNode {
       return `Storage for Bodycap is ${percent.format(alert.usedFraction)} full. Make a backup, then free up some space on this device.`
     case 'storage-not-persisted':
       return "This browser hasn't promised to keep Bodycap's data yet. That's normal at first, as browsers decide based on how a site is used. Backups keep your gear safe either way."
+    case 'overdue-loan': {
+      const item = byId.get(alert.gearId)
+      if (item === undefined) return null
+      return (
+        <>
+          <ItemLink item={item} /> was due back from {alert.borrower}{' '}
+          {days.format(-alert.daysOverdue, 'day')}.
+        </>
+      )
+    }
     case 'warranty': {
       const item = byId.get(alert.id)
       if (item === undefined) return null
@@ -67,6 +77,8 @@ function describe(alert: Alert, byId: ReadonlyMap<string, Gear>): ReactNode {
 
 function alertKey(alert: Alert): string {
   switch (alert.kind) {
+    case 'overdue-loan':
+      return `loan-${alert.loanId}`
     case 'warranty':
       return `warranty-${alert.id}`
     case 'duplicate-serial':

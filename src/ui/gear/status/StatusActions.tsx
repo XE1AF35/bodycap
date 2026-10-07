@@ -1,12 +1,17 @@
 // The buttons that move an item through its lifecycle, shown on its page. Only the changes the
-// lifecycle allows from the item's status are offered. After one, focus comes back to this bar
-// (its first button), since the button that was pressed has often gone, and the status line says
-// what changed.
-import { useEffect, useId, useRef, useState } from 'react'
+// lifecycle allows from the item's status are offered.
+//
+// The bar keeps track of the open dialog itself, so a dialog stays open while the item's status
+// changes underneath it. Once a change is saved, focus moves to the bar, which is always there,
+// since the button that was pressed has often gone; the status line says what changed. After
+// Cancel, focus goes back to the button pressed.
+import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react'
 import { toIsoDate } from '@/core/dates'
-import { STATUS_LABELS, type Gear } from '@/core/gear'
+import { STATUS_LABELS, type Gear, type Status } from '@/core/gear'
 import { RuleError } from '@/data/repositories'
+import { Button } from '@/ui/components/ui/button'
 import { gearName } from '@/ui/gear/labels'
+import { useLive } from '@/ui/hooks/useLive'
 import { useServices } from '@/ui/services'
 import type { ChangeProps } from './change-props'
 import { ConfirmChange } from './ConfirmChange'
@@ -16,6 +21,8 @@ import { ReturnDialog } from './ReturnDialog'
 import { SoldDialog } from './SoldDialog'
 import { saveStatusChange } from './status-change'
 
+type Action = 'lend' | 'return' | 'confirm' | 'sold' | 'lost'
+
 interface Confirmation {
   readonly to: 'owned' | 'in-repair'
   readonly trigger: string
@@ -23,81 +30,136 @@ interface Confirmation {
   readonly description: string
 }
 
-function confirmations(item: Gear): Partial<Record<Gear['status'], Confirmation>> {
+function confirmationFor(item: Gear): Confirmation | undefined {
   const name = gearName(item)
-  return {
-    owned: {
-      to: 'in-repair',
-      trigger: 'Repair',
-      title: `Send ${name} for repair?`,
-      description: "It stays in your gear, marked as in repair until it's back.",
-    },
-    'in-repair': {
-      to: 'owned',
-      trigger: 'Back from repair',
-      title: `Is ${name} back from repair?`,
-      description: "It's marked as owned again.",
-    },
-    wishlist: {
-      to: 'owned',
-      trigger: 'Bought it',
-      title: `Did you buy ${name}?`,
-      description:
-        'It moves from your wishlist into your gear. Edit it to add when you bought it and what you paid.',
-    },
-    sold: {
-      to: 'owned',
-      trigger: 'Own it again',
-      title: `Own ${name} again?`,
-      description: 'It goes back into your gear, and its sale date and price are cleared.',
-    },
-    lost: {
-      to: 'owned',
-      trigger: 'Found it',
-      title: `Found ${name}?`,
-      description: 'It goes back into your gear, and the date it was lost is cleared.',
-    },
+  switch (item.status) {
+    case 'owned':
+      return {
+        to: 'in-repair',
+        trigger: 'Repair',
+        title: `Send ${name} for repair?`,
+        description: "It stays in your gear, marked as in repair until it's back.",
+      }
+    case 'in-repair':
+      return {
+        to: 'owned',
+        trigger: 'Back from repair',
+        title: `Is ${name} back from repair?`,
+        description: "It's marked as owned again.",
+      }
+    case 'wishlist':
+      return {
+        to: 'owned',
+        trigger: 'Bought it',
+        title: `Did you buy ${name}?`,
+        description:
+          'It moves from your wishlist into your gear. Edit it to add when you bought it and what you paid.',
+      }
+    case 'sold':
+      return {
+        to: 'owned',
+        trigger: 'Own it again',
+        title: `Own ${name} again?`,
+        description: 'It goes back into your gear, and its sale date and price are cleared.',
+      }
+    case 'lost':
+      return {
+        to: 'owned',
+        trigger: 'Found it',
+        title: `Found ${name}?`,
+        description: 'It goes back into your gear, and the date it was lost is cleared.',
+      }
+    case 'lent-out':
+      return undefined
   }
+}
+
+/** The buttons offered from each status, in the order they're shown */
+function actionsFor(status: Status): readonly Action[] {
+  switch (status) {
+    case 'owned':
+      return ['lend', 'confirm', 'sold', 'lost']
+    case 'lent-out':
+      return ['return', 'lost']
+    case 'in-repair':
+      return ['confirm', 'sold', 'lost']
+    case 'wishlist':
+    case 'sold':
+    case 'lost':
+      return ['confirm']
+  }
+}
+
+const LABELS: Record<Exclude<Action, 'confirm'>, string> = {
+  lend: 'Lend',
+  return: 'Returned',
+  sold: 'Sold',
+  lost: 'Lost',
 }
 
 export function StatusActions({ item }: { readonly item: Gear }) {
   const { repositories } = useServices()
+  // Loaded with the bar, so Returned knows the loan by the time it's pressed
+  const loans = useLive(useMemo(() => repositories.loans.forGear(item.id), [repositories, item.id]))
   // Read once, which is close enough for dates typed while the page is open
   const [today] = useState(() => toIsoDate(new Date()))
-  const barRef = useRef<HTMLDivElement>(null)
   const labelId = useId()
-  const [done, setDone] = useState({ message: '', changes: 0 })
+  const barRef = useRef<HTMLDivElement>(null)
+  const openerRef = useRef<HTMLElement | null>(null)
+  const focusNextRef = useRef<'bar' | 'opener' | null>(null)
+  // The confirmation is kept from when it opened, so its words don't change if the status does
+  const [open, setOpen] = useState<{
+    readonly action: Action
+    readonly confirmation?: Confirmation | undefined
+  } | null>(null)
+  const [message, setMessage] = useState('')
 
+  // Once a dialog has gone, focus goes where it should: the bar after a change, the button after
+  // Cancel, or the bar if that button has gone meanwhile
   useEffect(() => {
-    if (done.changes > 0) barRef.current?.focus()
-  }, [done])
+    if (open !== null || focusNextRef.current === null) return
+    const opener = openerRef.current
+    const target =
+      focusNextRef.current === 'opener' && opener?.isConnected ? opener : barRef.current
+    focusNextRef.current = null
+    target?.focus()
+  })
 
   const props: ChangeProps = {
     item,
     today,
-    finalFocus: barRef,
-    onDone: (message) => {
-      setDone((previous) => ({ message, changes: previous.changes + 1 }))
+    onDone: (done) => {
+      setMessage(done)
+      focusNextRef.current = 'bar'
+      setOpen(null)
+    },
+    onCancel: () => {
+      focusNextRef.current = 'opener'
+      setOpen(null)
     },
   }
 
-  const confirmation = confirmations(item)[item.status]
-  const confirm =
-    confirmation === undefined ? null : (
-      <ConfirmChange
-        trigger={confirmation.trigger}
-        title={confirmation.title}
-        description={confirmation.description}
-        confirm={`Mark as ${STATUS_LABELS[confirmation.to].toLowerCase()}`}
-        finalFocus={barRef}
-        onConfirm={async () => {
-          const { to } = confirmation
-          const errors = await saveStatusChange(repositories.gear, item, { to }, today)
-          if (errors !== undefined) throw new RuleError(Object.values(errors).join(' '))
-          props.onDone(`Marked as ${STATUS_LABELS[to].toLowerCase()}.`)
+  const confirmation = confirmationFor(item)
+  const button = (action: Action): ReactNode => {
+    const label = action === 'confirm' ? confirmation?.trigger : LABELS[action]
+    if (label === undefined) return null
+    return (
+      <Button
+        key={action}
+        variant="outline"
+        size="sm"
+        aria-haspopup="dialog"
+        onClick={(event) => {
+          openerRef.current = event.currentTarget
+          setOpen({ action, confirmation: action === 'confirm' ? confirmation : undefined })
         }}
-      />
+      >
+        {label}
+      </Button>
     )
+  }
+
+  const confirming = open?.confirmation
 
   return (
     <div className="mb-8">
@@ -111,17 +173,30 @@ export function StatusActions({ item }: { readonly item: Gear }) {
         <span id={labelId} className="label-engraved mr-2">
           Change status
         </span>
-        {item.status === 'owned' && <LendDialog {...props} />}
-        {item.status === 'lent-out' && <ReturnDialog {...props} />}
-        {confirm}
-        {(item.status === 'owned' || item.status === 'in-repair') && <SoldDialog {...props} />}
-        {(item.status === 'owned' || item.status === 'lent-out' || item.status === 'in-repair') && (
-          <LostDialog {...props} />
-        )}
+        {actionsFor(item.status).map(button)}
       </div>
       <p role="status" className="mt-2 text-sm text-muted-foreground">
-        {done.message}
+        {message}
       </p>
+
+      {open?.action === 'lend' && <LendDialog {...props} />}
+      {open?.action === 'return' && <ReturnDialog {...props} loans={loans} />}
+      {open?.action === 'sold' && <SoldDialog {...props} />}
+      {open?.action === 'lost' && <LostDialog {...props} />}
+      {confirming !== undefined && (
+        <ConfirmChange
+          title={confirming.title}
+          description={confirming.description}
+          confirm={`Mark as ${STATUS_LABELS[confirming.to].toLowerCase()}`}
+          onCancel={props.onCancel}
+          onConfirm={async () => {
+            const { to } = confirming
+            const errors = await saveStatusChange(repositories.gear, item, { to }, today)
+            if (errors !== undefined) throw new RuleError(Object.values(errors).join(' '))
+            props.onDone(`Marked as ${STATUS_LABELS[to].toLowerCase()}.`)
+          }}
+        />
+      )}
     </div>
   )
 }
