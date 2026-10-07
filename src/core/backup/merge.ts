@@ -1,0 +1,84 @@
+// Merging a backup into what's here, rather than replacing it. Each record is matched by its ID,
+// and whichever copy changed last wins, whichever side it's on. Records only one side has are
+// kept. Deletions aren't recorded, so something deleted here but still in the backup comes back.
+import { err, ok, type Result } from '../result'
+import type { BackupData, BackupList, BackupSettings } from './format'
+
+export interface MergePlan {
+  /** What to save: records only the backup has, and backup copies that changed later */
+  readonly writes: Pick<BackupData, BackupList>
+  readonly added: Readonly<Record<BackupList, number>>
+  readonly updated: Readonly<Record<BackupList, number>>
+  readonly settings: BackupSettings
+}
+
+interface Stamped {
+  readonly id: string
+  /** ISO 8601 UTC */
+  readonly updatedAt: string
+}
+
+// Compared as times, since text would sort 03:00:00Z after 03:00:00.500Z
+const time = (record: Stamped) => Date.parse(record.updatedAt)
+
+/** The records to write from one list, and how many of them are new */
+function mergeList<T extends Stamped>(here: readonly T[], incoming: readonly T[]) {
+  const ours = new Map(here.map((record) => [record.id, record]))
+  const writes: T[] = []
+  let added = 0
+  for (const theirs of incoming) {
+    const mine = ours.get(theirs.id)
+    if (mine === undefined) added += 1
+    // A tie keeps what's here, so merging the same backup twice changes nothing
+    else if (time(theirs) <= time(mine)) continue
+    writes.push(theirs)
+  }
+  return { writes, added, updated: writes.length - added }
+}
+
+/** Works out a merge, or says why these two can't be merged */
+export function planMerge(here: BackupData, incoming: BackupData): Result<MergePlan> {
+  const gear = mergeList(here.gear, incoming.gear)
+  const kits = mergeList(here.kits, incoming.kits)
+  const loans = mergeList(here.loans, incoming.loans)
+  const maintenance = mergeList(here.maintenance, incoming.maintenance)
+
+  // Each side has at most one loan out per item, but different loans from each side would leave an
+  // item out twice. Which one is right can't be told from the data, so the person decides.
+  const merged = new Map([...here.loans, ...loans.writes].map((loan) => [loan.id, loan]))
+  const out = new Set<string>()
+  for (const loan of merged.values()) {
+    if (loan.returnedOn !== undefined) continue
+    if (out.has(loan.gearId)) {
+      const item = [...incoming.gear, ...here.gear].find(({ id }) => id === loan.gearId)
+      const name = item === undefined ? 'An item' : `${item.brand} ${item.model}`
+      return err(
+        `${name} is out on a loan here and a different one in the backup, so they can't be merged. Mark one of them as returned, then try again.`,
+      )
+    }
+    out.add(loan.gearId)
+  }
+
+  const lastUsedCurrency = here.settings.lastUsedCurrency ?? incoming.settings.lastUsedCurrency
+  return ok({
+    writes: {
+      gear: gear.writes,
+      kits: kits.writes,
+      loans: loans.writes,
+      maintenance: maintenance.writes,
+    },
+    added: {
+      gear: gear.added,
+      kits: kits.added,
+      loans: loans.added,
+      maintenance: maintenance.added,
+    },
+    updated: {
+      gear: gear.updated,
+      kits: kits.updated,
+      loans: loans.updated,
+      maintenance: maintenance.updated,
+    },
+    settings: lastUsedCurrency === undefined ? {} : { lastUsedCurrency },
+  })
+}

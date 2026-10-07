@@ -30,12 +30,13 @@ function changeCount(value: unknown): number {
   return typeof value === 'number' && Number.isSafeInteger(value) && value >= 0 ? value : 0
 }
 
-/** Adds one to the changes since the last backup. Call it inside the write's transaction. */
-export async function countChange(db: BodycapDatabase): Promise<void> {
+/** Adds to the changes since the last backup, one by default. Call it inside the write's transaction. */
+export async function countChange(db: BodycapDatabase, changes = 1): Promise<void> {
+  if (changes === 0) return
   const stored = await db.settings.get(SETTING.changesSinceBackup)
   await db.settings.put({
     key: SETTING.changesSinceBackup,
-    value: changeCount(stored?.value) + 1,
+    value: changeCount(stored?.value) + changes,
   })
 }
 

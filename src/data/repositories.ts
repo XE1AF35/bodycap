@@ -1,6 +1,7 @@
 // What the UI sees of storage. Components only use these interfaces, so another store, or sync,
 // could replace Dexie later without touching them.
 import type { Backup } from '@/core/backup/format'
+import type { MergePlan } from '@/core/backup/merge'
 import type { Gear, GearFields } from '@/core/gear'
 import type { Kit, KitDetails, KitFields } from '@/core/kits'
 import type { Loan, LoanDetails } from '@/core/loans'
@@ -100,7 +101,16 @@ export interface BackupStore {
    * Check the file with readBackupFile first.
    */
   restore(backup: Backup): Promise<void>
+  /**
+   * Adds a backup's contents to what's here, keeping whichever copy of each record changed last,
+   * in one go: if anything fails, nothing changes. Rejects with RuleError if the two can't be
+   * merged. Check the file with readBackupFile first.
+   */
+  merge(backup: Backup): Promise<MergeSummary>
 }
+
+/** How many records of each kind a merge added, and how many it replaced with newer copies */
+export type MergeSummary = Pick<MergePlan, 'added' | 'updated'>
 
 export interface Repositories {
   readonly gear: GearRepository
