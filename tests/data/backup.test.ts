@@ -1,11 +1,11 @@
-// Backing up and restoring on fake-indexeddb: the exact round trip, all-or-nothing restore, and the
-// backup reminder's bookkeeping. Until database version 2, there's nowhere to keep kits, loans, or
-// maintenance, so backups hold none and a restore that brings any is refused.
+// Backing up and restoring on fake-indexeddb: the exact round trip of gear, kits, loans, and
+// maintenance, all-or-nothing restore, and the backup reminder's bookkeeping.
 import { IDBFactory, IDBKeyRange } from 'fake-indexeddb'
 import { afterEach, describe, expect, it } from 'vitest'
 import type { Backup } from '@/core/backup/format'
 import { readBackup } from '@/core/backup/read'
 import type { GearFields } from '@/core/gear'
+import { addToKit, setChecklist } from '@/core/kits'
 import { BodycapDatabase } from '@/data/db'
 import { createRepositories } from '@/data/dexie-repositories'
 import type { Live } from '@/data/repositories'
@@ -89,6 +89,18 @@ async function backedUp() {
     await source.repos.gear.add(soldBody),
     await source.repos.gear.add(adapter),
   ]
+  const [first, second, third] = gear.map(({ id }) => id)
+  if (first === undefined || second === undefined || third === undefined) {
+    throw new Error('The gear was not added')
+  }
+  const kit = await source.repos.kits.add({ name: 'Travel light' })
+  await source.repos.kits.update(kit.id, (saved) =>
+    setChecklist(addToKit(saved, [first, third]), true),
+  )
+  // Lent and given back, so the lens is owned again, as it was added
+  const loan = await source.repos.loans.lend(first, { borrower: 'Aroha', dateOut: '2026-10-01' })
+  await source.repos.loans.giveBack(loan.id, '2026-10-03')
+  await source.repos.maintenance.add(second, { type: 'sensor-clean', date: '2026-09-01' })
   await source.repos.settings.setLastUsedCurrency('AUD')
   const file = await source.repos.backup.create()
   const read = readBackup(file.text)
@@ -98,16 +110,22 @@ async function backedUp() {
 
 describe('backup.create', () => {
   it('makes a file named for the local date, holding every item and portable setting', async () => {
-    const { file, gear, backup } = await backedUp()
+    const { file, gear, backup, source } = await backedUp()
     expect(file.name).toBe('bodycap-backup-2026-10-05.json')
     expect(backup).toEqual({
       app: 'bodycap',
       formatVersion: 2,
-      schemaVersion: 1,
+      schemaVersion: 2,
       appVersion: '0.1.0',
       exportedAt: EXPORTED_AT,
-      counts: { gear: 3, kits: 0, loans: 0, maintenance: 0 },
-      data: { gear, kits: [], loans: [], maintenance: [], settings: { lastUsedCurrency: 'AUD' } },
+      counts: { gear: 3, kits: 1, loans: 1, maintenance: 1 },
+      data: {
+        gear,
+        kits: await source.db.kits.toArray(),
+        loans: await source.db.loans.toArray(),
+        maintenance: await source.db.maintenance.toArray(),
+        settings: { lastUsedCurrency: 'AUD' },
+      },
     })
   })
 
@@ -139,7 +157,9 @@ describe('backup.restore', () => {
     const { source, backup } = await backedUp()
     const target = open()
     await target.repos.backup.restore(backup)
-    expect(await target.db.gear.toArray()).toEqual(await source.db.gear.toArray())
+    for (const table of ['gear', 'kits', 'loans', 'maintenance'] as const) {
+      expect(await target.db[table].toArray(), table).toEqual(await source.db[table].toArray())
+    }
     expect(await current(target.repos.gear.list())).toEqual(await current(source.repos.gear.list()))
     expect(await target.db.gear.where('serialKey').equals('AB1234').count()).toBe(1)
   })
@@ -189,59 +209,15 @@ describe('backup.restore', () => {
     })
   })
 
-  it.each<[string, Partial<Backup['data']>]>([
-    [
-      'kits',
-      {
-        kits: [
-          {
-            id: '1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d',
-            createdAt: EXPORTED_AT,
-            updatedAt: EXPORTED_AT,
-            name: 'Travel light',
-            gearIds: [],
-            checklist: false,
-            packedGearIds: [],
-          },
-        ],
-      },
-    ],
-    [
-      'loans',
-      {
-        loans: [
-          {
-            id: '2b3c4d5e-6f7a-4b8c-9d0e-1f2a3b4c5d6e',
-            createdAt: EXPORTED_AT,
-            updatedAt: EXPORTED_AT,
-            gearId: '00000000-0000-4000-8000-000000000001',
-            borrower: 'Aroha',
-            dateOut: '2026-10-01',
-          },
-        ],
-      },
-    ],
-    [
-      'maintenance',
-      {
-        maintenance: [
-          {
-            id: '4d5e6f7a-8b9c-4d0e-9f2a-3b4c5d6e7f8a',
-            createdAt: EXPORTED_AT,
-            updatedAt: EXPORTED_AT,
-            gearId: '00000000-0000-4000-8000-000000000001',
-            type: 'sensor-clean',
-            date: '2026-10-01',
-          },
-        ],
-      },
-    ],
-  ])('refuses a backup holding %s, changing nothing', async (_name, lists) => {
+  it('replaces kits, loans, and maintenance already there with those in the backup', async () => {
     const { backup } = await backedUp()
     const target = open()
-    const kept = await target.repos.gear.add({ ...lens, model: 'FE 85mm F1.8' })
-    const holding: Backup = { ...backup, data: { ...backup.data, ...lists } }
-    await expect(target.repos.backup.restore(holding)).rejects.toThrow()
-    expect(await current(target.repos.gear.list())).toEqual([kept])
+    const item = await target.repos.gear.add({ ...lens, model: 'FE 85mm F1.8' })
+    await target.repos.kits.add({ name: 'Old kit' })
+    await target.repos.maintenance.add(item.id, { type: 'repair', date: '2026-08-01' })
+    await target.repos.backup.restore(backup)
+    expect(await target.db.kits.toArray()).toEqual(backup.data.kits)
+    expect(await target.db.loans.toArray()).toEqual(backup.data.loans)
+    expect(await target.db.maintenance.toArray()).toEqual(backup.data.maintenance)
   })
 })

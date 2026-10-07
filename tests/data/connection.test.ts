@@ -51,8 +51,9 @@ describe('watchConnection', () => {
     const status = watchConnection(db)
     await db.open()
 
+    // One version above whatever this build is
     const newer = track(new Dexie('bodycap', { indexedDB, IDBKeyRange }))
-    newer.version(2).stores({ gear: 'id', settings: 'key' })
+    newer.version(db.verno + 1).stores({ gear: 'id', settings: 'key' })
     await newer.open()
     expect(status.current()).toBe('updated-elsewhere')
   })

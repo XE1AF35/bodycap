@@ -1,7 +1,9 @@
-// Gear and settings repositories on fake-indexeddb: saving, live updates, and change counts.
+// Gear and settings repositories on fake-indexeddb: the tables, saving, live updates, change counts,
+// and deleting an item along with everything that points at it.
 import { IDBFactory, IDBKeyRange } from 'fake-indexeddb'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { GearFields } from '@/core/gear'
+import { addToKit, setChecklist, setPacked } from '@/core/kits'
 import { BodycapDatabase } from '@/data/db'
 import { createRepositories } from '@/data/dexie-repositories'
 import { GearNotFoundError, type Live, type Repositories } from '@/data/repositories'
@@ -71,9 +73,9 @@ const changesSinceBackup = async () => {
 }
 
 describe('database', () => {
-  it('has the version 1 tables and indexes, which must never change once released', async () => {
+  it('has the version 2 tables and indexes, with version 1 tables as they were released', async () => {
     await db.open()
-    expect(db.verno).toBe(1)
+    expect(db.verno).toBe(2)
     expect(
       db.tables.map(({ name, schema }) => ({
         name,
@@ -87,6 +89,9 @@ describe('database', () => {
         indexes: ['category', 'status', 'mount', 'serialKey', 'warrantyExpiry', 'updatedAt'],
       },
       { name: 'settings', key: 'key', indexes: [] },
+      { name: 'kits', key: 'id', indexes: ['name', 'gearIds'] },
+      { name: 'loans', key: 'id', indexes: ['gearId', 'dueDate', '[gearId+dateOut]'] },
+      { name: 'maintenance', key: 'id', indexes: ['gearId', 'date', '[gearId+date]'] },
     ])
   })
 })
@@ -137,6 +142,31 @@ describe('gear repository', () => {
     await repos.gear.remove(firstId)
     expect(await db.gear.count()).toBe(0)
     expect(await changesSinceBackup()).toBe(2)
+  })
+
+  it('removes everything that points at an item with it, in one change', async () => {
+    const item = await repos.gear.add(lens)
+    const other = await repos.gear.add({ ...lens, model: 'FE 85mm F1.8' })
+    const kit = await repos.kits.add({ name: 'Wedding' })
+    await repos.kits.update(kit.id, (saved) => {
+      const packing = setChecklist(addToKit(saved, [item.id, other.id]), true)
+      return setPacked(setPacked(packing, item.id, true), other.id, true)
+    })
+    const loan = await repos.loans.lend(item.id, { borrower: 'Aroha', dateOut: '2026-10-01' })
+    await repos.loans.giveBack(loan.id, '2026-10-03')
+    await repos.maintenance.add(item.id, { type: 'repair', date: '2026-09-01' })
+    const kept = await repos.maintenance.add(other.id, { type: 'repair', date: '2026-09-02' })
+    const before = await changesSinceBackup()
+
+    await repos.gear.remove(item.id)
+    expect(await db.loans.count()).toBe(0)
+    expect(await db.maintenance.toArray()).toEqual([kept])
+    expect(await db.kits.get(kit.id)).toMatchObject({
+      gearIds: [other.id],
+      packedGearIds: [other.id],
+      updatedAt: START,
+    })
+    expect(await changesSinceBackup()).toBe((before ?? 0) + 1)
   })
 
   it('does nothing when removing an item that is already gone', async () => {

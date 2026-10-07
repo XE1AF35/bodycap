@@ -1,8 +1,5 @@
 // Backing up and restoring the whole database, each in one transaction. A backup and the reset of
 // the change count can't drift apart, and a restore replaces everything or nothing.
-//
-// Database version 1 has nowhere to keep kits, loans, or maintenance, so backups hold none, and a
-// backup that brings any is refused whole rather than restored without them. Version 2 adds them.
 import { backupFileName, createBackup, type Backup } from '@/core/backup/format'
 import { toIsoDate } from '@/core/dates'
 import type { BodycapDatabase } from './db'
@@ -19,19 +16,19 @@ export function createBackupStore(
   db: BodycapDatabase,
   { now, appVersion, timeZone }: BackupStoreOptions,
 ): BackupStore {
+  const everything = [db.gear, db.kits, db.loans, db.maintenance, db.settings]
   return {
     create: () =>
-      db.transaction('rw', db.gear, db.settings, async () => {
+      db.transaction('rw', everything, async () => {
         const at = now()
         const exportedAt = at.toISOString()
-        const gear = (await db.gear.toArray()).map(toGear)
         const { lastUsedCurrency } = toSettings(await db.settings.toArray())
         const backup = createBackup(
           {
-            gear,
-            kits: [],
-            loans: [],
-            maintenance: [],
+            gear: (await db.gear.toArray()).map(toGear),
+            kits: await db.kits.toArray(),
+            loans: await db.loans.toArray(),
+            maintenance: await db.maintenance.toArray(),
             settings: lastUsedCurrency === undefined ? {} : { lastUsedCurrency },
           },
           { schemaVersion: db.verno, appVersion, exportedAt },
@@ -46,13 +43,18 @@ export function createBackupStore(
       }),
 
     restore: (backup: Backup) =>
-      db.transaction('rw', db.gear, db.settings, async () => {
-        const { kits, loans, maintenance } = backup.data
-        if (kits.length + loans.length + maintenance.length > 0) {
-          throw new Error("This database can't keep kits, loans, or maintenance yet")
-        }
-        await db.gear.clear()
-        await db.gear.bulkAdd(backup.data.gear.map(toRecord))
+      db.transaction('rw', everything, async () => {
+        const { gear, kits, loans, maintenance } = backup.data
+        await Promise.all([
+          db.gear.clear(),
+          db.kits.clear(),
+          db.loans.clear(),
+          db.maintenance.clear(),
+        ])
+        await db.gear.bulkAdd(gear.map(toRecord))
+        await db.kits.bulkAdd(kits)
+        await db.loans.bulkAdd(loans)
+        await db.maintenance.bulkAdd(maintenance)
         // The data now matches the file, so it counts as backed up when the file was made
         await db.settings.bulkPut([
           { key: SETTING.lastBackupAt, value: backup.exportedAt },

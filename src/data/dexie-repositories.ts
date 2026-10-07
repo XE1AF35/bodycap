@@ -1,14 +1,18 @@
-// The repositories, on Dexie. A gear write and the change it adds to the backup reminder's count
-// run in one transaction, so they're always saved together or not at all.
-import { liveQuery } from 'dexie'
+// The repositories, on Dexie. Each write and the change it adds to the backup reminder's count run
+// in one transaction, so they're always saved together or not at all.
+import { toIsoDate } from '@/core/dates'
 import type { Gear } from '@/core/gear'
+import { removeFromKit } from '@/core/kits'
 import type { BodycapDatabase } from './db'
 import { createBackupStore } from './dexie-backup'
+import { createKitRepository } from './dexie-kits'
+import { createLoanRepository } from './dexie-loans'
+import { createMaintenanceRepository } from './dexie-maintenance'
+import { live } from './live'
 import { countChange, SETTING, toGear, toRecord, toSettings } from './records'
 import {
   GearNotFoundError,
   type GearRepository,
-  type Live,
   type Repositories,
   type SettingsRepository,
 } from './repositories'
@@ -19,20 +23,8 @@ export interface RepositoryOptions {
   readonly newId?: () => string
   /** Recorded in backups. The build sets it from package.json. */
   readonly appVersion?: string
-  /** For the date in a backup's file name. The browser's own time zone by default. */
+  /** For today's date and the date in a backup's file name. The browser's own by default. */
   readonly timeZone?: string
-}
-
-function live<T>(query: () => Promise<T>): Live<T> {
-  const observable = liveQuery(query)
-  return {
-    subscribe(next, error) {
-      const subscription = observable.subscribe({ next, error })
-      return () => {
-        subscription.unsubscribe()
-      }
-    },
-  }
 }
 
 export function createRepositories(
@@ -78,10 +70,16 @@ export function createRepositories(
         return item
       }),
 
+    // Nothing may point at gear that's gone, or a backup of what's left would be refused
     remove: (id) =>
-      db.transaction('rw', db.gear, db.settings, async () => {
+      db.transaction('rw', [db.gear, db.kits, db.loans, db.maintenance, db.settings], async () => {
         if ((await db.gear.get(id)) === undefined) return
         await db.gear.delete(id)
+        await db.loans.where('gearId').equals(id).delete()
+        await db.maintenance.where('gearId').equals(id).delete()
+        const at = now().toISOString()
+        const kits = await db.kits.where('gearIds').equals(id).distinct().toArray()
+        await db.kits.bulkPut(kits.map((kit) => ({ ...removeFromKit(kit, id), updatedAt: at })))
         await countChange(db)
       }),
   }
@@ -94,7 +92,11 @@ export function createRepositories(
     },
   }
 
+  const today = () => toIsoDate(now(), timeZone)
+  const kits = createKitRepository(db, { now, newId })
+  const loans = createLoanRepository(db, { now, newId, today })
+  const maintenance = createMaintenanceRepository(db, { now, newId })
   const backup = createBackupStore(db, { now, appVersion, timeZone })
 
-  return { gear, settings, backup }
+  return { gear, kits, loans, maintenance, settings, backup }
 }
