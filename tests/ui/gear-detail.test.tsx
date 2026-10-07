@@ -57,6 +57,7 @@ describe('gear detail', () => {
       'Warranty and insurance',
       'Notes',
       'Record',
+      'Maintenance',
     ])
     const shown: [string, string][] = [
       ['Category', 'Lens'],
