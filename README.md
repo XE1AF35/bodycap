@@ -9,25 +9,42 @@ it keeps everything in your own browser, works offline, and never needs an accou
 
 - **Your gear in one place**: bodies, lenses, flashes, tripods, bags, filters, memory cards,
   batteries, drones, mount adapters, and anything else, with serial numbers, where and when you
-  bought them, what you paid, condition, location, warranty, insured value, and notes.
-- **Statuses that follow real life**: owned, wishlist, lent out, in repair, sold, or lost. Selling
-  or losing something asks for the date and details, and the status list only offers changes that
-  make sense.
+  bought them, what you paid, condition, location, warranty, insured value, and notes. Lenses can
+  also record their focal length and aperture.
+- **Statuses that follow real life**: owned, wishlist, lent out, in repair, sold, or lost. Buttons
+  on each item's page lend it, take it back, sell it, or mark it lost, asking only for what that
+  change needs, and the status list only offers changes that make sense.
+- **Kits**: group gear into kits, such as a wedding kit or a travel kit, and use one as a packing
+  checklist, ticking things off as they go in the bag.
+- **Loans**: who has an item, how to reach them, and when it's due back. What's out shows on the
+  dashboard, and an overdue loan needs attention. Each item keeps a history of its loans.
+- **A maintenance log** for each item: sensor cleans, firmware updates, and repairs, with what they
+  cost and who did them.
+- **What works with what**: a lens's page lists your cameras, and a body's page lists your lenses,
+  saying whether each pair fits as it is, crops to APS-C, works through an adapter you own, needs
+  an adapter, or doesn't fit.
 - **Search and filters** by category, status, and mount, kept in the address so you can bookmark a
   filtered list.
 - **A dashboard** with counts, what your gear is worth in each currency (without converting between
-  them), and what needs attention: warranties running out, the same serial entered twice, and a
-  reminder when it's time for a backup.
-- **Money in any currency**, NZD by default, with each amount keeping its own currency.
+  them), what's on loan, and what needs attention: overdue loans, warranties running out, the same
+  serial entered twice, and a reminder when it's time for a backup.
+- **Money in any currency**, NZD by default, with each amount keeping its own currency. Settings can
+  choose the currency new amounts start in.
 
 ## Your data stays with you
 
 Everything is stored in your browser on your device, and nothing is sent anywhere. There are no
 accounts, no analytics, and no tracking.
 
-That makes **backups important**. In Settings, Back up now saves one file with all your gear.
-Keep it somewhere other than your device, such as cloud storage or a USB drive. Restore shows what
-a backup holds before anything changes, and only replaces your data once you confirm.
+That makes **backups important**. In Settings, Back up now saves one file with all your gear,
+kits, loans, and maintenance. Keep it somewhere other than your device, such as cloud storage or a
+USB drive. The dashboard reminds you when it's time for another, two weeks after the last one by
+default, and Settings can make that a week or a month.
+
+Restore shows what a backup holds before anything changes, and nothing changes until you confirm.
+It can replace everything with what's in the backup, or add the backup to what's there, such as
+to bring together gear from two devices. Adding never removes anything, and where the same record
+is in both, the copy changed most recently is kept.
 
 Browsers can delete a site's data:
 
@@ -41,20 +58,22 @@ Browsers can delete a site's data:
 
 Bodycap works offline once it has loaded, and can be installed like an app:
 
-- **Chrome or Edge**: use the install button in the address bar.
+- **Chrome or Edge**: use **Install app** in Bodycap's header, or the install button in the
+  address bar.
 - **iPhone or iPad**: open Bodycap in Safari, tap Share, then **Add to Home Screen**. This also
   stops Safari's 7-day deletion.
 
 When a new version is ready, Bodycap says so and waits for you to choose Reload, so nothing you're
-typing is lost.
+typing is lost. If the new version changes how your gear is stored, it suggests a backup first,
+just in case.
 
 Bodycap is made for current versions of Chrome, Edge, Firefox, and Safari. Some private windows block
 the storage it needs, and it says so if that happens.
 
 ## Coming later
 
-- Kits with packing checklists, loans with due dates, a maintenance log, and checking which lenses
-  fit which bodies
+- Sharing a kit as a link, a map of how your bodies, lenses, and adapters fit together, and more
+  dashboard statistics
 - Photos, CSV export, and a printable list for insurance
 - A shoots log and spending charts
 - Optional AI features, with everything else always working without them
@@ -99,11 +118,13 @@ Before the first `pnpm e2e`, install the test browsers with
 
 ```text
 src/core/   Domain logic with no React, storage, or browser APIs: validation, lifecycle rules,
-            mount compatibility, value totals, alerts, search, and the backup format
-src/data/   The only code that uses Dexie: the database, repositories, backup and restore,
-            and storage helpers
+            kits, loans, maintenance, mount compatibility, value totals, alerts, search, and the
+            backup format, its upgrades, and merging
+src/data/   The only code that uses Dexie: the database and its upgrades, repositories, backup,
+            restore, and merge, and storage helpers
 src/ui/     React components and pages, which reach storage only through the repositories
-build/      Build helpers: the Content Security Policy and the checks on the built site
+build/      Build helpers: the Content Security Policy, version.json, and the checks on the
+            built site
 tests/      Vitest tests for core, data, and UI, mirroring src/
 e2e/        Playwright tests against the built site
 ```
@@ -114,13 +135,16 @@ ESLint keeps those boundaries: `src/core` can't import React, Dexie, or browser 
 ### Tests
 
 - **Unit tests** cover all of `src/core`, with 95% coverage required.
-- **Storage tests** run the repositories, backup, and restore on fake-indexeddb.
+- **Storage tests** run the repositories, backup, restore, and merge on fake-indexeddb, and
+  upgrade a database seeded at an earlier version.
 - **UI tests** render the whole app in jsdom with Testing Library.
 - **End-to-end tests** run in Playwright against the built site, with its real base path, security
-  policy, and service worker: a keyboard-only flow, search, a backup restored into an empty
-  browser, offline use, the install manifest, and axe accessibility checks against WCAG 2.2 AA on
-  every screen in both themes. Every test fails on a console error or a security policy violation.
-  CI runs them in Chromium; locally, WebKit also runs the storage and offline tests.
+  policy, and service worker: adding gear and packing a kit with only a keyboard, lending and
+  returning, logging maintenance, search, a backup restored into an empty browser and merged into
+  another, offline use, the install manifest, focus outlines, and axe accessibility checks against
+  WCAG 2.2 AA on every screen and the main dialogs in both themes. Every test fails on a console
+  error or a security policy violation. CI runs them in Chromium; locally, WebKit also runs the
+  storage and offline tests.
 
 ### Security
 
@@ -129,8 +153,9 @@ ESLint keeps those boundaries: `src/core` can't import React, Dexie, or browser 
 - Trusted Types are required, so text can never be turned into script by accident. The service
   worker is registered with the one policy the app is allowed.
 - User text is always shown as text, never as HTML.
-- Backup files are treated as untrusted: they're size-capped, and every field is checked before a
-  restore.
+- Backup files are treated as untrusted: they're size-capped, every field is checked, and every
+  link between records (such as a loan's item) must point to something in the file, before a
+  restore or merge.
 
 ### Publishing
 
@@ -151,8 +176,8 @@ pnpm only installs versions that have been public for at least a day, refuses pa
 publishing trust has dropped, and runs no install scripts. Dependabot suggests updates weekly, a
 week after each release. Workflow actions are pinned to full commit SHAs.
 
-As of version 0.1.0, the site loads 152 kB of gzipped JavaScript at first, about 219 kB across all
-its pages, and 8 kB of CSS.
+As of October 2026, the site loads 182 kB of gzipped JavaScript at first, about 242 kB across all
+its pages, and 9 kB of CSS.
 
 ## Licence
 
