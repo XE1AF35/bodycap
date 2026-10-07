@@ -10,6 +10,7 @@ import { createRepositories } from '@/data/dexie-repositories'
 import { createStorageHelpers } from '@/data/storage'
 import { createAppRouter } from '@/router'
 import { App } from '@/ui/App'
+import { createInstallOffer } from '@/ui/pwa/install-offer'
 import { registerServiceWorker } from '@/ui/pwa/register'
 import { createUpdateOffer } from '@/ui/pwa/update-offer'
 import './index.css'
@@ -25,6 +26,8 @@ const services = {
   connection: watchConnection(db),
   storage: createStorageHelpers(navigator.storage),
   updates: createUpdateOffer(),
+  // Listening from the start, as the browser may offer before the app has rendered
+  install: createInstallOffer(window),
 }
 const router = createAppRouter(createHashHistory())
 

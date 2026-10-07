@@ -1,15 +1,16 @@
 // Offers a waiting new version of Bodycap. It never reloads by itself, and Later hides it until
-// the next visit.
+// the next visit. When the new version upgrades the database, it suggests a backup first.
 import { useId, useState, useSyncExternalStore } from 'react'
+import { BackupButton } from '@/ui/backup/BackupButton'
 import { Button } from '@/ui/components/ui/button'
 import { useServices } from '@/ui/services'
 
 export function UpdatePrompt() {
   const { updates } = useServices()
-  const install = useSyncExternalStore(updates.subscribe, updates.current)
+  const update = useSyncExternalStore(updates.subscribe, updates.current)
   const [later, setLater] = useState(false)
   const labelId = useId()
-  if (install === undefined || later) return null
+  if (update === undefined || later) return null
 
   return (
     <aside
@@ -20,9 +21,16 @@ export function UpdatePrompt() {
         Update
       </p>
       <p role="status" className="-mt-2 w-full">
-        A new version of Bodycap is ready. Reload to start using it.
+        {update.changesStorage
+          ? 'A new version of Bodycap is ready. It changes how your gear is stored, so back up first, just in case. Then reload to start using it.'
+          : 'A new version of Bodycap is ready. Reload to start using it.'}
       </p>
-      <Button onClick={install}>Reload</Button>
+      {update.changesStorage && (
+        <div className="w-full">
+          <BackupButton label="Back up first" />
+        </div>
+      )}
+      <Button onClick={update.install}>Reload</Button>
       <Button
         variant="ghost"
         onClick={() => {

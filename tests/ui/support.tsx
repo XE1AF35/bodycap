@@ -10,6 +10,7 @@ import { createRepositories } from '@/data/dexie-repositories'
 import { createStorageHelpers } from '@/data/storage'
 import { createAppRouter } from '@/router'
 import { App } from '@/ui/App'
+import { createInstallOffer } from '@/ui/pwa/install-offer'
 import { createUpdateOffer } from '@/ui/pwa/update-offer'
 import type { Services } from '@/ui/services'
 
@@ -49,6 +50,7 @@ export function testServices({
     connection,
     storage,
     updates: createUpdateOffer(),
+    install: createInstallOffer(undefined),
   }
 }
 

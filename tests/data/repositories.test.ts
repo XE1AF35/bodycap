@@ -7,6 +7,7 @@ import { addToKit, setChecklist, setPacked } from '@/core/kits'
 import { BodycapDatabase } from '@/data/db'
 import { createRepositories } from '@/data/dexie-repositories'
 import { GearNotFoundError, type Live, type Repositories } from '@/data/repositories'
+import { SCHEMA_VERSION } from '@/data/schema-version'
 
 /** The required fields and a mount, with nothing optional that an update could clear */
 const lens: GearFields = {
@@ -73,6 +74,11 @@ const changesSinceBackup = async () => {
 }
 
 describe('database', () => {
+  it('opens at the schema version the build announces to older tabs', async () => {
+    await db.open()
+    expect(db.verno).toBe(SCHEMA_VERSION)
+  })
+
   it('has the version 2 tables and indexes, with version 1 tables as they were released', async () => {
     await db.open()
     expect(db.verno).toBe(2)

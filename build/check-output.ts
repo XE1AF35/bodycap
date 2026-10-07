@@ -1,5 +1,5 @@
 // Checks the built app before it can be published: the web app manifest and its icons, the service
-// worker, and the security meta tags. Anything missing fails the build, rather than an install.
+// worker, version.json, and the security meta tags. Anything missing fails the build, rather than an install.
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import type { Plugin } from 'vite'
@@ -34,11 +34,23 @@ const REQUIRED_ICONS = [
 ] as const
 
 /** What's wrong with the built app in outDir, or nothing */
-export function outputProblems(outDir: string, base: string): string[] {
+export function outputProblems(outDir: string, base: string, schema: number): string[] {
   const problems: string[] = []
   const file = (name: string) => join(outDir, name)
 
-  if (!existsSync(file('sw.js'))) problems.push('There is no service worker (sw.js).')
+  if (!existsSync(file('sw.js'))) {
+    problems.push('There is no service worker (sw.js).')
+  } else if (readFileSync(file('sw.js'), 'utf8').includes('version.json')) {
+    problems.push('The service worker precaches version.json, so updates would read a stale one.')
+  }
+
+  // Older tabs read it to tell whether an update upgrades the database
+  const version = existsSync(file('version.json'))
+    ? z
+        .object({ schema: z.literal(schema) })
+        .safeParse(JSON.parse(readFileSync(file('version.json'), 'utf8')))
+    : undefined
+  if (!version?.success) problems.push(`version.json doesn't give the schema as ${String(schema)}.`)
 
   const html = existsSync(file('index.html')) ? readFileSync(file('index.html'), 'utf8') : ''
   const needed: [string, string][] = [
@@ -75,7 +87,7 @@ export function outputProblems(outDir: string, base: string): string[] {
   return problems
 }
 
-export function checkOutput(outDir: string, base: string): Plugin {
+export function checkOutput(outDir: string, base: string, schema: number): Plugin {
   return {
     name: 'bodycap:check-output',
     apply: 'build',
@@ -84,7 +96,7 @@ export function checkOutput(outDir: string, base: string): Plugin {
       order: 'post',
       sequential: true,
       handler() {
-        const problems = outputProblems(outDir, base)
+        const problems = outputProblems(outDir, base, schema)
         if (problems.length > 0) {
           throw new Error(`The build isn't ready to publish:\n- ${problems.join('\n- ')}`)
         }

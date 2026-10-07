@@ -6,6 +6,8 @@ import { VitePWA } from 'vite-plugin-pwa'
 import { defineConfig } from 'vitest/config'
 import { checkOutput } from './build/check-output'
 import { securityMeta } from './build/security'
+import { versionFile } from './build/version-file'
+import { SCHEMA_VERSION } from './src/data/schema-version'
 
 const { version } = JSON.parse(
   readFileSync(new URL('./package.json', import.meta.url), 'utf8'),
@@ -65,7 +67,8 @@ export default defineConfig({
       },
     }),
     securityMeta(),
-    checkOutput(outDir, base),
+    versionFile(version, SCHEMA_VERSION),
+    checkOutput(outDir, base, SCHEMA_VERSION),
   ],
   // Backups record which version of the app made them
   define: { __APP_VERSION__: JSON.stringify(version) },

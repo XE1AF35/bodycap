@@ -1,5 +1,5 @@
-// The header: the app's name, the main navigation, and the theme toggle. On phones the navigation
-// and the toggle fold behind a Menu button, a plain disclosure rather than a menu widget, since it
+// The header: the app's name, the main navigation, an Install button when the browser offers one,
+// and the theme toggle. On phones the navigation and the buttons fold behind a Menu button, a plain disclosure rather than a menu widget, since it
 // holds links. Everything is in the same order in the page as on screen, so Tab follows the eye.
 import { Link } from '@tanstack/react-router'
 import { Menu, X } from 'lucide-react'
@@ -7,6 +7,7 @@ import { useState } from 'react'
 import { Button } from '@/ui/components/ui/button'
 import { ThemeToggle } from '@/ui/components/ThemeToggle'
 import { cn } from '@/ui/lib/utils'
+import { InstallButton } from '@/ui/pwa/InstallButton'
 
 const PANEL_ID = 'site-nav'
 
@@ -91,7 +92,8 @@ export function SiteHeader() {
               ))}
             </ul>
           </nav>
-          <div className="sm:ml-auto">
+          <div className="flex flex-wrap items-center gap-2 sm:ml-auto">
+            <InstallButton />
             <ThemeToggle />
           </div>
         </div>
