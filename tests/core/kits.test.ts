@@ -12,6 +12,7 @@ import {
   setPacked,
   toKitInput,
   validateKit,
+  withDetails,
   type KitDetails,
   type KitFields,
   type KitInput,
@@ -59,6 +60,29 @@ describe('validateKit', () => {
       expect(validateKit(toKitInput(details))).toEqual(ok(details))
     },
   )
+})
+
+describe('withDetails', () => {
+  const packing = kit({
+    description: 'Two bodies',
+    gearIds: ['a', 'b'],
+    checklist: true,
+    packedGearIds: ['a'],
+  })
+
+  it('renames a kit, keeping its gear and ticks', () => {
+    expect(
+      withDetails(packing, { name: 'Weddings', description: 'Two bodies, one flash' }),
+    ).toEqual({
+      ...packing,
+      name: 'Weddings',
+      description: 'Two bodies, one flash',
+    })
+  })
+
+  it('drops a description cleared in the form', () => {
+    expect(withDetails(packing, { name: 'Weddings' })).not.toHaveProperty('description')
+  })
 })
 
 describe('newKit', () => {

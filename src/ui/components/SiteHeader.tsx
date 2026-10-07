@@ -14,6 +14,7 @@ const PAGES = [
   // Exact, or the dashboard at / would count as current on every page
   { to: '/', label: 'Dashboard', exact: true },
   { to: '/gear', label: 'Gear', exact: false },
+  { to: '/kits', label: 'Kits', exact: false },
   { to: '/settings', label: 'Settings', exact: false },
 ] as const
 

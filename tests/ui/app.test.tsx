@@ -18,6 +18,7 @@ describe('app shell', () => {
   it.each([
     ['/', 'Dashboard', 'Welcome to Bodycap'],
     ['/gear', 'Gear', 'Gear'],
+    ['/kits', 'Kits', 'Kits'],
     ['/settings', 'Settings', 'Settings'],
   ])('marks %s as the current page, and titles the window after it', async (path, link, title) => {
     renderApp(path)

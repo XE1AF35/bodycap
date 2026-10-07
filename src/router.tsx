@@ -45,6 +45,18 @@ const gearDetailRoute = createRoute({
   component: lazyRouteComponent(() => import('@/ui/pages/GearDetailPage'), 'GearDetailPage'),
 })
 
+const kitsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: 'kits',
+  component: lazyRouteComponent(() => import('@/ui/pages/KitsPage'), 'KitsPage'),
+})
+
+const kitRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: 'kits/$kitId',
+  component: lazyRouteComponent(() => import('@/ui/pages/KitPage'), 'KitPage'),
+})
+
 const settingsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: 'settings',
@@ -57,6 +69,8 @@ const routeTree = rootRoute.addChildren([
   addGearRoute,
   gearDetailRoute,
   editGearRoute,
+  kitsRoute,
+  kitRoute,
   settingsRoute,
 ])
 

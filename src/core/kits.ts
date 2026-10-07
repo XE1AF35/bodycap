@@ -51,6 +51,18 @@ export function toKitInput(kit: KitDetails): KitInput {
   return { name: kit.name, description: kit.description ?? '' }
 }
 
+/** A kit with a new name and description, keeping its gear and ticks. A cleared description goes. */
+export function withDetails(kit: KitFields, { name, description }: KitDetails): KitFields {
+  const { gearIds, checklist, packedGearIds } = kit
+  return {
+    name,
+    ...(description === undefined ? {} : { description }),
+    gearIds,
+    checklist,
+    packedGearIds,
+  }
+}
+
 /** A new kit: empty, and a plain collection until its checklist is turned on */
 export function newKit(details: KitDetails): KitFields {
   return { ...details, gearIds: [], checklist: false, packedGearIds: [] }
