@@ -23,6 +23,8 @@ export const SETTING = {
   lastBackupAt: 'lastBackupAt',
   changesSinceBackup: 'changesSinceBackup',
   lastUsedCurrency: 'lastUsedCurrency',
+  defaultCurrency: 'defaultCurrency',
+  backupReminderDays: 'backupReminderDays',
 } as const satisfies Record<keyof Settings, string>
 
 /** A stored count, or 0 if what's stored isn't a count */
@@ -40,16 +42,27 @@ export async function countChange(db: BodycapDatabase, changes = 1): Promise<voi
   })
 }
 
+/** A whole number of days, from one to a year */
+function isReminderDays(value: unknown): value is number {
+  return typeof value === 'number' && Number.isInteger(value) && value >= 1 && value <= 365
+}
+
 // Settings are stored as loose key and value pairs, so each value is checked as it's read
 export function toSettings(records: readonly SettingRecord[]): Settings {
   const values = new Map(records.map(({ key, value }) => [key, value]))
   const lastBackupAt = values.get(SETTING.lastBackupAt)
-  const lastUsedCurrency = values.get(SETTING.lastUsedCurrency)
+  const currency = (key: string) => {
+    const value = values.get(key)
+    return typeof value === 'string' && isCurrencyCode(value) ? value : undefined
+  }
+  const lastUsedCurrency = currency(SETTING.lastUsedCurrency)
+  const defaultCurrency = currency(SETTING.defaultCurrency)
+  const reminderDays = values.get(SETTING.backupReminderDays)
   return {
     changesSinceBackup: changeCount(values.get(SETTING.changesSinceBackup)),
     ...(typeof lastBackupAt === 'string' ? { lastBackupAt } : {}),
-    ...(typeof lastUsedCurrency === 'string' && isCurrencyCode(lastUsedCurrency)
-      ? { lastUsedCurrency }
-      : {}),
+    ...(lastUsedCurrency === undefined ? {} : { lastUsedCurrency }),
+    ...(defaultCurrency === undefined ? {} : { defaultCurrency }),
+    ...(isReminderDays(reminderDays) ? { backupReminderDays: reminderDays } : {}),
   }
 }

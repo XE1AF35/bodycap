@@ -79,11 +79,18 @@ export interface Settings {
   readonly lastBackupAt?: string
   readonly changesSinceBackup: number
   readonly lastUsedCurrency?: CurrencyCode
+  /** Kept on this device only. New amounts start in it, rather than the currency used last. */
+  readonly defaultCurrency?: CurrencyCode
+  /** Kept on this device only. Days after a backup before the reminder, once it's been chosen. */
+  readonly backupReminderDays?: number
 }
 
 export interface SettingsRepository {
   get(): Live<Settings>
   setLastUsedCurrency(currency: CurrencyCode): Promise<void>
+  /** Undefined goes back to starting amounts in the currency used last */
+  setDefaultCurrency(currency: CurrencyCode | undefined): Promise<void>
+  setBackupReminderDays(days: number): Promise<void>
 }
 
 /** A backup ready to download */

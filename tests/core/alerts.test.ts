@@ -74,6 +74,16 @@ describe('backupReminder', () => {
     const lastBackupOn = days === undefined ? undefined : daysFromToday(days)
     expect(backupReminder({ lastBackupOn, changesSinceBackup: changes }, TODAY)).toEqual(reminder)
   })
+
+  it.each([
+    ['a week, 8 days on', 7, -8, { reason: 'age', daysSince: 8, changes: 1 }],
+    ['a week, 6 days on', 7, -6, undefined],
+    ['a month, 20 days on', 30, -20, undefined],
+    ['a month, 30 days on', 30, -30, { reason: 'age', daysSince: 30, changes: 1 }],
+  ])('reminds after the number of days chosen: %s', (_name, dueDays, days, reminder) => {
+    const state = { lastBackupOn: daysFromToday(days), changesSinceBackup: 1, dueDays }
+    expect(backupReminder(state, TODAY)).toEqual(reminder)
+  })
 })
 
 describe('storageNearlyFull', () => {

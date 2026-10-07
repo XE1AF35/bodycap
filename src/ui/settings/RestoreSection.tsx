@@ -1,10 +1,11 @@
-// Restoring from a backup file. The file is checked and previewed first, a backup of what's here
-// now is offered, and nothing changes until the person confirms. The restore itself is all or
-// nothing.
+// Restoring from a backup file, either in place of everything here or merged into it. The file is
+// checked and previewed first, a backup of what's here now is offered, and nothing changes until
+// the person confirms. Either way, the restore itself is all or nothing.
 import { useMemo, useState } from 'react'
 import type { Backup } from '@/core/backup/format'
 import { formatDate, toIsoDate } from '@/core/dates'
 import { readBackupFile } from '@/data/backup-file'
+import { RuleError, type MergeSummary } from '@/data/repositories'
 import { isStorageFull } from '@/data/storage'
 import { BackupButton } from '@/ui/backup/BackupButton'
 import {
@@ -22,10 +23,36 @@ import { Button } from '@/ui/components/ui/button'
 import { Label } from '@/ui/components/ui/label'
 import { useLive } from '@/ui/hooks/useLive'
 import { useServices } from '@/ui/services'
-import { itemCount } from '@/ui/settings/words'
+import { itemCount, recordCounts } from '@/ui/settings/words'
+
+type Mode = 'replace' | 'merge'
+
+const MODES: readonly (readonly [Mode, string])[] = [
+  ['replace', 'Replace everything here'],
+  ['merge', "Add to what's here"],
+]
 
 /** The day the backup was made, where the person is */
 const madeOn = (backup: Backup) => formatDate(toIsoDate(new Date(backup.exportedAt)))
+
+/** Such as "Merged the backup made on 5 Oct 2026. Added 2 items. Updated 1 kit." */
+function mergedText(backup: Backup, { added, updated }: MergeSummary): string {
+  const addedText = recordCounts(added)
+  const updatedText = recordCounts(updated)
+  const changes: string[] = []
+  if (addedText !== undefined) changes.push(`Added ${addedText}.`)
+  if (updatedText !== undefined) changes.push(`Updated ${updatedText}.`)
+  if (changes.length === 0) changes.push('Everything in it was already here.')
+  return [`Merged the backup made on ${madeOn(backup)}.`, ...changes].join(' ')
+}
+
+/** What went wrong, in plain words, with the reassurance that nothing changed */
+function restoreProblem(error: unknown): string {
+  // Written for the person already, such as two loans of one item that can't both be kept
+  if (error instanceof RuleError) return error.message
+  if (isStorageFull(error)) return 'The browser has run out of space, so nothing was changed.'
+  return "The restore didn't work, so nothing was changed. Try again, or choose another backup."
+}
 
 export function RestoreSection() {
   const { repositories } = useServices()
@@ -33,6 +60,7 @@ export function RestoreSection() {
   const here = gear.status === 'ready' ? gear.value.length : 0
 
   const [chosen, setChosen] = useState<Backup>()
+  const [mode, setMode] = useState<Mode>('replace')
   const [problem, setProblem] = useState<string>()
   const [done, setDone] = useState('')
   const [confirming, setConfirming] = useState(false)
@@ -53,21 +81,20 @@ export function RestoreSection() {
   const restore = async (backup: Backup) => {
     setBusy(true)
     try {
-      await repositories.backup.restore(backup)
-      setConfirming(false)
+      if (mode === 'merge') {
+        setDone(mergedText(backup, await repositories.backup.merge(backup)))
+      } else {
+        await repositories.backup.restore(backup)
+        setDone(
+          `Restored ${itemCount(backup.counts.gear)} from the backup made on ${madeOn(backup)}.`,
+        )
+      }
       setChosen(undefined)
       setInputKey((key) => key + 1)
-      setDone(
-        `Restored ${itemCount(backup.counts.gear)} from the backup made on ${madeOn(backup)}.`,
-      )
     } catch (error) {
-      setConfirming(false)
-      setProblem(
-        isStorageFull(error)
-          ? 'The browser has run out of space, so nothing was changed.'
-          : "The restore didn't work, so nothing was changed. Try again, or choose another backup.",
-      )
+      setProblem(restoreProblem(error))
     } finally {
+      setConfirming(false)
       setBusy(false)
     }
   }
@@ -86,8 +113,8 @@ export function RestoreSection() {
         Restore
       </h2>
       <p className="max-w-prose text-muted-foreground">
-        Restoring replaces everything here with what's in a backup file. You'll see what the file
-        holds before anything changes.
+        Restoring brings back what's in a backup file, either in place of everything here or added
+        to it. You'll see what the file holds before anything changes.
       </p>
       <div className="grid gap-1.5">
         <Label htmlFor="restore-file">Backup file</Label>
@@ -115,31 +142,75 @@ export function RestoreSection() {
           <p>
             This backup was made on {madeOn(chosen)} and holds {itemCount(chosen.counts.gear)}.
           </p>
-          <p className="text-muted-foreground">{replaces}</p>
+          <fieldset className="grid gap-2">
+            <legend className="mb-1 text-sm font-medium">How to restore it</legend>
+            {MODES.map(([choice, label]) => (
+              <div key={choice} className="flex items-center gap-2">
+                <input
+                  id={`restore-${choice}`}
+                  type="radio"
+                  name="restore-mode"
+                  className="size-4 accent-primary"
+                  checked={mode === choice}
+                  onChange={() => {
+                    setMode(choice)
+                  }}
+                />
+                <label htmlFor={`restore-${choice}`}>{label}</label>
+              </div>
+            ))}
+          </fieldset>
+          {mode === 'replace' ? (
+            <p className="text-muted-foreground">{replaces}</p>
+          ) : (
+            <p className="text-muted-foreground">
+              Anything only in the backup is added, and anything the backup has a newer copy of is
+              updated. Nothing here is removed. Anything deleted here since the backup was made
+              comes back.
+            </p>
+          )}
           {here > 0 && <BackupButton label="Download a backup of what's here now" />}
           <AlertDialog open={confirming} onOpenChange={setConfirming}>
-            <AlertDialogTrigger render={<Button variant="destructive" className="w-fit" />}>
+            <AlertDialogTrigger
+              render={
+                <Button
+                  variant={mode === 'replace' ? 'destructive' : 'default'}
+                  className="w-fit"
+                />
+              }
+            >
               Restore this backup
             </AlertDialogTrigger>
             <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Replace everything?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  {here === 0
-                    ? `The ${itemCount(chosen.counts.gear)} in the backup will be added.`
-                    : `The ${itemCount(here)} here now will be replaced by the ${itemCount(chosen.counts.gear)} in the backup. This can't be undone.`}
-                </AlertDialogDescription>
-              </AlertDialogHeader>
+              {mode === 'replace' ? (
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Replace everything?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    {here === 0
+                      ? `The ${itemCount(chosen.counts.gear)} in the backup will be added.`
+                      : `The ${itemCount(here)} here now will be replaced by the ${itemCount(chosen.counts.gear)} in the backup. This can't be undone.`}
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+              ) : (
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Merge this backup?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    What's in the backup will be added to what's here. This can't be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+              )}
               <AlertDialogFooter>
-                <AlertDialogCancel>Keep what's here</AlertDialogCancel>
+                <AlertDialogCancel>
+                  {mode === 'replace' ? "Keep what's here" : "Don't merge"}
+                </AlertDialogCancel>
                 <AlertDialogAction
-                  variant="destructive"
+                  variant={mode === 'replace' ? 'destructive' : 'default'}
                   disabled={busy}
                   onClick={() => {
                     void restore(chosen)
                   }}
                 >
-                  Replace everything
+                  {mode === 'replace' ? 'Replace everything' : 'Merge'}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>

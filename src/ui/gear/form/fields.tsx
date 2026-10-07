@@ -4,13 +4,9 @@ import type { ReactNode } from 'react'
 import type { MoneyInput } from '@/core/gear'
 import { Input } from '@/ui/components/ui/input'
 import { Label } from '@/ui/components/ui/label'
-import {
-  NativeSelect,
-  NativeSelectOptGroup,
-  NativeSelectOption,
-} from '@/ui/components/ui/native-select'
+import { NativeSelect, NativeSelectOption } from '@/ui/components/ui/native-select'
 import { Textarea } from '@/ui/components/ui/textarea'
-import { CURRENCY_GROUPS, currencyName } from '@/ui/gear/form/currencies'
+import { CURRENCY_OPTIONS } from '@/ui/gear/form/currency-options'
 
 interface FieldProps {
   readonly id: string
@@ -160,18 +156,6 @@ export function SelectField<T extends string>(props: SelectFieldProps<T>) {
     </div>
   )
 }
-
-// Built once: every amount field shares these few hundred options, and React skips an element it
-// has already rendered, so typing elsewhere in the form doesn't rebuild them
-const CURRENCY_OPTIONS = CURRENCY_GROUPS.map((group) => (
-  <NativeSelectOptGroup key={group.label} label={group.label}>
-    {group.codes.map((code) => (
-      <NativeSelectOption key={code} value={code}>
-        {currencyName(code)}
-      </NativeSelectOption>
-    ))}
-  </NativeSelectOptGroup>
-))
 
 interface MoneyFieldProps extends FieldProps {
   readonly value: MoneyInput

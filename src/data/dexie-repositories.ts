@@ -90,6 +90,16 @@ export function createRepositories(
     setLastUsedCurrency: async (currency) => {
       await db.settings.put({ key: SETTING.lastUsedCurrency, value: currency })
     },
+
+    // Preferences for this device, so neither counts as a change to back up
+    setDefaultCurrency: async (currency) => {
+      if (currency === undefined) await db.settings.delete(SETTING.defaultCurrency)
+      else await db.settings.put({ key: SETTING.defaultCurrency, value: currency })
+    },
+
+    setBackupReminderDays: async (days) => {
+      await db.settings.put({ key: SETTING.backupReminderDays, value: days })
+    },
   }
 
   const today = () => toIsoDate(now(), timeZone)

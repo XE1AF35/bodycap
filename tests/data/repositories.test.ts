@@ -230,11 +230,33 @@ describe('settings repository', () => {
     })
   })
 
+  it('keeps a default currency for new amounts until it is cleared, without counting a change', async () => {
+    const settings = watch(repos.settings.get())
+    await repos.settings.setDefaultCurrency('AUD')
+    await vi.waitFor(() => {
+      expect(settings.latest()).toEqual({ changesSinceBackup: 0, defaultCurrency: 'AUD' })
+    })
+    await repos.settings.setDefaultCurrency(undefined)
+    await vi.waitFor(() => {
+      expect(settings.latest()).toEqual({ changesSinceBackup: 0 })
+    })
+  })
+
+  it('keeps how many days to wait before a backup reminder, without counting a change', async () => {
+    await repos.settings.setBackupReminderDays(7)
+    const settings = watch(repos.settings.get())
+    await vi.waitFor(() => {
+      expect(settings.latest()).toEqual({ changesSinceBackup: 0, backupReminderDays: 7 })
+    })
+  })
+
   it('ignores stored values of the wrong kind', async () => {
     await db.settings.bulkPut([
       { key: 'changesSinceBackup', value: 'lots' },
       { key: 'lastUsedCurrency', value: 'XYZ' },
       { key: 'lastBackupAt', value: 42 },
+      { key: 'defaultCurrency', value: 'Kiwi dollars' },
+      { key: 'backupReminderDays', value: 0 },
     ])
     const settings = watch(repos.settings.get())
     await vi.waitFor(() => {

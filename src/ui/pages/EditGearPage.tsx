@@ -3,10 +3,10 @@
 import { Link, useParams } from '@tanstack/react-router'
 import { useMemo } from 'react'
 import { toGearInput } from '@/core/gear'
-import { DEFAULT_CURRENCY } from '@/core/money'
 import { EmptyState } from '@/ui/components/EmptyState'
 import { Page } from '@/ui/components/Page'
 import { buttonVariants } from '@/ui/components/ui/button-variants'
+import { startingCurrency } from '@/ui/gear/form/currencies'
 import { GearForm } from '@/ui/gear/form/GearForm'
 import { gearName } from '@/ui/gear/labels'
 import { firstValue, useLive } from '@/ui/hooks/useLive'
@@ -42,10 +42,7 @@ export function EditGearPage() {
   }
 
   const saved = item.value
-  const currency =
-    settings.status === 'ready'
-      ? (settings.value.lastUsedCurrency ?? DEFAULT_CURRENCY)
-      : DEFAULT_CURRENCY
+  const currency = startingCurrency(settings.status === 'ready' ? settings.value : undefined)
 
   return (
     <Page title={`Edit ${gearName(saved)}`}>

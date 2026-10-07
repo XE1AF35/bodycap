@@ -37,6 +37,8 @@ export interface BackupState {
   /** The local date of the last backup, if there's been one */
   readonly lastBackupOn?: IsoDate | undefined
   readonly changesSinceBackup: number
+  /** Days after a backup before the reminder, as chosen in Settings. Two weeks by default. */
+  readonly dueDays?: number | undefined
 }
 
 export type BackupReminder =
@@ -45,14 +47,14 @@ export type BackupReminder =
 
 /** Why a backup is due, if it is. With nothing changed since the last one, none is needed. */
 export function backupReminder(
-  { lastBackupOn, changesSinceBackup: changes }: BackupState,
+  { lastBackupOn, changesSinceBackup: changes, dueDays = BACKUP_DUE_DAYS }: BackupState,
   today: IsoDate,
 ): BackupReminder | undefined {
   if (changes === 0) return undefined
   if (lastBackupOn === undefined) return { reason: 'never', changes }
   const daysSince = daysBetween(lastBackupOn, today)
   if (changes >= BACKUP_DUE_CHANGES) return { reason: 'changes', daysSince, changes }
-  if (daysSince >= BACKUP_DUE_DAYS) return { reason: 'age', daysSince, changes }
+  if (daysSince >= dueDays) return { reason: 'age', daysSince, changes }
   return undefined
 }
 

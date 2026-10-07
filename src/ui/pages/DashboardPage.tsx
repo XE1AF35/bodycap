@@ -13,6 +13,7 @@ import { OnLoan } from '@/ui/dashboard/OnLoan'
 import { StatusCounts } from '@/ui/dashboard/StatusCounts'
 import { ValueSummary } from '@/ui/dashboard/ValueSummary'
 import { Welcome } from '@/ui/dashboard/Welcome'
+import { startingCurrency } from '@/ui/gear/form/currencies'
 import { useLive } from '@/ui/hooks/useLive'
 import { useServices } from '@/ui/services'
 
@@ -48,14 +49,14 @@ export function DashboardPage() {
   }
   if (gear.value.length === 0) return <Welcome />
 
-  const { lastBackupAt, changesSinceBackup, lastUsedCurrency } = settings.value
+  const { lastBackupAt, changesSinceBackup, backupReminderDays } = settings.value
   // The last backup counts by the day it was made where the person is, like "today"
   const lastBackupOn = lastBackupAt === undefined ? undefined : toIsoDate(new Date(lastBackupAt))
   const alerts = collectAlerts(
     {
       items: gear.value,
       loans: loans.value,
-      backup: { lastBackupOn, changesSinceBackup },
+      backup: { lastBackupOn, changesSinceBackup, dueDays: backupReminderDays },
       storage: storageState,
     },
     today,
@@ -75,7 +76,7 @@ export function DashboardPage() {
       <StatusCounts items={gear.value} />
       <OnLoan loans={loans.value} items={gear.value} today={today} />
       <div className="grid gap-x-10 lg:grid-cols-[3fr_2fr]">
-        <ValueSummary items={gear.value} first={lastUsedCurrency} />
+        <ValueSummary items={gear.value} first={startingCurrency(settings.value)} />
         <BackupStatus
           lastBackupOn={lastBackupOn}
           changesSinceBackup={changesSinceBackup}

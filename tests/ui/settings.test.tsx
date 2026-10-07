@@ -1,4 +1,5 @@
-// Settings: backups, restoring with a preview and confirmation, storage, the theme, and About.
+// Settings: backups and how soon to be reminded, restoring by replacing or merging with a preview
+// and confirmation, the currency new amounts start in, storage, the theme, and About.
 import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -101,6 +102,51 @@ describe('backup', () => {
   })
 })
 
+describe('preferences', () => {
+  it('starts new amounts in the currency chosen here, until it goes back to the last one used', async () => {
+    const { user, services } = await renderSettings()
+    const currency = region('Currency').getByRole('combobox', { name: 'Start new amounts in' })
+    expect(currency).toHaveValue('')
+    await user.selectOptions(currency, 'AUD')
+    await waitFor(async () => {
+      expect((await current(services.repositories.settings.get())).defaultCurrency).toBe('AUD')
+    })
+    expect(currency).toHaveValue('AUD')
+
+    await user.click(screen.getByRole('link', { name: 'Gear' }))
+    await user.click(await screen.findByRole('link', { name: 'Add gear' }))
+    const price = within(await screen.findByRole('group', { name: 'Purchase price' }))
+    expect(price.getByRole('combobox', { name: 'Currency' })).toHaveValue('AUD')
+
+    await user.click(screen.getByRole('link', { name: 'Settings' }))
+    await user.selectOptions(
+      await region('Currency').findByRole('combobox', { name: 'Start new amounts in' }),
+      'The currency I used last',
+    )
+    await waitFor(async () => {
+      expect(await current(services.repositories.settings.get())).not.toHaveProperty(
+        'defaultCurrency',
+      )
+    })
+  })
+
+  it('reminds about backups after the time chosen here', async () => {
+    const services = testServices()
+    const eightDaysAgo = new Date(Date.now() - 8 * 86_400_000).toISOString()
+    await services.repositories.backup.restore({ ...backup, exportedAt: eightDaysAgo })
+    await services.repositories.gear.add(lens)
+    const { user } = await renderSettings(services)
+    const remind = region('Backup').getByRole('combobox', { name: 'Remind me to back up' })
+    expect(remind).toHaveValue('14')
+    await user.selectOptions(remind, 'A week after the last one')
+    await waitFor(async () => {
+      expect((await current(services.repositories.settings.get())).backupReminderDays).toBe(7)
+    })
+    await user.click(screen.getByRole('link', { name: 'Dashboard' }))
+    expect(await screen.findByText(/Your last backup was 8 days ago/)).toBeVisible()
+  })
+})
+
 describe('restore', () => {
   async function chooseBackup(services = testServices(), file = backupFile()) {
     await services.repositories.gear.add(lens)
@@ -133,6 +179,22 @@ describe('restore', () => {
     expect([...(await current(services.repositories.gear.list()))].sort(byId)).toEqual(
       [...backedUpGear].sort(byId),
     )
+  })
+
+  it('adds a backup to what is here when merging, after saying what that means', async () => {
+    const { user, services } = await chooseBackup()
+    const restore = region('Restore')
+    await user.click(await restore.findByRole('radio', { name: "Add to what's here" }))
+    expect(
+      restore.getByText(/Anything deleted here since the backup was made comes back/),
+    ).toBeVisible()
+    await user.click(restore.getByRole('button', { name: 'Restore this backup' }))
+    const dialog = await screen.findByRole('alertdialog', { name: 'Merge this backup?' })
+    await user.click(within(dialog).getByRole('button', { name: 'Merge' }))
+    expect(
+      await screen.findByText(`Merged the backup made on ${madeOn}. Added 2 items.`),
+    ).toBeInTheDocument()
+    expect(await current(services.repositories.gear.list())).toHaveLength(3)
   })
 
   it('changes nothing when the person keeps what is there', async () => {

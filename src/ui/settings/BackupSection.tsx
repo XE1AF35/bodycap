@@ -1,10 +1,21 @@
-// When the last backup was, how much has changed since, and a button to make one.
+// When the last backup was, how much has changed since, a button to make one, and how soon the
+// dashboard reminds about the next. Like the theme, the reminder is kept on this device only.
 import { useMemo, useState } from 'react'
+import { BACKUP_DUE_CHANGES, BACKUP_DUE_DAYS } from '@/core/alerts'
 import { daysBetween, toIsoDate } from '@/core/dates'
 import { BackupButton } from '@/ui/backup/BackupButton'
+import { Label } from '@/ui/components/ui/label'
+import { NativeSelect, NativeSelectOption } from '@/ui/components/ui/native-select'
 import { useLive } from '@/ui/hooks/useLive'
 import { useServices } from '@/ui/services'
+import { useChoice } from '@/ui/settings/use-choice'
 import { relativeDays } from '@/ui/settings/words'
+
+const REMINDERS: readonly (readonly [number, string])[] = [
+  [7, 'A week after the last one'],
+  [14, 'Two weeks after the last one'],
+  [30, 'A month after the last one'],
+]
 
 function changesText(changes: number): string {
   if (changes === 0) return 'No changes since then.'
@@ -15,6 +26,10 @@ export function BackupSection() {
   const { repositories } = useServices()
   const settings = useLive(useMemo(() => repositories.settings.get(), [repositories]))
   const [today] = useState(() => toIsoDate(new Date()))
+  const savedDays = settings.status === 'ready' ? settings.value.backupReminderDays : undefined
+  const reminder = useChoice(String(savedDays ?? BACKUP_DUE_DAYS), (days) =>
+    repositories.settings.setBackupReminderDays(Number(days)),
+  )
 
   let status: string[] = []
   if (settings.status === 'ready') {
@@ -47,6 +62,32 @@ export function BackupSection() {
         <p key={line}>{line}</p>
       ))}
       <BackupButton />
+      <div className="mt-3 grid gap-1.5">
+        <Label htmlFor="backup-reminder">Remind me to back up</Label>
+        <NativeSelect
+          id="backup-reminder"
+          value={reminder.shown}
+          aria-describedby="backup-reminder-hint"
+          onChange={(event) => {
+            reminder.choose(event.target.value)
+          }}
+        >
+          {REMINDERS.map(([days, label]) => (
+            <NativeSelectOption key={days} value={days}>
+              {label}
+            </NativeSelectOption>
+          ))}
+        </NativeSelect>
+      </div>
+      <p id="backup-reminder-hint" className="text-sm text-muted-foreground">
+        Or after {BACKUP_DUE_CHANGES} changes, if that comes first. This is kept on this device
+        only.
+      </p>
+      {reminder.problem !== undefined && (
+        <p role="alert" className="font-medium text-destructive">
+          {reminder.problem}
+        </p>
+      )}
     </section>
   )
 }
