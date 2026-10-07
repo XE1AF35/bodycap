@@ -5,6 +5,7 @@ import { formatDate, toIsoDate, type IsoDate } from '@/core/dates'
 import { CATEGORY_LABELS, CONDITION_LABELS, type Gear, type GearFields } from '@/core/gear'
 import { formatMoney, type Money } from '@/core/money'
 import { MOUNT_LABELS, SENSOR_FORMAT_LABELS } from '@/core/mounts'
+import { formatAperture, formatFocalLength } from '@/core/optics'
 import { Readout, type ReadoutRow } from '@/ui/components/Readout'
 import { StatusDot } from '@/ui/gear/StatusDot'
 import { FIELD_LABELS } from '@/ui/gear/labels'
@@ -55,6 +56,8 @@ export function GearDetails({ item }: { readonly item: Gear }) {
           row('mount', mount(item.mount)),
           row('sensorFormat', format(item.sensorFormat)),
           row('lensCoverage', format(item.lensCoverage)),
+          { label: 'Focal length', value: formatFocalLength(item), data: true },
+          { label: 'Aperture', value: formatAperture(item), data: true },
           row('adapterFrom', mount(item.adapterFrom)),
           row('adapterTo', mount(item.adapterTo)),
           row('adapterAutofocus', autofocus),

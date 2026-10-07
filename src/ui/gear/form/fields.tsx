@@ -72,15 +72,24 @@ function aria({ id, hint, error, required }: FieldProps, extra?: string) {
 interface TextFieldProps extends FieldProps {
   readonly value: string
   readonly onChange: (value: string) => void
-  /** Typed in the data font, for codes such as serial numbers */
-  readonly data?: boolean
+  /**
+   * What's typed: words, a code such as a serial number (in the data font), or a short number (in
+   * the data font, with a decimal keypad on phones)
+   */
+  readonly kind?: 'text' | 'code' | 'number'
   /** The id of something else that describes the field, such as a warning */
   readonly describedById?: string | undefined
   readonly children?: ReactNode
 }
 
+const KIND_CLASSES: Record<NonNullable<TextFieldProps['kind']>, string | undefined> = {
+  text: undefined,
+  code: 'font-mono',
+  number: 'w-32 font-mono tabular-nums',
+}
+
 export function TextField(props: TextFieldProps) {
-  const { value, onChange, data = false, describedById, children, ...field } = props
+  const { value, onChange, kind = 'text', describedById, children, ...field } = props
   return (
     <div className="grid gap-1.5">
       <FieldLabel {...field} />
@@ -88,7 +97,8 @@ export function TextField(props: TextFieldProps) {
       <Input
         id={field.id}
         value={value}
-        className={data ? 'font-mono' : undefined}
+        className={KIND_CLASSES[kind]}
+        inputMode={kind === 'number' ? 'decimal' : undefined}
         onChange={(event) => {
           onChange(event.target.value)
         }}

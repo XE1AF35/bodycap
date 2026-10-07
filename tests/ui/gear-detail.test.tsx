@@ -15,6 +15,9 @@ const lens: GearFields = {
   serialNumber: '1834567',
   mount: 'sony-e',
   lensCoverage: 'full-frame',
+  focalLengthMin: 24,
+  focalLengthMax: 70,
+  maxAperture: 2.8,
   purchaseDate: '2026-03-01',
   purchasePrice: { amountMinor: 389900, currency: 'NZD' },
   whereBought: 'Photo Warehouse',
@@ -63,6 +66,8 @@ describe('gear detail', () => {
       ['Serial number', '1834567'],
       ['Mount', 'Sony E (including FE)'],
       ['Lens coverage', 'Full frame'],
+      ['Focal length', '24-70mm'],
+      ['Aperture', 'f/2.8'],
       ['Purchase date', '1 Mar 2026'],
       ['Purchase price', '$3,899.00'],
       ['Where bought', 'Photo Warehouse'],
@@ -87,7 +92,7 @@ describe('gear detail', () => {
       within(glance)
         .getAllByRole('listitem')
         .map((item) => item.textContent),
-    ).toEqual(['Workhorse', 'Owned', 'Lens', 'EMount: Sony E (including FE)'])
+    ).toEqual(['Workhorse', 'Owned', 'Lens', '24-70mm f/2.8', 'EMount: Sony E (including FE)'])
     expect(within(glance).getByText('E')).toHaveAttribute('aria-hidden', 'true')
   })
 
@@ -140,6 +145,23 @@ describe('gear detail', () => {
         ['Lens side', 'Nikon F'],
         ['Camera side', 'Nikon Z'],
         ['Autofocus', 'Yes'],
+      ],
+    ],
+    [
+      'the optics of a zoom that is slower at the long end',
+      {
+        category: 'lens',
+        brand: 'Fujifilm',
+        model: 'XF 70-300mm F4-5.6 R LM OIS WR',
+        focalLengthMin: 70,
+        focalLengthMax: 300,
+        maxAperture: 4,
+        maxApertureTele: 5.6,
+        status: 'owned',
+      },
+      [
+        ['Focal length', '70-300mm'],
+        ['Aperture', 'f/4-5.6'],
       ],
     ],
     [

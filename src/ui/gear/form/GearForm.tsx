@@ -62,6 +62,10 @@ const ORDER: readonly Field[] = [
   'mount',
   'sensorFormat',
   'lensCoverage',
+  'focalLengthMin',
+  'focalLengthMax',
+  'maxAperture',
+  'maxApertureTele',
   'adapterFrom',
   'adapterTo',
   'adapterAutofocus',
@@ -242,7 +246,7 @@ export function GearForm({ initial, saved, onSave, cancel }: GearFormProps) {
         {applies.has('serialNumber') && (
           <TextField
             {...text('serialNumber')}
-            data
+            kind="code"
             hint="Often on the bottom of a body, or near the mount on a lens."
             describedById={clashes.length > 0 ? 'gear-serialNumber-warning' : undefined}
           >
@@ -279,6 +283,33 @@ export function GearForm({ initial, saved, onSave, cancel }: GearFormProps) {
             emptyLabel="Not set"
             choices={FORMAT_CHOICES}
           />
+        )}
+        {applies.has('focalLengthMin') && (
+          <fieldset className="grid gap-1.5">
+            <legend className="mb-3 text-sm font-medium">Focal length and aperture</legend>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <TextField
+                {...text('focalLengthMin')}
+                kind="number"
+                hint="In millimetres. For a prime, its only focal length."
+              />
+              <TextField
+                {...text('focalLengthMax')}
+                kind="number"
+                hint="For a zoom, such as 70 for a 24-70mm."
+              />
+              <TextField
+                {...text('maxAperture')}
+                kind="number"
+                hint="As an f-number, such as 2.8."
+              />
+              <TextField
+                {...text('maxApertureTele')}
+                kind="number"
+                hint="Only if it's slower at the long end, such as 5.6."
+              />
+            </div>
+          </fieldset>
         )}
         {applies.has('adapterFrom') && (
           <SelectField

@@ -4,6 +4,7 @@ import { Link, useParams } from '@tanstack/react-router'
 import { ArrowLeft, Pencil } from 'lucide-react'
 import { useMemo } from 'react'
 import { CATEGORY_LABELS, type Gear } from '@/core/gear'
+import { formatAperture, formatFocalLength } from '@/core/optics'
 import { EmptyState } from '@/ui/components/EmptyState'
 import { Page } from '@/ui/components/Page'
 import { buttonVariants } from '@/ui/components/ui/button-variants'
@@ -25,6 +26,8 @@ function BackToGear() {
 
 /** The item at a glance, under its name: what it's called, where it stands, and its mount */
 function Glance({ item }: { readonly item: Gear }) {
+  // Such as "24-70mm f/2.8", for a lens with optics recorded
+  const optics = [formatFocalLength(item), formatAperture(item)].filter(Boolean).join(' ')
   return (
     <ul
       aria-label="At a glance"
@@ -35,6 +38,7 @@ function Glance({ item }: { readonly item: Gear }) {
         <StatusDot status={item.status} />
       </li>
       <li>{CATEGORY_LABELS[item.category]}</li>
+      {optics !== '' && <li className="font-mono">{optics}</li>}
       {mountText(item) !== undefined && (
         <li>
           <MountBadge gear={item} />

@@ -1,5 +1,6 @@
 // The add and edit gear form: saving, the error summary and field messages, fields that come and
-// go with category and status, currencies, duplicate serials, and the unsaved-changes guard.
+// go with category and status, lens optics, currencies, duplicate serials, and the unsaved-changes
+// guard.
 import { screen, waitFor, within } from '@testing-library/react'
 import userEvent, { type UserEvent } from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
@@ -109,6 +110,48 @@ describe('adding gear', () => {
     for (const name of shown) expect(select(name)).toBeInTheDocument()
     for (const name of hidden)
       expect(screen.queryByRole('combobox', { name })).not.toBeInTheDocument()
+  })
+
+  it.each([
+    ['Lens', true],
+    ['Camera body', false],
+    ['Mount adapter', false],
+  ])('asks for focal length and aperture for a %s only if it is a lens', async (category, asks) => {
+    const { user } = await renderAdd()
+    await user.selectOptions(select('Category'), category)
+    const group = screen.queryByRole('group', { name: 'Focal length and aperture' })
+    expect(group !== null).toBe(asks)
+  })
+
+  it("saves a lens's focal length and aperture as typed, and shows them on its page", async () => {
+    const { user, services } = await renderAdd()
+    await fillBasics(user, 'Lens', 'Fujifilm', 'XF 18-55mm F2.8-4')
+    await user.type(field('Shortest focal length'), '18')
+    await user.type(field('Longest focal length'), '55 mm')
+    await user.type(field('Widest aperture'), 'f/2.8')
+    await user.type(field('Widest aperture at the long end'), '4')
+    await save(user)
+    await screen.findByRole('heading', { level: 1, name: 'Fujifilm XF 18-55mm F2.8-4' })
+    const shown = (label: string) =>
+      screen.getByText(label, { selector: 'dt' }).nextElementSibling?.textContent
+    expect([shown('Focal length'), shown('Aperture')]).toEqual(['18-55mm', 'f/2.8-4'])
+    expect(await current(services.repositories.gear.list())).toMatchObject([
+      { focalLengthMin: 18, focalLengthMax: 55, maxAperture: 2.8, maxApertureTele: 4 },
+    ])
+  })
+
+  it('explains a focal length range typed the wrong way round, at the field and in the summary', async () => {
+    const { user } = await renderAdd()
+    await fillBasics(user, 'Lens', 'Sony', 'FE 24-70mm F2.8 GM II')
+    await user.type(field('Shortest focal length'), '70')
+    await user.type(field('Longest focal length'), '24')
+    await save(user)
+    const message = "The longest focal length can't be shorter than the shortest."
+    expect(within(screen.getByRole('alert')).getByRole('link', { name: message })).toBeVisible()
+    expect(field('Longest focal length')).toHaveAttribute('aria-invalid', 'true')
+    expect(field('Longest focal length')).toHaveAccessibleDescription(
+      /Error: The longest focal length can't be shorter than the shortest\.$/,
+    )
   })
 
   it('asks whether autofocus works through an adapter', async () => {
@@ -281,6 +324,16 @@ describe('editing gear', () => {
       model: 'FE 24-70mm F2.8 GM',
       purchasePrice: { amountMinor: 389900, currency: 'NZD' },
     })
+  })
+
+  it("fills in a lens's focal length and aperture", async () => {
+    await renderEdit({ ...lens, focalLengthMin: 24, focalLengthMax: 70, maxAperture: 2.8 })
+    expect(
+      ['Shortest focal length', 'Longest focal length', 'Widest aperture'].map(
+        (name) => (field(name) as HTMLInputElement).value,
+      ),
+    ).toEqual(['24', '70', '2.8'])
+    expect(field('Widest aperture at the long end')).toHaveValue('')
   })
 
   it.each<[GearFields['status'], string[]]>([
