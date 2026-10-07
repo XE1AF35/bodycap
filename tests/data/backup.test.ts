@@ -1,5 +1,6 @@
 // Backing up and restoring on fake-indexeddb: the exact round trip, all-or-nothing restore, and the
-// backup reminder's bookkeeping.
+// backup reminder's bookkeeping. Until database version 2, there's nowhere to keep kits, loans, or
+// maintenance, so backups hold none and a restore that brings any is refused.
 import { IDBFactory, IDBKeyRange } from 'fake-indexeddb'
 import { afterEach, describe, expect, it } from 'vitest'
 import type { Backup } from '@/core/backup/format'
@@ -101,12 +102,12 @@ describe('backup.create', () => {
     expect(file.name).toBe('bodycap-backup-2026-10-05.json')
     expect(backup).toEqual({
       app: 'bodycap',
-      formatVersion: 1,
+      formatVersion: 2,
       schemaVersion: 1,
       appVersion: '0.1.0',
       exportedAt: EXPORTED_AT,
-      counts: { gear: 3 },
-      data: { gear, settings: { lastUsedCurrency: 'AUD' } },
+      counts: { gear: 3, kits: 0, loans: 0, maintenance: 0 },
+      data: { gear, kits: [], loans: [], maintenance: [], settings: { lastUsedCurrency: 'AUD' } },
     })
   })
 
@@ -177,7 +178,7 @@ describe('backup.restore', () => {
     // be all or nothing
     const broken: Backup = {
       ...backup,
-      counts: { gear: 2 },
+      counts: { ...backup.counts, gear: 2 },
       data: { ...backup.data, gear: [first, first] },
     }
     await expect(target.repos.backup.restore(broken)).rejects.toThrow()
@@ -186,5 +187,61 @@ describe('backup.restore', () => {
       changesSinceBackup: 1,
       lastUsedCurrency: 'USD',
     })
+  })
+
+  it.each<[string, Partial<Backup['data']>]>([
+    [
+      'kits',
+      {
+        kits: [
+          {
+            id: '1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d',
+            createdAt: EXPORTED_AT,
+            updatedAt: EXPORTED_AT,
+            name: 'Travel light',
+            gearIds: [],
+            checklist: false,
+            packedGearIds: [],
+          },
+        ],
+      },
+    ],
+    [
+      'loans',
+      {
+        loans: [
+          {
+            id: '2b3c4d5e-6f7a-4b8c-9d0e-1f2a3b4c5d6e',
+            createdAt: EXPORTED_AT,
+            updatedAt: EXPORTED_AT,
+            gearId: '00000000-0000-4000-8000-000000000001',
+            borrower: 'Aroha',
+            dateOut: '2026-10-01',
+          },
+        ],
+      },
+    ],
+    [
+      'maintenance',
+      {
+        maintenance: [
+          {
+            id: '4d5e6f7a-8b9c-4d0e-9f2a-3b4c5d6e7f8a',
+            createdAt: EXPORTED_AT,
+            updatedAt: EXPORTED_AT,
+            gearId: '00000000-0000-4000-8000-000000000001',
+            type: 'sensor-clean',
+            date: '2026-10-01',
+          },
+        ],
+      },
+    ],
+  ])('refuses a backup holding %s, changing nothing', async (_name, lists) => {
+    const { backup } = await backedUp()
+    const target = open()
+    const kept = await target.repos.gear.add({ ...lens, model: 'FE 85mm F1.8' })
+    const holding: Backup = { ...backup, data: { ...backup.data, ...lists } }
+    await expect(target.repos.backup.restore(holding)).rejects.toThrow()
+    expect(await current(target.repos.gear.list())).toEqual([kept])
   })
 })

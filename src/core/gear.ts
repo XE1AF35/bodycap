@@ -12,6 +12,13 @@ import {
   type Money,
 } from './money'
 import { MOUNTS, SENSOR_FORMATS, type MountId, type SensorFormat } from './mounts'
+import {
+  OPTICS_FIELDS,
+  toOpticsInput,
+  validateOptics,
+  type LensOptics,
+  type OpticsInput,
+} from './optics'
 import { err, ok, type Result } from './result'
 import { characterCount, cleanLine, cleanMultiline } from './text'
 
@@ -91,8 +98,8 @@ export const CONDITION_LABELS: Record<Condition, string> = {
   'for-parts': 'For parts',
 }
 
-/** A gear item's details: everything except its ID and timestamps */
-export interface GearFields {
+/** A gear item's details: everything except its ID and timestamps. Only lenses have optics. */
+export interface GearFields extends LensOptics {
   readonly category: Category
   readonly brand: string
   readonly model: string
@@ -139,7 +146,7 @@ export interface MoneyInput {
 }
 
 /** What the gear form holds: everything as typed or picked, before any checks */
-export interface GearInput {
+export interface GearInput extends OpticsInput {
   readonly category: string
   readonly brand: string
   readonly model: string
@@ -187,7 +194,7 @@ const ONCE_BOUGHT: readonly OptionalField[] = [
 
 const BY_CATEGORY: Partial<Record<Category, readonly OptionalField[]>> = {
   'camera-body': ['mount', 'sensorFormat'],
-  lens: ['mount', 'lensCoverage'],
+  lens: ['mount', 'lensCoverage', ...OPTICS_FIELDS],
   'mount-adapter': ['adapterFrom', 'adapterTo', 'adapterAutofocus'],
 }
 
@@ -347,6 +354,11 @@ export function validateGear(input: GearInput, today: IsoDate): Result<GearField
     if (salePrice === undefined) errors.salePrice ??= 'Enter what it sold for.'
   }
 
+  // Lenses only. The optics rules live with the optics, and report problems the same way.
+  const optics = applies.has('focalLengthMin') ? validateOptics(input) : ok<LensOptics>({})
+  if (!optics.ok) Object.assign(errors, optics.error)
+  const opticsFields = optics.ok ? optics.value : {}
+
   const lostDate = date('lostDate')
   if (status === 'lost') {
     if (lostDate === undefined) errors.lostDate ??= 'Enter the date it was lost.'
@@ -373,6 +385,7 @@ export function validateGear(input: GearInput, today: IsoDate): Result<GearField
   if (mount !== undefined) fields.mount = mount
   if (sensorFormat !== undefined) fields.sensorFormat = sensorFormat
   if (lensCoverage !== undefined) fields.lensCoverage = lensCoverage
+  Object.assign(fields, opticsFields)
   if (adapterFrom !== undefined) fields.adapterFrom = adapterFrom
   if (adapterTo !== undefined) fields.adapterTo = adapterTo
   if (applies.has('adapterAutofocus')) fields.adapterAutofocus = input.adapterAutofocus
@@ -405,6 +418,10 @@ export function emptyGearInput(currency: CurrencyCode = DEFAULT_CURRENCY): GearI
     adapterFrom: '',
     adapterTo: '',
     adapterAutofocus: false,
+    focalLengthMin: '',
+    focalLengthMax: '',
+    maxAperture: '',
+    maxApertureTele: '',
     purchaseDate: '',
     purchasePrice: noAmount,
     whereBought: '',
@@ -439,6 +456,7 @@ export function toGearInput(
     adapterFrom: fields.adapterFrom ?? '',
     adapterTo: fields.adapterTo ?? '',
     adapterAutofocus: fields.adapterAutofocus ?? false,
+    ...toOpticsInput(fields),
     purchaseDate: fields.purchaseDate ?? '',
     purchasePrice: amount(fields.purchasePrice),
     whereBought: fields.whereBought ?? '',

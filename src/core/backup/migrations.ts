@@ -7,8 +7,28 @@ export type BackupMigration = (file: Readonly<Record<string, unknown>>) => Recor
 
 type Migrations = Readonly<Partial<Record<number, BackupMigration>>>
 
-/** Step n upgrades format n to n + 1. Format 1 is the first, so there are none yet. */
-export const BACKUP_MIGRATIONS: Migrations = {}
+const isObject = (value: unknown): value is Readonly<Record<string, unknown>> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value)
+
+/**
+ * Format 1 had only gear and settings. Format 2 adds kits, loans, and maintenance, which a format 1
+ * file has none of, and optional lens optics, which its gear simply doesn't have. A file whose data
+ * or counts aren't objects is left as it is, for the checks to refuse as damaged.
+ */
+function addKitsLoansAndMaintenance(file: Readonly<Record<string, unknown>>) {
+  const { data, counts } = file
+  if (!isObject(data) || !isObject(counts)) return { ...file }
+  return {
+    ...file,
+    counts: { ...counts, kits: 0, loans: 0, maintenance: 0 },
+    data: { ...data, kits: [], loans: [], maintenance: [] },
+  }
+}
+
+/** Step n upgrades format n to n + 1 */
+export const BACKUP_MIGRATIONS: Migrations = {
+  1: addKitsLoansAndMaintenance,
+}
 
 /** Upgrades a file in format `from` to format `to`, setting its formatVersion as it goes. */
 export function migrateBackup(

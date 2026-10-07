@@ -31,6 +31,7 @@ describe('emptyGearInput', () => {
     expect(empty.adapterAutofocus).toBe(false)
     expect(empty.purchasePrice).toEqual({ amount: '', currency: 'NZD' })
     expect(empty.salePrice).toEqual({ amount: '', currency: 'NZD' })
+    expect([empty.focalLengthMin, empty.focalLengthMax, empty.maxAperture]).toEqual(['', '', ''])
   })
 
   it('can start every amount in another currency', () => {
@@ -67,12 +68,46 @@ describe('applicableFields', () => {
     ['insuredValue', 'lens', 'wishlist', false],
     ['purchasePrice', 'lens', 'wishlist', true],
     ['notes', 'other', 'lost', true],
+    ['focalLengthMin', 'lens', 'owned', true],
+    ['maxApertureTele', 'lens', 'wishlist', true],
+    ['focalLengthMax', 'camera-body', 'owned', false],
+    ['maxAperture', 'mount-adapter', 'owned', false],
   ] as const)('%s applies to a %s that is %s: %s', (field, category, status, applies) => {
     expect(applicableFields(category, status).has(field)).toBe(applies)
   })
 })
 
 describe('validateGear', () => {
+  it("checks a lens's optics with the optics rules, keeping them as numbers", () => {
+    expect(
+      validateGear(
+        input({ focalLengthMin: '24', focalLengthMax: '70 mm', maxAperture: 'f/2.8' }),
+        TODAY,
+      ),
+    ).toMatchObject({
+      ok: true,
+      value: { focalLengthMin: 24, focalLengthMax: 70, maxAperture: 2.8 },
+    })
+    expect(
+      validateGear(input({ focalLengthMin: '70', focalLengthMax: '24', brand: '' }), TODAY),
+    ).toEqual({
+      ok: false,
+      error: {
+        brand: 'Enter the brand.',
+        focalLengthMax: "The longest focal length can't be shorter than the shortest.",
+      },
+    })
+  })
+
+  it('drops optics left over from choosing lens before another category', () => {
+    const result = validateGear(
+      input({ category: 'camera-body', focalLengthMin: '35', maxAperture: 'abc' }),
+      TODAY,
+    )
+    expect(result).toMatchObject({ ok: true })
+    expect(result.ok && result.value).not.toHaveProperty('focalLengthMin')
+  })
+
   it('turns a minimal item into clean fields', () => {
     expect(
       validateGear(input({ brand: '  Sony ', model: 'FE  24-70mm F2.8 GM II' }), TODAY),
@@ -381,6 +416,9 @@ describe('toGearInput', () => {
         model: '35mm F1.4 DG DN Art',
         mount: 'l-mount',
         lensCoverage: 'full-frame',
+        focalLengthMin: 35,
+        focalLengthMax: 35,
+        maxAperture: 1.4,
         purchaseDate: '2023-03-10',
         purchasePrice: { amountMinor: 159900, currency: 'USD' },
         status: 'sold',
@@ -399,6 +437,21 @@ describe('toGearInput', () => {
         adapterAutofocus: true,
         status: 'lost',
         lostDate: '2026-01-15',
+      },
+    ],
+    [
+      'a variable-aperture zoom on the wishlist',
+      {
+        category: 'lens',
+        brand: 'Fujifilm',
+        model: 'XF 70-300mm F4-5.6 R LM OIS WR',
+        mount: 'fujifilm-x',
+        focalLengthMin: 70,
+        focalLengthMax: 300,
+        maxAperture: 4,
+        maxApertureTele: 5.6,
+        purchasePrice: { amountMinor: 129900, currency: 'NZD' },
+        status: 'wishlist',
       },
     ],
     [

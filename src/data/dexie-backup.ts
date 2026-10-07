@@ -1,5 +1,8 @@
 // Backing up and restoring the whole database, each in one transaction. A backup and the reset of
 // the change count can't drift apart, and a restore replaces everything or nothing.
+//
+// Database version 1 has nowhere to keep kits, loans, or maintenance, so backups hold none, and a
+// backup that brings any is refused whole rather than restored without them. Version 2 adds them.
 import { backupFileName, createBackup, type Backup } from '@/core/backup/format'
 import { toIsoDate } from '@/core/dates'
 import type { BodycapDatabase } from './db'
@@ -24,7 +27,13 @@ export function createBackupStore(
         const gear = (await db.gear.toArray()).map(toGear)
         const { lastUsedCurrency } = toSettings(await db.settings.toArray())
         const backup = createBackup(
-          { gear, settings: lastUsedCurrency === undefined ? {} : { lastUsedCurrency } },
+          {
+            gear,
+            kits: [],
+            loans: [],
+            maintenance: [],
+            settings: lastUsedCurrency === undefined ? {} : { lastUsedCurrency },
+          },
           { schemaVersion: db.verno, appVersion, exportedAt },
         )
         await db.settings.bulkPut([
@@ -38,6 +47,10 @@ export function createBackupStore(
 
     restore: (backup: Backup) =>
       db.transaction('rw', db.gear, db.settings, async () => {
+        const { kits, loans, maintenance } = backup.data
+        if (kits.length + loans.length + maintenance.length > 0) {
+          throw new Error("This database can't keep kits, loans, or maintenance yet")
+        }
         await db.gear.clear()
         await db.gear.bulkAdd(backup.data.gear.map(toRecord))
         // The data now matches the file, so it counts as backed up when the file was made

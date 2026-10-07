@@ -1,4 +1,4 @@
-// Making backups: the file's envelope, its counts, and its name.
+// Making backups: the file's envelope, the count of each list, and its name.
 import { describe, expect, it } from 'vitest'
 import { backupFileName, createBackup, FORMAT_VERSION } from '@/core/backup/format'
 import type { Gear } from '@/core/gear'
@@ -17,7 +17,13 @@ describe('createBackup', () => {
   it('wraps the data with what a restore needs to check it', () => {
     expect(
       createBackup(
-        { gear: [tripod], settings: { lastUsedCurrency: 'NZD' } },
+        {
+          gear: [tripod],
+          kits: [],
+          loans: [],
+          maintenance: [],
+          settings: { lastUsedCurrency: 'NZD' },
+        },
         { schemaVersion: 1, appVersion: '0.1.0', exportedAt: '2026-10-05T03:00:00.000Z' },
       ),
     ).toEqual({
@@ -26,9 +32,39 @@ describe('createBackup', () => {
       schemaVersion: 1,
       appVersion: '0.1.0',
       exportedAt: '2026-10-05T03:00:00.000Z',
-      counts: { gear: 1 },
-      data: { gear: [tripod], settings: { lastUsedCurrency: 'NZD' } },
+      counts: { gear: 1, kits: 0, loans: 0, maintenance: 0 },
+      data: {
+        gear: [tripod],
+        kits: [],
+        loans: [],
+        maintenance: [],
+        settings: { lastUsedCurrency: 'NZD' },
+      },
     })
+  })
+
+  it('counts each list on its own', () => {
+    const backup = createBackup(
+      {
+        gear: [tripod],
+        kits: [
+          {
+            id: '1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d',
+            createdAt: '2026-07-01T00:00:00.000Z',
+            updatedAt: '2026-07-01T00:00:00.000Z',
+            name: 'Landscape',
+            gearIds: [tripod.id],
+            checklist: false,
+            packedGearIds: [],
+          },
+        ],
+        loans: [],
+        maintenance: [],
+        settings: {},
+      },
+      { schemaVersion: 2, appVersion: '0.2.0', exportedAt: '2026-10-05T03:00:00.000Z' },
+    )
+    expect(backup.counts).toEqual({ gear: 1, kits: 1, loans: 0, maintenance: 0 })
   })
 })
 

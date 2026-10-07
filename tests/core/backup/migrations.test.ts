@@ -1,7 +1,7 @@
-// Backup format migrations: upgrading an older file one version at a time.
+// Backup format migrations: upgrading an older file one version at a time, and each real step.
 import { describe, expect, it } from 'vitest'
 import { FORMAT_VERSION } from '@/core/backup/format'
-import { migrateBackup, type BackupMigration } from '@/core/backup/migrations'
+import { BACKUP_MIGRATIONS, migrateBackup, type BackupMigration } from '@/core/backup/migrations'
 
 describe('migrateBackup', () => {
   it('leaves a backup in the current format as it is', () => {
@@ -34,5 +34,34 @@ describe('migrateBackup', () => {
         'No backup migration from format 4',
       )
     })
+  })
+})
+
+describe('format 1 to 2', () => {
+  const formatOne = {
+    app: 'bodycap',
+    formatVersion: 1,
+    schemaVersion: 1,
+    appVersion: '0.1.0',
+    exportedAt: '2026-10-05T03:00:00.000Z',
+    counts: { gear: 1 },
+    data: { gear: [{ id: 'kept as it is' }], settings: { lastUsedCurrency: 'AUD' } },
+  }
+
+  it('adds kits, loans, and maintenance, each empty and counted as none', () => {
+    expect(migrateBackup(formatOne, 1, 2)).toEqual({
+      ...formatOne,
+      formatVersion: 2,
+      counts: { gear: 1, kits: 0, loans: 0, maintenance: 0 },
+      data: { ...formatOne.data, kits: [], loans: [], maintenance: [] },
+    })
+  })
+
+  it.each([
+    ['no data', { ...formatOne, data: undefined }],
+    ['data that is a list', { ...formatOne, data: [] }],
+    ['counts that are text', { ...formatOne, counts: 'one' }],
+  ])('leaves a file with %s for the checks to refuse', (_name, file) => {
+    expect(BACKUP_MIGRATIONS[1]?.(file)).toEqual(file)
   })
 })
