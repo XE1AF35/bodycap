@@ -1,7 +1,17 @@
 // Accessibility: axe checks every screen against the WCAG 2.2 AA rules, in the dark and light themes.
 import AxeBuilder from '@axe-core/playwright'
 import type { Page } from '@playwright/test'
-import { expect, open, SAMPLE_COLLECTION, SAMPLE_GEAR, seed, test, type Seed } from './fixtures'
+import {
+  expect,
+  open,
+  openShareDialog,
+  SAMPLE_COLLECTION,
+  SAMPLE_GEAR,
+  SAMPLE_SYSTEM,
+  seed,
+  test,
+  type Seed,
+} from './fixtures'
 
 const WCAG_AA = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']
 
@@ -67,6 +77,14 @@ async function chooseMerge(page: Page) {
   await restore.getByLabel('Backup file').setInputFiles(await download.path())
   await restore.getByRole('radio', { name: "Add to what's here" }).check()
   await expect(restore.getByText(/Anything deleted here since the backup was made/)).toBeVisible()
+}
+
+/** Opens the wedding kit's share link, in the same browser */
+async function atSharedKit(page: Page) {
+  const dialog = await openShareDialog(page)
+  const link = await dialog.getByRole('textbox', { name: 'Link' }).inputValue()
+  await page.goto(link)
+  await expect(page.getByText(/A copy of a kit someone shared with you/)).toBeVisible()
 }
 
 const GEAR: Seed = { gear: SAMPLE_GEAR }
@@ -223,6 +241,51 @@ const SCREENS: readonly Screen[] = [
     show: async (page) => {
       await atItem(page)
       await openDialog(page, 'Log work', 'Log work on Fujifilm X-T5')
+    },
+  },
+  {
+    name: 'share dialog',
+    seed: SAMPLE_COLLECTION,
+    show: async (page) => {
+      await openShareDialog(page)
+    },
+  },
+  { name: 'shared kit', seed: SAMPLE_COLLECTION, show: atSharedKit },
+  {
+    name: "shared link that can't be opened",
+    show: (page) => at(page, '#/shared/not-a-kit', "This link can't be opened"),
+  },
+  {
+    name: 'system map',
+    seed: SAMPLE_SYSTEM,
+    show: async (page) => {
+      await at(page, '#/system', 'System map')
+      await expect(page.getByRole('region', { name: 'Adapters' })).toBeVisible()
+    },
+  },
+  {
+    name: 'system map on a phone',
+    seed: SAMPLE_SYSTEM,
+    show: async (page) => {
+      await onPhone(page)
+      await at(page, '#/system', 'System map')
+      await expect(page.getByRole('region', { name: 'Nikon Z6 III' })).toBeVisible()
+    },
+  },
+  {
+    name: 'empty system map',
+    show: async (page) => {
+      await at(page, '#/system', 'System map')
+      await expect(page.getByText('Nothing to map yet.')).toBeVisible()
+    },
+  },
+  {
+    name: 'dashboard stats on a phone',
+    seed: SAMPLE_COLLECTION,
+    show: async (page) => {
+      await onPhone(page)
+      await at(page, '#/', 'Dashboard')
+      await expect(page.getByRole('region', { name: 'Your gear in numbers' })).toBeVisible()
     },
   },
   { name: 'settings, merging a backup', seed: GEAR, show: chooseMerge },

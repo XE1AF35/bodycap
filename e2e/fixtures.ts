@@ -159,7 +159,8 @@ const BACKPACK = '9d4a6c21-5e7b-4f80-b3c2-1a8e6d5f4b37'
 
 /**
  * Gear with everything M2 added: the X-T5 out on an overdue loan, with a sensor clean logged, and
- * a wedding kit used as a packing checklist, with the X-T5 packed
+ * a wedding kit used as a packing checklist, with the X-T5 packed. The X-T5's serial, purchase
+ * dates, and warranty give the stats something to show, and sharing something to leave out.
  */
 export const SAMPLE_COLLECTION: Seed = {
   gear: [
@@ -168,9 +169,12 @@ export const SAMPLE_COLLECTION: Seed = {
       category: 'camera-body',
       brand: 'Fujifilm',
       model: 'X-T5',
+      serialNumber: 'XT5-0042',
       mount: 'fujifilm-x',
       sensorFormat: 'aps-c',
+      purchaseDate: daysFromToday(-400),
       purchasePrice: { amountMinor: 299900, currency: 'NZD' },
+      warrantyExpiry: daysFromToday(330),
       status: 'lent-out',
     },
     {
@@ -183,6 +187,7 @@ export const SAMPLE_COLLECTION: Seed = {
       focalLengthMin: 33,
       focalLengthMax: 33,
       maxAperture: 1.4,
+      purchaseDate: daysFromToday(-100),
       status: 'owned',
     },
     {
@@ -227,4 +232,81 @@ export const SAMPLE_COLLECTION: Seed = {
       provider: 'Camera Clinic',
     },
   ],
+}
+
+const nikon = (fields: {
+  readonly category: string
+  readonly model: string
+  readonly [field: string]: unknown
+}): SeedItem => ({
+  brand: 'Nikon',
+  status: 'owned',
+  ...fields,
+})
+
+/**
+ * Two Nikon bodies, full frame and APS-C, with lenses for both: a DX lens, an F-mount lens through
+ * an FTZ, a gap before the telephoto, and a lens no camera here can take
+ */
+export const SAMPLE_SYSTEM: Seed = {
+  gear: [
+    nikon({
+      category: 'camera-body',
+      model: 'Z6 III',
+      mount: 'nikon-z',
+      sensorFormat: 'full-frame',
+    }),
+    nikon({ category: 'camera-body', model: 'Z50 II', mount: 'nikon-z', sensorFormat: 'aps-c' }),
+    nikon({
+      category: 'lens',
+      model: 'Z 24-70mm f/4 S',
+      mount: 'nikon-z',
+      lensCoverage: 'full-frame',
+      focalLengthMin: 24,
+      focalLengthMax: 70,
+      maxAperture: 4,
+    }),
+    nikon({
+      category: 'lens',
+      model: 'Z DX 16-50mm',
+      mount: 'nikon-z',
+      lensCoverage: 'aps-c',
+      focalLengthMin: 16,
+      focalLengthMax: 50,
+    }),
+    nikon({
+      category: 'lens',
+      model: 'AF-S 50mm f/1.8G',
+      mount: 'nikon-f',
+      focalLengthMin: 50,
+      focalLengthMax: 50,
+      maxAperture: 1.8,
+    }),
+    nikon({
+      category: 'lens',
+      model: 'Z 180-600mm',
+      mount: 'nikon-z',
+      focalLengthMin: 180,
+      focalLengthMax: 600,
+    }),
+    nikon({
+      category: 'mount-adapter',
+      model: 'FTZ II',
+      adapterFrom: 'nikon-f',
+      adapterTo: 'nikon-z',
+      adapterAutofocus: true,
+    }),
+    { category: 'lens', brand: 'Canon', model: 'RF 50mm F1.8', mount: 'canon-rf', status: 'owned' },
+  ],
+}
+
+/** Opens the sample collection's wedding kit and its share dialog */
+export async function openShareDialog(page: Page): Promise<Locator> {
+  await open(page, '#/kits')
+  await page.getByRole('link', { name: 'Wedding kit' }).click()
+  await expect(page.getByRole('heading', { level: 1, name: 'Wedding kit' })).toBeVisible()
+  await page.getByRole('button', { name: 'Share' }).click()
+  const dialog = page.getByRole('dialog', { name: 'Share Wedding kit' })
+  await expect(dialog).toBeVisible()
+  return dialog
 }

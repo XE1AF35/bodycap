@@ -1,7 +1,17 @@
 // Focus: every stop on the way through a screen draws the same solid outline. An outline, unlike a
 // box-shadow ring, stays visible in Windows high contrast mode.
 import type { Page } from '@playwright/test'
-import { expect, open, SAMPLE_COLLECTION, SAMPLE_GEAR, seed, seedGear, test } from './fixtures'
+import {
+  expect,
+  open,
+  openShareDialog,
+  SAMPLE_COLLECTION,
+  SAMPLE_GEAR,
+  SAMPLE_SYSTEM,
+  seed,
+  seedGear,
+  test,
+} from './fixtures'
 
 /** Tabs through the screen, describing each stop whose focus isn't a solid outline of 2px or more */
 async function stopsWithoutOutline(page: Page, stops: number): Promise<string[]> {
@@ -59,4 +69,22 @@ test('outlines every stop on an item with a loan, kits, and maintenance', async 
   await page.reload()
   await expect(page.getByRole('region', { name: 'Maintenance' })).toBeVisible()
   expect(await stopsWithoutOutline(page, 40)).toEqual([])
+})
+
+test('outlines every stop on the system map', async ({ page }) => {
+  await seed(page, SAMPLE_SYSTEM)
+  await page.goto('./#/system')
+  await page.reload()
+  await expect(page.getByRole('heading', { level: 1, name: 'System map' })).toBeVisible()
+  expect(await stopsWithoutOutline(page, 40)).toEqual([])
+})
+
+test('outlines every stop on a shared kit', async ({ page }) => {
+  await seed(page, SAMPLE_COLLECTION)
+  const dialog = await openShareDialog(page)
+  const link = await dialog.getByRole('textbox', { name: 'Link' }).inputValue()
+  await page.goto(link)
+  await page.reload()
+  await expect(page.getByText(/A copy of a kit someone shared with you/)).toBeVisible()
+  expect(await stopsWithoutOutline(page, 30)).toEqual([])
 })
