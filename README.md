@@ -15,7 +15,8 @@ it keeps everything in your own browser, works offline, and never needs an accou
   on each item's page lend it, take it back, sell it, or mark it lost, asking only for what that
   change needs, and the status list only offers changes that make sense.
 - **Kits**: group gear into kits, such as a wedding kit or a travel kit, and use one as a packing
-  checklist, ticking things off as they go in the bag.
+  checklist, ticking things off as they go in the bag. Share a kit as a link, and whoever opens it
+  sees a read-only copy and can add its gear to their own wishlist.
 - **Loans**: who has an item, how to reach them, and when it's due back. What's out shows on the
   dashboard, and an overdue loan needs attention. Each item keeps a history of its loans.
 - **A maintenance log** for each item: sensor cleans, firmware updates, and repairs, with what they
@@ -23,11 +24,16 @@ it keeps everything in your own browser, works offline, and never needs an accou
 - **What works with what**: a lens's page lists your cameras, and a body's page lists your lenses,
   saying whether each pair fits as it is, crops to APS-C, works through an adapter you own, needs
   an adapter, or doesn't fit.
+- **A system map** of how it all fits together: each camera with the lenses it takes, a strip of
+  the focal lengths it covers with any big gaps, what each adapter unlocks, and lenses no camera
+  you have can take.
 - **Search and filters** by category, status, and mount, kept in the address so you can bookmark a
   filtered list.
 - **A dashboard** with counts, what your gear is worth in each currency (without converting between
   them), what's on loan, and what needs attention: overdue loans, warranties running out, the same
-  serial entered twice, and a reminder when it's time for a backup.
+  serial entered twice, and a reminder when it's time for a backup. Below that, your gear in
+  numbers: bodies and lenses by mount, how long ago gear was bought, the warranties still running,
+  and how much of your gear is in kits.
 - **Money in any currency**, NZD by default, with each amount keeping its own currency. Settings can
   choose the currency new amounts start in.
 
@@ -45,6 +51,13 @@ Restore shows what a backup holds before anything changes, and nothing changes u
 It can replace everything with what's in the backup, or add the backup to what's there, such as
 to bring together gear from two devices. Adding never removes anything, and where the same record
 is in both, the copy changed most recently is kept.
+
+**Shared kit links** say what each item is (its brand, model, mount, and focal lengths) and
+nothing about whose it is: no serial numbers, and nothing about where or when it was bought, where
+it's kept, or its warranty or insurance. Prices and notes go in only if you tick them. The kit
+travels in the part of the link after the `#`, which browsers never send to a server, but links
+can end up in chat apps and their previews, so share them as you would the kit itself. Opening a
+link is checked as carefully as a backup file, and adds nothing until you choose to.
 
 Browsers can delete a site's data:
 
@@ -72,8 +85,6 @@ the storage it needs, and it says so if that happens.
 
 ## Coming later
 
-- Sharing a kit as a link, a map of how your bodies, lenses, and adapters fit together, and more
-  dashboard statistics
 - Photos, CSV export, and a printable list for insurance
 - A shoots log and spending charts
 - Optional AI features, with everything else always working without them
@@ -118,8 +129,8 @@ Before the first `pnpm e2e`, install the test browsers with
 
 ```text
 src/core/   Domain logic with no React, storage, or browser APIs: validation, lifecycle rules,
-            kits, loans, maintenance, mount compatibility, value totals, alerts, search, and the
-            backup format, its upgrades, and merging
+            kits, loans, maintenance, mount compatibility, the system map, value totals, stats,
+            alerts, search, shared kit links, and the backup format, its upgrades, and merging
 src/data/   The only code that uses Dexie: the database and its upgrades, repositories, backup,
             restore, and merge, and storage helpers
 src/ui/     React components and pages, which reach storage only through the repositories
@@ -141,10 +152,11 @@ ESLint keeps those boundaries: `src/core` can't import React, Dexie, or browser 
 - **End-to-end tests** run in Playwright against the built site, with its real base path, security
   policy, and service worker: adding gear and packing a kit with only a keyboard, lending and
   returning, logging maintenance, search, a backup restored into an empty browser and merged into
-  another, offline use, the install manifest, focus outlines, and axe accessibility checks against
-  WCAG 2.2 AA on every screen and the main dialogs in both themes. Every test fails on a console
-  error or a security policy violation. CI runs them in Chromium; locally, WebKit also runs the
-  storage and offline tests.
+  another, a kit shared into another browser's wishlist, offline use, the install manifest, focus
+  outlines, layouts that must fit on a phone, and axe accessibility checks against WCAG 2.2 AA on
+  every screen and the main dialogs in both themes. Every test fails on a console error or a
+  security policy violation. CI runs them in Chromium; locally, WebKit also runs the storage and
+  offline tests.
 
 ### Security
 
@@ -156,6 +168,10 @@ ESLint keeps those boundaries: `src/core` can't import React, Dexie, or browser 
 - Backup files are treated as untrusted: they're size-capped, every field is checked, and every
   link between records (such as a loan's item) must point to something in the file, before a
   restore or merge.
+- Shared kit links are treated the same way: size-capped, checked field by field, and held to the
+  same rules as the gear form, so a changed link can't bring in anything the app wouldn't save.
+- Charts are SVG drawn with attributes, not inline styles, so the security policy needs no
+  exceptions for them.
 
 ### Publishing
 
@@ -176,7 +192,7 @@ pnpm only installs versions that have been public for at least a day, refuses pa
 publishing trust has dropped, and runs no install scripts. Dependabot suggests updates weekly, a
 week after each release. Workflow actions are pinned to full commit SHAs.
 
-As of October 2026, the site loads 182 kB of gzipped JavaScript at first, about 242 kB across all
+As of October 2026, the site loads 183 kB of gzipped JavaScript at first, about 252 kB across all
 its pages, and 9 kB of CSS.
 
 ## Licence
