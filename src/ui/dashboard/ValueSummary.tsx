@@ -1,9 +1,10 @@
 // What the gear you have adds up to, by what you paid or what it's insured for. Each currency is
-// totalled on its own, since converting would need exchange rates.
+// totalled on its own, since converting would need exchange rates, so the bars after each category
+// compare amounts in the first currency only.
 import { useState } from 'react'
 import { CATEGORY_LABELS, type Gear } from '@/core/gear'
 import { LOCALE } from '@/core/locale'
-import { formatMoney, type CurrencyCode } from '@/core/money'
+import { formatMoney, type CurrencyCode, type Money } from '@/core/money'
 import { summariseValue, type ValueBasis } from '@/core/value'
 import {
   Table,
@@ -14,6 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/ui/components/ui/table'
+import { StatBar } from '@/ui/dashboard/StatBar'
 
 const list = new Intl.ListFormat(LOCALE, { type: 'conjunction' })
 
@@ -33,6 +35,12 @@ export function ValueSummary({ items, first }: ValueSummaryProps) {
   const summary = summariseValue(items, basis, first)
   const missing = BASES.find(([choice]) => choice === basis)?.[2] ?? ''
   const { unpriced } = summary
+  // The first currency listed, which the bars compare
+  const [main] = summary.totals
+  const shareOf = (totals: readonly Money[]) => {
+    const amount = totals.find(({ currency }) => currency === main?.currency)
+    return amount === undefined || main === undefined ? 0 : amount.amountMinor / main.amountMinor
+  }
 
   return (
     <section aria-labelledby="value-title" className="mb-8">
@@ -96,13 +104,22 @@ export function ValueSummary({ items, first }: ValueSummaryProps) {
                     {CATEGORY_LABELS[category]}
                   </th>
                   <TableCell className="text-right font-mono tabular-nums">
-                    {totals.map(formatMoney).join(', ')}
+                    <span className="inline-flex items-center gap-3">
+                      {totals.map(formatMoney).join(', ')}
+                      <StatBar share={shareOf(totals)} className="w-16 sm:w-24" />
+                    </span>
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </div>
+      )}
+
+      {main !== undefined && summary.totals.length > 1 && summary.byCategory.length > 0 && (
+        <p className="mb-4 text-sm text-muted-foreground">
+          The bars compare amounts in {main.currency}.
+        </p>
       )}
 
       {summary.wishlist.length > 0 && (
