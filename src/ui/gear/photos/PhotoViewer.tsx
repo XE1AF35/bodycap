@@ -1,21 +1,11 @@
 // One photo as a thumbnail that opens it full size in a dialog, with what can be done to it there:
 // making it the cover, or deleting it once the person confirms. Keeping these in the dialog leaves
-// one stop per photo in the gallery for keyboards, and room for the photos on a phone.
+// one stop per photo in the gallery for keyboards, and room for the photos on a phone. Deleting
+// asks in the dialog itself, with the photo still in view, rather than in a second dialog over it.
 import { Trash2 } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import type { Gear } from '@/core/gear'
 import type { Photo } from '@/core/photos'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/ui/components/ui/alert-dialog'
 import { Button } from '@/ui/components/ui/button'
 import {
   Dialog,
@@ -66,29 +56,6 @@ function FullImage({ photo, alt }: { readonly photo: Photo; readonly alt: string
   )
 }
 
-function DeletePhotoButton({ onDelete }: { readonly onDelete: () => void }) {
-  return (
-    <AlertDialog>
-      <AlertDialogTrigger render={<Button variant="destructive" />}>
-        <Trash2 aria-hidden="true" />
-        Delete
-      </AlertDialogTrigger>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Delete this photo?</AlertDialogTitle>
-          <AlertDialogDescription>It goes from Bodycap for good.</AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Keep it</AlertDialogCancel>
-          <AlertDialogAction variant="destructive" onClick={onDelete}>
-            Delete
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
-  )
-}
-
 interface PhotoViewerProps {
   readonly item: Gear
   readonly photo: Photo
@@ -103,6 +70,7 @@ export function PhotoViewer({ item, photo, number, total, onDelete }: PhotoViewe
   const { repositories } = useServices()
   const [open, setOpen] = useState(false)
   const [problem, setProblem] = useState<string>()
+  const [confirming, setConfirming] = useState(false)
   const position = `photo ${String(number)} of ${String(total)}`
 
   const change = async (save: () => Promise<void>) => {
@@ -120,6 +88,7 @@ export function PhotoViewer({ item, photo, number, total, onDelete }: PhotoViewe
       onOpenChange={(next) => {
         setOpen(next)
         setProblem(undefined)
+        setConfirming(false)
       }}
     >
       <DialogTrigger
@@ -146,27 +115,61 @@ export function PhotoViewer({ item, photo, number, total, onDelete }: PhotoViewe
             {problem}
           </p>
         )}
-        <DialogFooter>
-          {!photo.isCover && (
+        {confirming ? (
+          <div className="grid gap-3 rounded-lg border border-border p-3">
+            <p role="alert" className="font-medium">
+              Delete this photo? It goes from Bodycap for good.
+            </p>
+            <div className="flex flex-wrap justify-end gap-2">
+              <Button
+                variant="outline"
+                // The safe choice has focus, so Enter or Space keeps the photo
+                ref={(button: HTMLButtonElement | null) => {
+                  button?.focus()
+                }}
+                onClick={() => {
+                  setConfirming(false)
+                }}
+              >
+                Keep it
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  void change(async () => {
+                    await onDelete()
+                    setOpen(false)
+                  })
+                }}
+              >
+                Delete photo
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <DialogFooter>
+            {!photo.isCover && (
+              <Button
+                variant="outline"
+                onClick={() => {
+                  void change(() => repositories.photos.setCover(photo.id))
+                }}
+              >
+                Make cover
+              </Button>
+            )}
             <Button
-              variant="outline"
+              variant="destructive"
               onClick={() => {
-                void change(() => repositories.photos.setCover(photo.id))
+                setConfirming(true)
               }}
             >
-              Make cover
+              <Trash2 aria-hidden="true" />
+              Delete
             </Button>
-          )}
-          <DeletePhotoButton
-            onDelete={() => {
-              void change(async () => {
-                await onDelete()
-                setOpen(false)
-              })
-            }}
-          />
-          <DialogClose render={<Button variant="outline" />}>Close</DialogClose>
-        </DialogFooter>
+            <DialogClose render={<Button variant="outline" />}>Close</DialogClose>
+          </DialogFooter>
+        )}
       </DialogContent>
     </Dialog>
   )

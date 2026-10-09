@@ -144,8 +144,13 @@ describe('photos on an item', () => {
     await user.click(section.getByRole('button', { name: 'View photo 1 of 2' }))
     const viewer = within(await screen.findByRole('dialog', { name: 'Photo 1 of 2' }))
     await user.click(viewer.getByRole('button', { name: 'Delete' }))
-    const confirm = within(await screen.findByRole('alertdialog', { name: 'Delete this photo?' }))
-    await user.click(confirm.getByRole('button', { name: 'Delete' }))
+    expect(viewer.getByRole('alert')).toHaveTextContent(
+      'Delete this photo? It goes from Bodycap for good.',
+    )
+    // The photo stays in view while the person decides
+    expect(viewer.getByRole('img', { name: 'Canon EOS R6 Mark II, photo 1 of 2' })).toBeVisible()
+    expect(viewer.getByRole('button', { name: 'Keep it' })).toHaveFocus()
+    await user.click(viewer.getByRole('button', { name: 'Delete photo' }))
     await waitFor(() => {
       expect(screen.queryByRole('dialog')).toBeNull()
     })
@@ -160,13 +165,16 @@ describe('photos on an item', () => {
   it('keeps a photo when the person changes their mind', async () => {
     const { user, section } = await renderItem(1)
     await user.click(section.getByRole('button', { name: 'View photo 1 of 1' }))
-    const viewer = await screen.findByRole('dialog', { name: 'Photo 1 of 1' })
-    await user.click(within(viewer).getByRole('button', { name: 'Delete' }))
-    await user.click(await screen.findByRole('button', { name: 'Keep it' }))
+    const viewer = within(await screen.findByRole('dialog', { name: 'Photo 1 of 1' }))
+    await user.click(viewer.getByRole('button', { name: 'Delete' }))
+    await user.click(viewer.getByRole('button', { name: 'Keep it' }))
+    expect(viewer.queryByRole('alert')).toBeNull()
+    expect(viewer.getByRole('button', { name: 'Delete' })).toBeVisible()
+    // The page behind the viewer is hidden from screen readers until it closes
+    await user.click(viewer.getByRole('button', { name: 'Close' }))
     await waitFor(() => {
-      expect(screen.queryByRole('alertdialog')).toBeNull()
+      expect(gallery(section)).toHaveLength(1)
     })
-    expect(viewer).toBeVisible()
   })
 
   it('adds the photos it can, and says which files it could not use', async () => {
