@@ -7,6 +7,7 @@ import type { Kit, KitDetails, KitFields } from '@/core/kits'
 import type { Loan, LoanDetails } from '@/core/loans'
 import type { MaintenanceDetails, MaintenanceRecord } from '@/core/maintenance'
 import type { CurrencyCode } from '@/core/money'
+import type { NewPhoto, Photo } from '@/core/photos'
 
 /** A query that gives fresh results whenever its data changes, until unsubscribed */
 export interface Live<T> {
@@ -24,8 +25,8 @@ export interface GearRepository {
   /** Replaces an item's details. Rejects with GearNotFoundError if it's gone. */
   update(id: string, fields: GearFields): Promise<Gear>
   /**
-   * Deletes an item, with its loans and maintenance, and takes it out of every kit, all at once.
-   * Deleting one that's already gone does nothing.
+   * Deletes an item, with its loans, maintenance, and photos, and takes it out of every kit, all at
+   * once. Deleting one that's already gone does nothing.
    */
   remove(id: string): Promise<void>
 }
@@ -73,6 +74,26 @@ export interface MaintenanceRepository {
   add(gearId: string, details: MaintenanceDetails): Promise<MaintenanceRecord>
   /** Replaces a record's details, keeping its item */
   update(id: string, details: MaintenanceDetails): Promise<MaintenanceRecord>
+  remove(id: string): Promise<void>
+}
+
+export interface PhotoRepository {
+  /** An item's photos, oldest first */
+  forGear(gearId: string): Live<readonly Photo[]>
+  /** Each item's cover photo, by the item's ID, for lists. Items with no photos aren't there. */
+  covers(): Live<ReadonlyMap<string, Photo>>
+  /**
+   * Saves photos for an item, all of them or none, in the order given. The first becomes the cover
+   * if the item has none. Rejects with GearNotFoundError if the item is gone, or RuleError if they
+   * won't fit on it or one can't be kept.
+   */
+  add(gearId: string, photos: readonly NewPhoto[]): Promise<readonly Photo[]>
+  /** Makes a photo its item's cover. Rejects with RecordNotFoundError if it's gone. */
+  setCover(id: string): Promise<void>
+  /**
+   * Deletes a photo. If it was the cover, the oldest photo left takes over. Deleting one that's
+   * already gone does nothing.
+   */
   remove(id: string): Promise<void>
 }
 
@@ -126,6 +147,7 @@ export interface Repositories {
   readonly kits: KitRepository
   readonly loans: LoanRepository
   readonly maintenance: MaintenanceRepository
+  readonly photos: PhotoRepository
   readonly settings: SettingsRepository
   readonly backup: BackupStore
 }
@@ -141,10 +163,10 @@ export class GearNotFoundError extends Error {
   }
 }
 
-/** A kit, loan, or maintenance record was deleted, perhaps in another tab, before a change to it */
+/** A kit, loan, maintenance record, or photo was deleted, perhaps in another tab, before a change */
 export class RecordNotFoundError extends Error {
   override readonly name = 'RecordNotFoundError'
-  readonly kind: 'kit' | 'loan' | 'maintenance'
+  readonly kind: 'kit' | 'loan' | 'maintenance' | 'photo'
   readonly id: string
 
   constructor(kind: RecordNotFoundError['kind'], id: string) {

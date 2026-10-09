@@ -26,7 +26,7 @@ export function createBackupStore(
   db: BodycapDatabase,
   { now, appVersion, timeZone }: BackupStoreOptions,
 ): BackupStore {
-  const everything = [db.gear, db.kits, db.loans, db.maintenance, db.settings]
+  const everything = [db.gear, db.kits, db.loans, db.maintenance, db.photos, db.settings]
 
   /** Everything a backup holds, as it's stored now. Call it inside a transaction. */
   const readAll = async (): Promise<BackupData> => {
@@ -36,7 +36,7 @@ export function createBackupStore(
       kits: await db.kits.toArray(),
       loans: await db.loans.toArray(),
       maintenance: await db.maintenance.toArray(),
-      // Nothing stores photos until the database has a table for them
+      // A .json backup leaves photos out
       photos: [],
       settings: lastUsedCurrency === undefined ? {} : { lastUsedCurrency },
     }
@@ -69,6 +69,7 @@ export function createBackupStore(
           db.kits.clear(),
           db.loans.clear(),
           db.maintenance.clear(),
+          db.photos.clear(),
         ])
         await db.gear.bulkAdd(gear.map(toRecord))
         await db.kits.bulkAdd(kits)

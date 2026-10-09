@@ -79,9 +79,9 @@ describe('database', () => {
     expect(db.verno).toBe(SCHEMA_VERSION)
   })
 
-  it('has the version 2 tables and indexes, with version 1 tables as they were released', async () => {
+  it('has the version 3 tables and indexes, with older tables as they were released', async () => {
     await db.open()
-    expect(db.verno).toBe(2)
+    expect(db.verno).toBe(3)
     expect(
       db.tables.map(({ name, schema }) => ({
         name,
@@ -98,6 +98,7 @@ describe('database', () => {
       { name: 'kits', key: 'id', indexes: ['name', 'gearIds'] },
       { name: 'loans', key: 'id', indexes: ['gearId', 'dueDate', '[gearId+dateOut]'] },
       { name: 'maintenance', key: 'id', indexes: ['gearId', 'date', '[gearId+date]'] },
+      { name: 'photos', key: 'id', indexes: ['gearId'] },
     ])
   })
 })

@@ -8,6 +8,7 @@ import { createBackupStore } from './dexie-backup'
 import { createKitRepository } from './dexie-kits'
 import { createLoanRepository } from './dexie-loans'
 import { createMaintenanceRepository } from './dexie-maintenance'
+import { createPhotoRepository } from './dexie-photos'
 import { live } from './live'
 import { countChange, SETTING, toGear, toRecord, toSettings } from './records'
 import {
@@ -86,16 +87,21 @@ export function createRepositories(
 
     // Nothing may point at gear that's gone, or a backup of what's left would be refused
     remove: (id) =>
-      db.transaction('rw', [db.gear, db.kits, db.loans, db.maintenance, db.settings], async () => {
-        if ((await db.gear.get(id)) === undefined) return
-        await db.gear.delete(id)
-        await db.loans.where('gearId').equals(id).delete()
-        await db.maintenance.where('gearId').equals(id).delete()
-        const at = now().toISOString()
-        const kits = await db.kits.where('gearIds').equals(id).distinct().toArray()
-        await db.kits.bulkPut(kits.map((kit) => ({ ...removeFromKit(kit, id), updatedAt: at })))
-        await countChange(db)
-      }),
+      db.transaction(
+        'rw',
+        [db.gear, db.kits, db.loans, db.maintenance, db.photos, db.settings],
+        async () => {
+          if ((await db.gear.get(id)) === undefined) return
+          await db.gear.delete(id)
+          await db.loans.where('gearId').equals(id).delete()
+          await db.maintenance.where('gearId').equals(id).delete()
+          await db.photos.where('gearId').equals(id).delete()
+          const at = now().toISOString()
+          const kits = await db.kits.where('gearIds').equals(id).distinct().toArray()
+          await db.kits.bulkPut(kits.map((kit) => ({ ...removeFromKit(kit, id), updatedAt: at })))
+          await countChange(db)
+        },
+      ),
   }
 
   const settings: SettingsRepository = {
@@ -120,7 +126,8 @@ export function createRepositories(
   const kits = createKitRepository(db, { now, newId })
   const loans = createLoanRepository(db, { now, newId, today })
   const maintenance = createMaintenanceRepository(db, { now, newId })
+  const photos = createPhotoRepository(db, { now, newId })
   const backup = createBackupStore(db, { now, appVersion, timeZone })
 
-  return { gear, kits, loans, maintenance, settings, backup }
+  return { gear, kits, loans, maintenance, photos, settings, backup }
 }

@@ -1,15 +1,18 @@
-// Photo rules: the sizes photos and thumbnails shrink to, which chosen files are worth opening, how
-// many photos an item can have, the order they're shown in, and keeping one cover per item.
+// Photo rules: the sizes photos and thumbnails shrink to, which chosen files are worth opening, which
+// shrunk photos can be kept, how many photos an item can have, the order they're shown in, and
+// keeping one cover per item.
 import { describe, expect, it } from 'vitest'
 import {
   coverChanges,
   fitWithin,
+  isStorablePhoto,
   MAX_PHOTOS_PER_ITEM,
   photoCountProblem,
   photoFileProblem,
   photoSizes,
   sortPhotos,
   type CoverPhoto,
+  type PhotoFields,
   type PhotoFile,
   type PixelSize,
 } from '@/core/photos'
@@ -89,6 +92,38 @@ describe('photoFileProblem', () => {
     ],
   ])('turns down %s', (_name, fields, message) => {
     expect(photoFileProblem(file(fields))).toBe(message)
+  })
+})
+
+describe('isStorablePhoto', () => {
+  type Shrunk = Pick<PhotoFields, 'width' | 'height' | 'bytes' | 'thumbnailBytes'>
+  const shrunk = (fields: Partial<Shrunk>): Shrunk => ({
+    width: 1600,
+    height: 1067,
+    bytes: 250_000,
+    thumbnailBytes: 12_000,
+    ...fields,
+  })
+
+  it.each<[string, Partial<Shrunk>]>([
+    ['a photo shrunk to fit', {}],
+    ['a square photo on the edge', { width: 1600, height: 1600 }],
+    ['a tiny photo', { width: 1, height: 1, bytes: 1, thumbnailBytes: 1 }],
+    ['the biggest files a backup takes', { bytes: 10_000_000, thumbnailBytes: 1_000_000 }],
+  ])('keeps %s', (_name, fields) => {
+    expect(isStorablePhoto(shrunk(fields))).toBe(true)
+  })
+
+  it.each<[string, Partial<Shrunk>]>([
+    ['a side of 0', { width: 0 }],
+    ['a side past the edge', { height: 1601 }],
+    ['a fraction of a pixel', { width: 1066.5 }],
+    ['an empty image', { bytes: 0 }],
+    ['an image too big for a backup', { bytes: 10_000_001 }],
+    ['an empty thumbnail', { thumbnailBytes: 0 }],
+    ['a thumbnail too big for a backup', { thumbnailBytes: 1_000_001 }],
+  ])('turns down %s, which a backup would refuse', (_name, fields) => {
+    expect(isStorablePhoto(shrunk(fields))).toBe(false)
   })
 })
 

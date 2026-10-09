@@ -57,6 +57,37 @@ export interface PhotoInfo extends PhotoFields {
   readonly updatedAt: string
 }
 
+/** A stored photo: its details, the image, and its thumbnail */
+export interface Photo extends PhotoInfo {
+  readonly image: Blob
+  readonly thumbnail: Blob
+}
+
+/** A photo shrunk in the browser and ready to save, before it has an ID */
+export type NewPhoto = Pick<Photo, 'image' | 'thumbnail' | 'mimeType' | 'width' | 'height'>
+
+const isSide = (pixels: number) => Number.isInteger(pixels) && pixels >= 1 && pixels <= PHOTO_EDGE
+
+/**
+ * Whether a shrunk photo has the shape and sizes a backup accepts, so nothing saved can make a
+ * backup that won't restore.
+ */
+export function isStorablePhoto({
+  width,
+  height,
+  bytes,
+  thumbnailBytes,
+}: Pick<PhotoFields, 'width' | 'height' | 'bytes' | 'thumbnailBytes'>): boolean {
+  return (
+    isSide(width) &&
+    isSide(height) &&
+    bytes >= 1 &&
+    bytes <= MAX_STORED_PHOTO_BYTES &&
+    thumbnailBytes >= 1 &&
+    thumbnailBytes <= MAX_THUMBNAIL_BYTES
+  )
+}
+
 /**
  * The size an image shrinks to so its longest side is at most `edge`, keeping its shape. A smaller
  * image keeps its size, since enlarging only adds bytes. Sides are whole pixels, and at least 1.
