@@ -14,7 +14,7 @@ import type { BodycapDatabase } from './db'
 import { countChange, SETTING, toGear, toRecord, toSettings } from './records'
 import { RuleError, type BackupStore } from './repositories'
 
-const LISTS: readonly BackupList[] = ['gear', 'kits', 'loans', 'maintenance']
+const LISTS: readonly BackupList[] = ['gear', 'kits', 'loans', 'maintenance', 'photos']
 
 export interface BackupStoreOptions {
   readonly now: () => Date
@@ -36,6 +36,8 @@ export function createBackupStore(
       kits: await db.kits.toArray(),
       loans: await db.loans.toArray(),
       maintenance: await db.maintenance.toArray(),
+      // Nothing stores photos until the database has a table for them
+      photos: [],
       settings: lastUsedCurrency === undefined ? {} : { lastUsedCurrency },
     }
   }

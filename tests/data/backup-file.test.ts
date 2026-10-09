@@ -4,7 +4,7 @@ import { createBackup, MAX_BACKUP_BYTES } from '@/core/backup/format'
 import { readBackupFile } from '@/data/backup-file'
 
 const backup = createBackup(
-  { gear: [], kits: [], loans: [], maintenance: [], settings: {} },
+  { gear: [], kits: [], loans: [], maintenance: [], photos: [], settings: {} },
   { schemaVersion: 1, appVersion: '0.1.0', exportedAt: '2026-10-05T03:00:00.000Z' },
 )
 

@@ -1,5 +1,6 @@
 // Merging a backup into what's here: whichever copy of a record changed last wins, either way,
-// nothing here is lost, and an item out on two different loans is refused rather than guessed at.
+// nothing here is lost, an item out on two different loans is refused rather than guessed at, and
+// each item ends up with one cover photo.
 import { describe, expect, it } from 'vitest'
 import type { BackupData, BackupList } from '@/core/backup/format'
 import { planMerge } from '@/core/backup/merge'
@@ -7,6 +8,7 @@ import type { Gear } from '@/core/gear'
 import type { Kit } from '@/core/kits'
 import type { Loan } from '@/core/loans'
 import type { MaintenanceRecord } from '@/core/maintenance'
+import type { PhotoInfo } from '@/core/photos'
 
 const EARLY = '2026-10-01T00:00:00.000Z'
 const LATE = '2026-10-05T00:00:00.000Z'
@@ -50,16 +52,31 @@ const record = (id: string, updatedAt = EARLY, type: MaintenanceRecord['type'] =
   date: '2026-09-01',
 })
 
+const photo = (id: string, fields: Partial<PhotoInfo> = {}): PhotoInfo => ({
+  id,
+  createdAt: EARLY,
+  updatedAt: EARLY,
+  gearId: 'g1',
+  isCover: false,
+  mimeType: 'image/webp',
+  width: 1600,
+  height: 1200,
+  bytes: 250_000,
+  thumbnailBytes: 12_000,
+  ...fields,
+})
+
 const data = (lists: Partial<BackupData> = {}): BackupData => ({
   gear: [gear('g1')],
   kits: [],
   loans: [],
   maintenance: [],
+  photos: [],
   settings: {},
   ...lists,
 })
 
-const NONE: Record<BackupList, number> = { gear: 0, kits: 0, loans: 0, maintenance: 0 }
+const NONE: Record<BackupList, number> = { gear: 0, kits: 0, loans: 0, maintenance: 0, photos: 0 }
 
 describe('planMerge', () => {
   it('adds what only the backup has, and leaves what only this browser has alone', () => {
@@ -68,9 +85,10 @@ describe('planMerge', () => {
     expect(planMerge(here, incoming)).toEqual({
       ok: true,
       value: {
-        writes: { gear: [gear('g3')], kits: [], loans: [], maintenance: [] },
+        writes: { gear: [gear('g3')], kits: [], loans: [], maintenance: [], photos: [] },
         added: { ...NONE, gear: 1 },
         updated: NONE,
+        coverChanges: [],
         settings: {},
       },
     })
@@ -120,6 +138,11 @@ describe('planMerge', () => {
       { maintenance: [record('m1'), record('m2')] },
       { maintenance: [record('m1', LATE, 'sensor-clean'), record('m3')] },
     ],
+    [
+      'photos',
+      { photos: [photo('p1', { isCover: true }), photo('p2')] },
+      { photos: [photo('p1', { isCover: true, updatedAt: LATE }), photo('p3')] },
+    ],
   ])('merges %s the same way', (list, hereLists, backupLists) => {
     const plan = planMerge(data(hereLists), data(backupLists))
     expect(plan.ok).toBe(true)
@@ -147,6 +170,52 @@ describe('planMerge', () => {
   ])('%s', (_name, here, incoming, expected) => {
     const plan = planMerge(data({ settings: here }), data({ settings: incoming }))
     expect(plan).toMatchObject({ ok: true, value: { settings: expected } })
+  })
+
+  describe('cover photos', () => {
+    const MINUTE_LATER = '2026-10-01T00:01:00.000Z'
+
+    it("takes an item's photos from the backup as they are when there are none here", () => {
+      const incoming = [photo('b1', { isCover: true }), photo('b2')]
+      expect(planMerge(data(), data({ photos: incoming }))).toMatchObject({
+        ok: true,
+        value: { writes: { photos: incoming }, coverChanges: [] },
+      })
+    })
+
+    it("keeps the cover here when it's older, adding the backup's cover as a plain photo", () => {
+      const here = [photo('h1', { isCover: true })]
+      const incoming = [photo('b1', { isCover: true, createdAt: MINUTE_LATER })]
+      expect(planMerge(data({ photos: here }), data({ photos: incoming }))).toMatchObject({
+        ok: true,
+        value: {
+          writes: { photos: [{ ...incoming[0], isCover: false }] },
+          added: { ...NONE, photos: 1 },
+          coverChanges: [],
+        },
+      })
+    })
+
+    it("takes the backup's cover when it's older, changing the one here", () => {
+      const here = [photo('h1', { isCover: true, createdAt: MINUTE_LATER })]
+      const incoming = [photo('b1', { isCover: true })]
+      expect(planMerge(data({ photos: here }), data({ photos: incoming }))).toMatchObject({
+        ok: true,
+        value: {
+          writes: { photos: incoming },
+          coverChanges: [{ id: 'h1', isCover: false }],
+        },
+      })
+    })
+
+    it('leaves covers alone when a newer copy of the cover itself comes in', () => {
+      const here = [photo('h1', { isCover: true }), photo('h2', { createdAt: MINUTE_LATER })]
+      const incoming = [photo('h1', { isCover: true, updatedAt: LATE })]
+      expect(planMerge(data({ photos: here }), data({ photos: incoming }))).toMatchObject({
+        ok: true,
+        value: { writes: { photos: incoming }, coverChanges: [] },
+      })
+    })
   })
 
   it('refuses an item out on a different loan in each copy, naming it', () => {

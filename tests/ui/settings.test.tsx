@@ -40,7 +40,7 @@ const backedUpGear: Gear[] = [
 ]
 
 const backup = createBackup(
-  { gear: backedUpGear, kits: [], loans: [], maintenance: [], settings: {} },
+  { gear: backedUpGear, kits: [], loans: [], maintenance: [], photos: [], settings: {} },
   { schemaVersion: 1, appVersion: '0.1.0', exportedAt: '2026-10-05T03:00:00.000Z' },
 )
 

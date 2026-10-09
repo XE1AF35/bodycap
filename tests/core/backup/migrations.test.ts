@@ -65,3 +65,31 @@ describe('format 1 to 2', () => {
     expect(BACKUP_MIGRATIONS[1]?.(file)).toEqual(file)
   })
 })
+
+describe('format 2 to 3', () => {
+  const formatTwo = {
+    app: 'bodycap',
+    formatVersion: 2,
+    schemaVersion: 2,
+    appVersion: '0.2.0',
+    exportedAt: '2026-10-08T03:00:00.000Z',
+    counts: { gear: 1, kits: 0, loans: 0, maintenance: 0 },
+    data: { gear: [{ id: 'kept as it is' }], kits: [], loans: [], maintenance: [], settings: {} },
+  }
+
+  it('adds photos, empty and counted as none', () => {
+    expect(migrateBackup(formatTwo, 2, 3)).toEqual({
+      ...formatTwo,
+      formatVersion: 3,
+      counts: { ...formatTwo.counts, photos: 0 },
+      data: { ...formatTwo.data, photos: [] },
+    })
+  })
+
+  it.each([
+    ['no data', { ...formatTwo, data: undefined }],
+    ['counts that are a list', { ...formatTwo, counts: [] }],
+  ])('leaves a file with %s for the checks to refuse', (_name, file) => {
+    expect(BACKUP_MIGRATIONS[2]?.(file)).toEqual(file)
+  })
+})

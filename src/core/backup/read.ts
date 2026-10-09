@@ -1,6 +1,6 @@
 // Reading a backup file someone chose. Nothing in it is trusted: it's parsed, its format is checked
 // and upgraded, every field is validated, each record goes through the same rules as its form, and
-// kits, loans, and maintenance may only point at gear in the same file.
+// kits, loans, maintenance, and photos may only point at gear in the same file.
 import { z } from 'zod'
 import { isOneOf } from '../choice'
 import { addDays, type IsoDate } from '../dates'
@@ -9,6 +9,7 @@ import { toKitInput, validateKit, type Kit } from '../kits'
 import { returnLoan, toLoanInput, validateLoan, type Loan } from '../loans'
 import { toMaintenanceInput, validateMaintenance, type MaintenanceRecord } from '../maintenance'
 import { DEFAULT_CURRENCY } from '../money'
+import type { PhotoInfo } from '../photos'
 import { err, ok, type Result } from '../result'
 import { BACKUP_APP, FORMAT_VERSION, type Backup, type BackupList } from './format'
 import { migrateBackup } from './migrations'
@@ -20,7 +21,13 @@ const DAMAGED = "This backup is damaged, so it can't be restored."
 const INCOMPLETE = "This backup is incomplete, so it can't be restored."
 
 // Gear comes first, since the other lists are checked against it
-const LISTS = ['gear', 'kits', 'loans', 'maintenance'] as const satisfies readonly BackupList[]
+const LISTS = [
+  'gear',
+  'kits',
+  'loans',
+  'maintenance',
+  'photos',
+] as const satisfies readonly BackupList[]
 
 /** How messages name one record in each list */
 const RECORD_NAMES: Record<BackupList, string> = {
@@ -28,6 +35,7 @@ const RECORD_NAMES: Record<BackupList, string> = {
   kits: 'kit',
   loans: 'loan',
   maintenance: 'maintenance record',
+  photos: 'photo',
 }
 
 // Just enough to tell a Bodycap backup from any other file, before knowing which format it's in
@@ -175,6 +183,13 @@ function checkMaintenance(
   return ok({ id, createdAt, updatedAt, gearId, ...details.value })
 }
 
+function checkPhoto(
+  photo: PhotoInfo,
+  gearIds: ReadonlySet<string>,
+): Result<PhotoInfo, RecordProblem> {
+  return gearIds.has(photo.gearId) ? ok(photo) : err({ kind: 'missing-gear' })
+}
+
 /** The checks that need the whole file: counts, repeated IDs, each record's rules, and references */
 function checkContents(file: z.output<typeof backupSchema>): Result<Backup> {
   const { counts, data } = file
@@ -201,6 +216,17 @@ function checkContents(file: z.output<typeof backupSchema>): Result<Backup> {
     checkMaintenance(record, gearIds, latest),
   )
   if (!maintenance.ok) return maintenance
+  const photos = checkEach('photos', data.photos, (photo) => checkPhoto(photo, gearIds))
+  if (!photos.ok) return photos
+
+  // The app keeps exactly one cover for each item with photos, so anything else is damage. The
+  // item's first photo in the file is named.
+  const covers = new Map<string, number>()
+  for (const { gearId, isCover } of photos.value) {
+    covers.set(gearId, (covers.get(gearId) ?? 0) + (isCover ? 1 : 0))
+  }
+  const uncovered = photos.value.findIndex(({ gearId }) => covers.get(gearId) !== 1)
+  if (uncovered !== -1) return err(describeProblem('photos', uncovered, { kind: 'damaged' }))
 
   return ok({
     ...file,
@@ -210,6 +236,7 @@ function checkContents(file: z.output<typeof backupSchema>): Result<Backup> {
       kits: kits.value,
       loans: loans.value,
       maintenance: maintenance.value,
+      photos: photos.value,
     },
   })
 }

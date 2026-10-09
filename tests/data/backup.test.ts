@@ -114,16 +114,17 @@ describe('backup.create', () => {
     expect(file.name).toBe('bodycap-backup-2026-10-05.json')
     expect(backup).toEqual({
       app: 'bodycap',
-      formatVersion: 2,
+      formatVersion: 3,
       schemaVersion: 2,
       appVersion: '0.1.0',
       exportedAt: EXPORTED_AT,
-      counts: { gear: 3, kits: 1, loans: 1, maintenance: 1 },
+      counts: { gear: 3, kits: 1, loans: 1, maintenance: 1, photos: 0 },
       data: {
         gear,
         kits: await source.db.kits.toArray(),
         loans: await source.db.loans.toArray(),
         maintenance: await source.db.maintenance.toArray(),
+        photos: [],
         settings: { lastUsedCurrency: 'AUD' },
       },
     })

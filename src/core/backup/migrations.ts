@@ -25,9 +25,17 @@ function addKitsLoansAndMaintenance(file: Readonly<Record<string, unknown>>) {
   }
 }
 
+/** Format 3 adds photos, which a format 2 file has none of */
+function addPhotos(file: Readonly<Record<string, unknown>>) {
+  const { data, counts } = file
+  if (!isObject(data) || !isObject(counts)) return { ...file }
+  return { ...file, counts: { ...counts, photos: 0 }, data: { ...data, photos: [] } }
+}
+
 /** Step n upgrades format n to n + 1 */
 export const BACKUP_MIGRATIONS: Migrations = {
   1: addKitsLoansAndMaintenance,
+  2: addPhotos,
 }
 
 /** Upgrades a file in format `from` to format `to`, setting its formatVersion as it goes. */

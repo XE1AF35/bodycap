@@ -23,9 +23,38 @@ export const PHOTO_TYPES = ['image/webp', 'image/jpeg'] as const
 
 export type PhotoType = (typeof PHOTO_TYPES)[number]
 
+/**
+ * No photo or thumbnail shrunk to its edge comes near these sizes, so anything bigger in a backup
+ * has been tampered with. They also bound what a .zip backup can make the app read.
+ */
+export const MAX_STORED_PHOTO_BYTES = 10_000_000
+export const MAX_THUMBNAIL_BYTES = 1_000_000
+
 export interface PixelSize {
   readonly width: number
   readonly height: number
+}
+
+/** A photo's details, apart from the image and thumbnail themselves */
+export interface PhotoFields {
+  readonly gearId: string
+  /** Whether it's the photo that stands for its item in lists */
+  readonly isCover: boolean
+  /** What the image and its thumbnail are stored as */
+  readonly mimeType: PhotoType
+  /** The image's size in pixels, within PHOTO_EDGE. Its thumbnail is the same shape. */
+  readonly width: number
+  readonly height: number
+  /** The image's and thumbnail's sizes in bytes, so a restore can tell each arrived whole */
+  readonly bytes: number
+  readonly thumbnailBytes: number
+}
+
+export interface PhotoInfo extends PhotoFields {
+  readonly id: string
+  /** ISO 8601 UTC timestamps */
+  readonly createdAt: string
+  readonly updatedAt: string
 }
 
 /**

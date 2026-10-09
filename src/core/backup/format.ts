@@ -6,10 +6,14 @@ import type { Kit } from '../kits'
 import type { Loan } from '../loans'
 import type { MaintenanceRecord } from '../maintenance'
 import type { CurrencyCode } from '../money'
+import type { PhotoInfo } from '../photos'
 
 export const BACKUP_APP = 'bodycap'
-/** 1: gear and settings (M1). 2: adds lens optics, kits, loans, and maintenance (M2). */
-export const FORMAT_VERSION = 2
+/**
+ * 1: gear and settings (M1). 2: adds lens optics, kits, loans, and maintenance (M2). 3: adds photos
+ * (M3), whose details are in the data and whose images only a .zip backup holds.
+ */
+export const FORMAT_VERSION = 3
 
 /** Larger files are refused before they're read. No real backup comes close. */
 export const MAX_BACKUP_BYTES = 50 * 1024 * 1024
@@ -24,6 +28,8 @@ export interface BackupData {
   readonly kits: readonly Kit[]
   readonly loans: readonly Loan[]
   readonly maintenance: readonly MaintenanceRecord[]
+  /** Empty in a .json backup, which leaves photos out */
+  readonly photos: readonly PhotoInfo[]
   readonly settings: BackupSettings
 }
 
@@ -56,12 +62,13 @@ export function createBackup(data: BackupData, info: BackupInfo): Backup {
       kits: data.kits.length,
       loans: data.loans.length,
       maintenance: data.maintenance.length,
+      photos: data.photos.length,
     },
     data,
   }
 }
 
-/** Such as bodycap-backup-2026-10-05.json */
-export function backupFileName(exportedOn: IsoDate): string {
-  return `bodycap-backup-${exportedOn}.json`
+/** Such as bodycap-backup-2026-10-05.json, or .zip for a backup with photos */
+export function backupFileName(exportedOn: IsoDate, extension: 'json' | 'zip' = 'json'): string {
+  return `bodycap-backup-${exportedOn}.${extension}`
 }

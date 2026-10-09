@@ -9,6 +9,13 @@ import type { Loan } from '../loans'
 import { MAINTENANCE_TYPES, type MaintenanceRecord } from '../maintenance'
 import { isCurrencyCode } from '../money'
 import { MOUNTS, SENSOR_FORMATS } from '../mounts'
+import {
+  MAX_STORED_PHOTO_BYTES,
+  MAX_THUMBNAIL_BYTES,
+  PHOTO_EDGE,
+  PHOTO_TYPES,
+  type PhotoInfo,
+} from '../photos'
 import { BACKUP_APP, FORMAT_VERSION, type Backup, type BackupList } from './format'
 
 // Far above the form's limits, which validateGear applies afterwards. These only stop absurd text
@@ -91,6 +98,20 @@ const maintenanceShape = {
   notes: longText.exactOptional(),
 } satisfies Record<keyof MaintenanceRecord, z.ZodType>
 
+// The app stores photos shrunk to fit its edge, and never an empty file
+const pixels = z.int().min(1).max(PHOTO_EDGE)
+
+const photoShape = {
+  ...recordShape,
+  gearId: z.uuid(),
+  isCover: z.boolean(),
+  mimeType: z.enum(PHOTO_TYPES),
+  width: pixels,
+  height: pixels,
+  bytes: z.int().min(1).max(MAX_STORED_PHOTO_BYTES),
+  thumbnailBytes: z.int().min(1).max(MAX_THUMBNAIL_BYTES),
+} satisfies Record<keyof PhotoInfo, z.ZodType>
+
 const count = z.int().min(0)
 
 export const backupSchema = z.object({
@@ -104,12 +125,14 @@ export const backupSchema = z.object({
     kits: count,
     loans: count,
     maintenance: count,
+    photos: count,
   } satisfies Record<BackupList, z.ZodType>),
   data: z.object({
     gear: z.array(z.object(gearShape)),
     kits: z.array(z.object(kitShape)),
     loans: z.array(z.object(loanShape)),
     maintenance: z.array(z.object(maintenanceShape)),
+    photos: z.array(z.object(photoShape)),
     settings: z.object({ lastUsedCurrency: currency.exactOptional() }),
   }),
 }) satisfies z.ZodType<Backup>

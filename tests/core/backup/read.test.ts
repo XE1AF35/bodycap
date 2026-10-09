@@ -1,12 +1,14 @@
-// Reading backups: the exact round trip, upgrading format 1 files, refusing bad or newer files, and
-// checking the contents, including that kits, loans, and maintenance only point at gear in the file.
+// Reading backups: the exact round trip, upgrading older formats, refusing bad or newer files, and
+// checking the contents, including that kits, loans, maintenance, and photos only point at gear in
+// the file, and that each item with photos has one cover.
 import { describe, expect, it } from 'vitest'
-import { createBackup } from '@/core/backup/format'
+import { createBackup, FORMAT_VERSION } from '@/core/backup/format'
 import { readBackup } from '@/core/backup/read'
 import type { Gear } from '@/core/gear'
 import type { Kit } from '@/core/kits'
 import type { Loan } from '@/core/loans'
 import type { MaintenanceRecord } from '@/core/maintenance'
+import type { PhotoInfo } from '@/core/photos'
 
 const lens: Gear = {
   id: '6f1c7a52-3b8e-4f0a-9d2c-5e4b1a7c8d90',
@@ -111,6 +113,34 @@ const firmware: MaintenanceRecord = {
   firmwareVersion: '1.10',
 }
 
+const cover: PhotoInfo = {
+  id: '6f7a8b9c-0d1e-4f2a-9b4c-5d6e7f8a9b0c',
+  createdAt: '2026-03-02T01:05:00.000Z',
+  updatedAt: '2026-03-02T01:05:00.000Z',
+  gearId: lens.id,
+  isCover: true,
+  mimeType: 'image/webp',
+  width: 1600,
+  height: 1067,
+  bytes: 284_113,
+  thumbnailBytes: 14_020,
+}
+
+const sidePhoto: PhotoInfo = {
+  ...cover,
+  id: '7a8b9c0d-1e2f-4a3b-8c5d-6e7f8a9b0c1d',
+  isCover: false,
+  mimeType: 'image/jpeg',
+  width: 1067,
+  height: 1600,
+}
+
+const adapterPhoto: PhotoInfo = {
+  ...cover,
+  id: '8b9c0d1e-2f3a-4b4c-9d6e-7f8a9b0c1d2e',
+  gearId: adapter.id,
+}
+
 const INFO = { schemaVersion: 1, appVersion: '0.1.0', exportedAt: '2026-10-05T03:00:00.000Z' }
 
 const backup = createBackup(
@@ -119,12 +149,13 @@ const backup = createBackup(
     kits: [kit],
     loans: [loan, returnedLoan],
     maintenance: [clean, firmware],
+    photos: [cover, sidePhoto, adapterPhoto],
     settings: { lastUsedCurrency: 'AUD' },
   },
   INFO,
 )
 
-type List = 'gear' | 'kits' | 'loans' | 'maintenance'
+type List = 'gear' | 'kits' | 'loans' | 'maintenance' | 'photos'
 
 /** The backup as text, with top-level fields replaced. Undefined leaves a field out. */
 const withFile = (overrides: Record<string, unknown>) => JSON.stringify({ ...backup, ...overrides })
@@ -139,8 +170,8 @@ const withList = (list: List, records: readonly unknown[]) =>
 /** A backup holding only this gear, and nothing that points at it */
 const onlyGear = (gear: readonly unknown[]) =>
   withFile({
-    counts: { gear: gear.length, kits: 0, loans: 0, maintenance: 0 },
-    data: { gear, kits: [], loans: [], maintenance: [], settings: {} },
+    counts: { gear: gear.length, kits: 0, loans: 0, maintenance: 0, photos: 0 },
+    data: { gear, kits: [], loans: [], maintenance: [], photos: [], settings: {} },
   })
 
 /** A backup holding only the lens, with some of its fields replaced */
@@ -160,13 +191,13 @@ describe('readBackup', () => {
 
   it('reads a backup with nothing in it', () => {
     const empty = createBackup(
-      { gear: [], kits: [], loans: [], maintenance: [], settings: {} },
+      { gear: [], kits: [], loans: [], maintenance: [], photos: [], settings: {} },
       INFO,
     )
     expect(readBackup(JSON.stringify(empty))).toEqual({ ok: true, value: empty })
   })
 
-  it('upgrades a format 1 backup exactly, with no kits, loans, or maintenance', () => {
+  it('upgrades a format 1 backup exactly, with no kits, loans, maintenance, or photos', () => {
     const formatOne = {
       app: 'bodycap',
       formatVersion: 1,
@@ -178,9 +209,28 @@ describe('readBackup', () => {
       ok: true,
       value: {
         ...formatOne,
-        formatVersion: 2,
-        counts: { gear: 2, kits: 0, loans: 0, maintenance: 0 },
-        data: { ...formatOne.data, kits: [], loans: [], maintenance: [] },
+        formatVersion: FORMAT_VERSION,
+        counts: { gear: 2, kits: 0, loans: 0, maintenance: 0, photos: 0 },
+        data: { ...formatOne.data, kits: [], loans: [], maintenance: [], photos: [] },
+      },
+    })
+  })
+
+  it('upgrades a format 2 backup exactly, with no photos', () => {
+    // Undefined leaves the photos out of the text, as format 2 had none
+    const formatTwo = {
+      ...backup,
+      formatVersion: 2,
+      counts: { ...backup.counts, photos: undefined },
+      data: { ...backup.data, photos: undefined },
+    }
+    expect(JSON.stringify(formatTwo)).not.toContain('photos')
+    expect(readBackup(JSON.stringify(formatTwo))).toEqual({
+      ok: true,
+      value: {
+        ...backup,
+        counts: { ...backup.counts, photos: 0 },
+        data: { ...backup.data, photos: [] },
       },
     })
   })
@@ -197,7 +247,7 @@ describe('readBackup', () => {
   })
 
   it('refuses a backup made by a newer version of Bodycap', () => {
-    expect(readBackup(withFile({ formatVersion: 3 }))).toEqual(
+    expect(readBackup(withFile({ formatVersion: FORMAT_VERSION + 1 }))).toEqual(
       refused(
         'This backup was made by a newer version of Bodycap. Update Bodycap, then try again.',
       ),
@@ -215,6 +265,7 @@ describe('readBackup', () => {
     ['no counts', { counts: undefined }],
     ['no data', { data: undefined }],
     ['no kits', { data: { ...backup.data, kits: undefined } }],
+    ['no photos', { data: { ...backup.data, photos: undefined } }],
     ['gear that is not a list', { data: { ...backup.data, gear: {} } }],
     [
       'an unknown currency in its settings',
@@ -266,6 +317,16 @@ describe('readBackup', () => {
       { ...clean, cost: { amountMinor: 89.5, currency: 'NZD' } },
       'Maintenance record 1',
     ],
+    ['photos', { ...cover, gearId: 'the lens' }, 'Photo 1'],
+    ['photos', { ...cover, isCover: 'yes' }, 'Photo 1'],
+    ['photos', { ...cover, mimeType: 'image/png' }, 'Photo 1'],
+    ['photos', { ...cover, width: 0 }, 'Photo 1'],
+    ['photos', { ...cover, height: 1066.5 }, 'Photo 1'],
+    ['photos', { ...cover, width: 1601 }, 'Photo 1'],
+    ['photos', { ...cover, bytes: 0 }, 'Photo 1'],
+    ['photos', { ...cover, bytes: 10_000_001 }, 'Photo 1'],
+    ['photos', { ...cover, thumbnailBytes: 1_000_001 }, 'Photo 1'],
+    ['photos', { ...cover, createdAt: 'yesterday' }, 'Photo 1'],
   ])('names the damaged record in %s', (list, record, name) => {
     expect(readBackup(withList(list, [record]))).toEqual(
       refused(`${name} in this backup is damaged, so it can't be restored.`),
@@ -283,6 +344,7 @@ describe('readBackup', () => {
     ['kits', { kits: 2 }],
     ['loans', { loans: 1 }],
     ['maintenance', { maintenance: 0 }],
+    ['photos', { photos: 2 }],
   ])('refuses a backup whose count of %s does not match what is in it', (_name, counts) => {
     expect(readBackup(withFile({ counts: { ...backup.counts, ...counts } }))).toEqual(INCOMPLETE)
   })
@@ -292,6 +354,7 @@ describe('readBackup', () => {
     ['kits', kit, 'kit'],
     ['loans', returnedLoan, 'loan'],
     ['maintenance', clean, 'maintenance record'],
+    ['photos', cover, 'photo'],
   ])('refuses a backup with the same record twice in %s', (list, record, noun) => {
     expect(readBackup(withList(list, [record, record]))).toEqual(
       refused(`This backup has the same ${noun} twice, so it can't be restored.`),
@@ -367,6 +430,12 @@ describe('readBackup', () => {
       { ...clean, gearId: MISSING },
       "Maintenance record 1 in this backup is for gear that isn't in the backup, so it can't be restored.",
     ],
+    [
+      'a photo of gear that is not in the backup',
+      'photos',
+      { ...cover, gearId: MISSING },
+      "Photo 1 in this backup is for gear that isn't in the backup, so it can't be restored.",
+    ],
   ])('refuses %s', (_name, list, record, message) => {
     expect(readBackup(withList(list, [record]))).toEqual(refused(message))
   })
@@ -384,6 +453,15 @@ describe('readBackup', () => {
   ])('refuses a kit that %s as damaged', (_name, record) => {
     expect(readBackup(withList('kits', [record]))).toEqual(
       refused("Kit 1 in this backup is damaged, so it can't be restored."),
+    )
+  })
+
+  it.each<[string, PhotoInfo[], string]>([
+    ['an item with two covers', [sidePhoto, { ...cover, id: MISSING }, cover], 'Photo 1'],
+    ['an item with photos but no cover', [adapterPhoto, sidePhoto], 'Photo 2'],
+  ])('refuses %s as damaged, naming its first photo', (_name, photos, name) => {
+    expect(readBackup(withList('photos', photos))).toEqual(
+      refused(`${name} in this backup is damaged, so it can't be restored.`),
     )
   })
 

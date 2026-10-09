@@ -27,7 +27,7 @@ async function here() {
 /** A backup holding these lists, and nothing else */
 const backupOf = (lists: Partial<Backup['data']>): Backup =>
   createBackup(
-    { gear: [], kits: [], loans: [], maintenance: [], settings: {}, ...lists },
+    { gear: [], kits: [], loans: [], maintenance: [], photos: [], settings: {}, ...lists },
     { schemaVersion: 2, appVersion: '0.2.0', exportedAt: EXPORTED_AT },
   )
 
@@ -58,8 +58,8 @@ describe('backup.merge', () => {
     )
 
     expect(summary).toEqual({
-      added: { gear: 1, kits: 0, loans: 0, maintenance: 1 },
-      updated: { gear: 1, kits: 0, loans: 0, maintenance: 0 },
+      added: { gear: 1, kits: 0, loans: 0, maintenance: 1, photos: 0 },
+      updated: { gear: 1, kits: 0, loans: 0, maintenance: 0, photos: 0 },
     })
     expect(await current(repos.gear.get(zoom.id))).toEqual(renamedLater)
     expect(await current(repos.gear.get(camera.id))).toEqual(camera)
