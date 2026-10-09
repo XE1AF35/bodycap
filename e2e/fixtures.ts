@@ -310,3 +310,98 @@ export async function openShareDialog(page: Page): Promise<Locator> {
   await expect(dialog).toBeVisible()
   return dialog
 }
+
+/** A file for setInputFiles, made in the test rather than kept in the repo */
+export interface TestFile {
+  readonly name: string
+  readonly mimeType: string
+  readonly buffer: Buffer
+}
+
+/**
+ * A 2400 by 1600 JPEG made by the browser's own encoder, with a gradient so it isn't a flat colour.
+ * It has no EXIF, as a canvas never writes any.
+ */
+export async function photoFile(page: Page, name = 'IMG_0001.JPG'): Promise<TestFile> {
+  const base64 = await page.evaluate(async () => {
+    const canvas = document.createElement('canvas')
+    canvas.width = 2400
+    canvas.height = 1600
+    const context = canvas.getContext('2d')
+    if (context === null) throw new Error('No 2D canvas')
+    const gradient = context.createLinearGradient(0, 0, 2400, 1600)
+    gradient.addColorStop(0, '#2b3a55')
+    gradient.addColorStop(1, '#c84b31')
+    context.fillStyle = gradient
+    context.fillRect(0, 0, 2400, 1600)
+    const blob = await new Promise<Blob | null>((resolve) => {
+      canvas.toBlob(resolve, 'image/jpeg', 0.9)
+    })
+    if (blob === null) throw new Error('The canvas would not write a JPEG')
+    const bytes = new Uint8Array(await blob.arrayBuffer())
+    // A character at a time, since spreading a large array into one call overflows the stack
+    let binary = ''
+    for (const byte of bytes) binary += String.fromCharCode(byte)
+    return btoa(binary)
+  })
+  return { name, mimeType: 'image/jpeg', buffer: Buffer.from(base64, 'base64') }
+}
+
+/**
+ * An EXIF block, as a phone writes one, holding only a GPS latitude of 41 degrees 17 minutes south,
+ * which is Wellington. Little-endian TIFF: the first directory points at the GPS one, which has
+ * the latitude's hemisphere and its three rational numbers.
+ */
+function exifWithLocation(): Buffer {
+  const tiff = Buffer.alloc(80)
+  tiff.write('II', 0, 'latin1')
+  tiff.writeUInt16LE(42, 2)
+  tiff.writeUInt32LE(8, 4)
+  // The first directory: one entry, pointing at the GPS directory at 26
+  tiff.writeUInt16LE(1, 8)
+  tiff.writeUInt16LE(0x8825, 10)
+  tiff.writeUInt16LE(4, 12)
+  tiff.writeUInt32LE(1, 14)
+  tiff.writeUInt32LE(26, 18)
+  tiff.writeUInt32LE(0, 22)
+  // The GPS directory: the hemisphere, then the latitude's numbers at 56
+  tiff.writeUInt16LE(2, 26)
+  tiff.writeUInt16LE(0x0001, 28)
+  tiff.writeUInt16LE(2, 30)
+  tiff.writeUInt32LE(2, 32)
+  tiff.write('S', 36, 'latin1')
+  tiff.writeUInt16LE(0x0002, 40)
+  tiff.writeUInt16LE(5, 42)
+  tiff.writeUInt32LE(3, 44)
+  tiff.writeUInt32LE(56, 48)
+  tiff.writeUInt32LE(0, 52)
+  for (const [index, [numerator, denominator]] of [
+    [41, 1],
+    [17, 1],
+    [2400, 100],
+  ].entries()) {
+    tiff.writeUInt32LE(numerator ?? 0, 56 + index * 8)
+    tiff.writeUInt32LE(denominator ?? 1, 60 + index * 8)
+  }
+  const payload = Buffer.concat([Buffer.from('Exif\0\0', 'latin1'), tiff])
+  const header = Buffer.from([0xff, 0xe1, 0, 0])
+  header.writeUInt16BE(payload.length + 2, 2)
+  return Buffer.concat([header, payload])
+}
+
+/** The same JPEG with a GPS location in its EXIF, straight after the start of image marker */
+export function withLocation(photo: TestFile): TestFile {
+  const { buffer } = photo
+  return {
+    ...photo,
+    buffer: Buffer.concat([buffer.subarray(0, 2), exifWithLocation(), buffer.subarray(2)]),
+  }
+}
+
+/** Adds photos to the item whose page is open, and waits until they're saved */
+export async function addPhotos(page: Page, files: readonly TestFile[]): Promise<void> {
+  const photos = page.getByRole('region', { name: 'Photos' })
+  await photos.getByLabel('Photos to add').setInputFiles([...files])
+  const count = files.length === 1 ? '1 photo' : `${String(files.length)} photos`
+  await expect(photos.getByRole('status')).toHaveText(`Added ${count}.`, { timeout: 20_000 })
+}

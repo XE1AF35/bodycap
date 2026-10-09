@@ -2,9 +2,11 @@
 import AxeBuilder from '@axe-core/playwright'
 import type { Page } from '@playwright/test'
 import {
+  addPhotos,
   expect,
   open,
   openShareDialog,
+  photoFile,
   SAMPLE_COLLECTION,
   SAMPLE_GEAR,
   SAMPLE_SYSTEM,
@@ -77,6 +79,20 @@ async function chooseMerge(page: Page) {
   await restore.getByLabel('Backup file').setInputFiles(await download.path())
   await restore.getByRole('radio', { name: "Add to what's here" }).check()
   await expect(restore.getByText(/Anything deleted here since the backup was made/)).toBeVisible()
+}
+
+/** The X-T5's page, with two photos added */
+async function atItemWithPhotos(page: Page) {
+  await atItem(page)
+  await addPhotos(page, [await photoFile(page, 'front.jpg'), await photoFile(page, 'top.jpg')])
+}
+
+/** The second photo full size */
+async function atPhotoViewer(page: Page) {
+  await atItemWithPhotos(page)
+  await page.getByRole('button', { name: 'View photo 2 of 2' }).click()
+  const viewer = page.getByRole('dialog', { name: 'Photo 2 of 2' })
+  await expect(viewer.getByRole('img', { name: 'Fujifilm X-T5, photo 2 of 2' })).toBeVisible()
 }
 
 /** Opens the wedding kit's share link, in the same browser */
@@ -286,6 +302,57 @@ const SCREENS: readonly Screen[] = [
       await onPhone(page)
       await at(page, '#/', 'Dashboard')
       await expect(page.getByRole('region', { name: 'Your gear in numbers' })).toBeVisible()
+    },
+  },
+  { name: 'gear detail with photos', seed: GEAR, show: atItemWithPhotos },
+  { name: 'photo viewer', seed: GEAR, show: atPhotoViewer },
+  {
+    name: 'delete photo confirmation',
+    seed: GEAR,
+    show: async (page) => {
+      await atPhotoViewer(page)
+      const viewer = page.getByRole('dialog', { name: 'Photo 2 of 2' })
+      await viewer.getByRole('button', { name: 'Delete' }).click()
+      await expect(viewer.getByRole('alert')).toHaveText(/^Delete this photo\?/)
+    },
+  },
+  {
+    name: 'gear list with cover photos',
+    seed: GEAR,
+    show: async (page) => {
+      await atItemWithPhotos(page)
+      await at(page, '#/gear', 'Gear')
+      await expect(page.getByRole('table').locator('img')).toBeVisible()
+    },
+  },
+  {
+    name: 'settings with photos',
+    seed: GEAR,
+    show: async (page) => {
+      await atItemWithPhotos(page)
+      await at(page, '#/settings', 'Settings')
+      await expect(page.getByRole('button', { name: 'Back up without photos' })).toBeVisible()
+    },
+  },
+  {
+    name: 'insurance list',
+    seed: SAMPLE_COLLECTION,
+    show: (page) => at(page, '#/insurance', 'Insurance list'),
+  },
+  {
+    name: 'insurance list with cover photos',
+    seed: GEAR,
+    show: async (page) => {
+      await atItemWithPhotos(page)
+      await at(page, '#/insurance', 'Insurance list')
+      await expect(page.getByRole('checkbox', { name: 'Show cover photos' })).toBeChecked()
+    },
+  },
+  {
+    name: 'empty insurance list',
+    show: async (page) => {
+      await at(page, '#/insurance', 'Insurance list')
+      await expect(page.getByText('Nothing to insure yet.')).toBeVisible()
     },
   },
   { name: 'settings, merging a backup', seed: GEAR, show: chooseMerge },

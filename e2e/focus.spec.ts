@@ -2,9 +2,11 @@
 // box-shadow ring, stays visible in Windows high contrast mode.
 import type { Page } from '@playwright/test'
 import {
+  addPhotos,
   expect,
   open,
   openShareDialog,
+  photoFile,
   SAMPLE_COLLECTION,
   SAMPLE_GEAR,
   SAMPLE_SYSTEM,
@@ -68,6 +70,16 @@ test('outlines every stop on an item with a loan, kits, and maintenance', async 
   await page.getByRole('table').getByRole('link', { name: 'Fujifilm X-T5' }).click()
   await page.reload()
   await expect(page.getByRole('region', { name: 'Maintenance' })).toBeVisible()
+  expect(await stopsWithoutOutline(page, 40)).toEqual([])
+})
+
+test('outlines every stop on an item with photos', async ({ page }) => {
+  await seedGear(page, SAMPLE_GEAR)
+  await open(page, '#/gear')
+  await page.getByRole('table').getByRole('link', { name: 'Fujifilm X-T5' }).click()
+  await addPhotos(page, [await photoFile(page, 'front.jpg'), await photoFile(page, 'top.jpg')])
+  await page.reload()
+  await expect(page.getByRole('button', { name: 'View photo 2 of 2' })).toBeVisible()
   expect(await stopsWithoutOutline(page, 40)).toEqual([])
 })
 
