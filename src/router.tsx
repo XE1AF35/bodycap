@@ -70,6 +70,13 @@ const sharedKitRoute = createRoute({
   component: lazyRouteComponent(() => import('@/ui/pages/SharedKitPage'), 'SharedKitPage'),
 })
 
+// Laid out to print, from the dashboard or Settings
+const insuranceRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: 'insurance',
+  component: lazyRouteComponent(() => import('@/ui/pages/InsurancePage'), 'InsurancePage'),
+})
+
 const settingsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: 'settings',
@@ -86,6 +93,7 @@ const routeTree = rootRoute.addChildren([
   kitRoute,
   systemRoute,
   sharedKitRoute,
+  insuranceRoute,
   settingsRoute,
 ])
 

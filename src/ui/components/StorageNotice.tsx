@@ -19,7 +19,7 @@ export function StorageNotice() {
   return (
     <div
       role="alert"
-      className="mb-6 flex flex-wrap items-start gap-x-3 gap-y-2 rounded-lg border border-border bg-card px-4 py-3 text-card-foreground motion-safe:animate-rise-in"
+      className="mb-6 flex flex-wrap items-start print:hidden gap-x-3 gap-y-2 rounded-lg border border-border bg-card px-4 py-3 text-card-foreground motion-safe:animate-rise-in"
     >
       {/* The red dot that marks alerts, beside the first line */}
       <span className="mt-2 size-2 shrink-0 rounded-full bg-signal" />

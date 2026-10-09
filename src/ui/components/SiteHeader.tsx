@@ -45,7 +45,7 @@ export function SiteHeader() {
   const [menuOpen, setMenuOpen] = useState(false)
 
   return (
-    <header className="border-b border-border">
+    <header className="border-b border-border print:hidden">
       <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-2 px-4 py-3">
         <Wordmark />
         <Button

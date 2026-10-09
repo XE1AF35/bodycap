@@ -1,6 +1,7 @@
 // What the gear you have adds up to, by what you paid or what it's insured for. Each currency is
 // totalled on its own, since converting would need exchange rates, so the bars after each category
 // compare amounts in the first currency only.
+import { Link } from '@tanstack/react-router'
 import { useState } from 'react'
 import { CATEGORY_LABELS, type Gear } from '@/core/gear'
 import { LOCALE } from '@/core/locale'
@@ -44,9 +45,14 @@ export function ValueSummary({ items, first }: ValueSummaryProps) {
 
   return (
     <section aria-labelledby="value-title" className="mb-8">
-      <h2 id="value-title" className="mb-3 text-base font-semibold">
-        Value
-      </h2>
+      <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+        <h2 id="value-title" className="text-base font-semibold">
+          Value
+        </h2>
+        <Link to="/insurance" className="text-sm underline underline-offset-4">
+          Insurance list
+        </Link>
+      </div>
       <fieldset className="mb-4 flex flex-wrap gap-4">
         <legend className="sr-only">Count gear by</legend>
         {BASES.map(([choice, label]) => (

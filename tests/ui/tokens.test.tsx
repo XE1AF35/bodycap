@@ -1,14 +1,15 @@
 // Design tokens: every colour pair the interface relies on meets WCAG 2.2 AA contrast in both themes,
-// read straight from index.css. axe checks text on real screens, but not the 3:1 that control
-// borders, focus rings, and indicators need.
+// read straight from index.css, and printing always uses the light theme. axe checks text on real
+// screens, but not the 3:1 that control borders, focus rings, and indicators need.
 import { describe, expect, it } from 'vitest'
 import css from '@/index.css?raw'
 
 type Rgb = readonly [number, number, number]
 
-/** The custom properties declared in one top-level block of index.css, such as :root or .dark */
+/** The custom properties declared in one block of index.css, such as :root or .dark */
 function tokens(selector: string): ReadonlyMap<string, string> {
-  const start = css.indexOf(`\n${selector} {`)
+  // A block can sit inside an @media rule, indented
+  const start = css.search(new RegExp(`\n *${selector.replace('.', '\\.')} \\{`))
   const end = css.indexOf('\n}', start)
   if (start === -1 || end === -1) throw new Error(`index.css has no ${selector} block`)
   const declarations = css.slice(start, end).matchAll(/--([\w-]+):\s*([^;]+);/g)
@@ -84,5 +85,11 @@ describe.each([
 
   it.each(PAIRS)('--%s on --%s reaches %s:1', (drawn, under, minimum) => {
     expect(contrast(colour(drawn), colour(under))).toBeGreaterThanOrEqual(minimum)
+  })
+})
+
+describe('printing', () => {
+  it('keeps the dark theme to screens, so paper always gets dark text on white', () => {
+    expect(css).toMatch(/\n@media screen \{\n {2}\.dark \{\n {4}color-scheme: dark;/)
   })
 })

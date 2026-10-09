@@ -15,7 +15,7 @@ export function UpdatePrompt() {
   return (
     <aside
       aria-labelledby={labelId}
-      className="fixed right-4 bottom-4 left-4 z-40 mx-auto flex max-w-md flex-wrap items-center gap-3 rounded-lg border border-border bg-popover p-4 text-popover-foreground shadow-lg motion-safe:animate-rise-in sm:left-auto"
+      className="fixed right-4 bottom-4 left-4 z-40 print:hidden mx-auto flex max-w-md flex-wrap items-center gap-3 rounded-lg border border-border bg-popover p-4 text-popover-foreground shadow-lg motion-safe:animate-rise-in sm:left-auto"
     >
       <p id={labelId} className="label-engraved w-full">
         Update
