@@ -23,7 +23,7 @@ import { Button } from '@/ui/components/ui/button'
 import { Label } from '@/ui/components/ui/label'
 import { useLive } from '@/ui/hooks/useLive'
 import { useServices } from '@/ui/services'
-import { itemCount, recordCounts } from '@/ui/settings/words'
+import { gearAndPhotos, photoCount, recordCounts } from '@/ui/settings/words'
 
 type Mode = 'replace' | 'merge'
 
@@ -34,6 +34,9 @@ const MODES: readonly (readonly [Mode, string])[] = [
 
 /** The day the backup was made, where the person is */
 const madeOn = (backup: Backup) => formatDate(toIsoDate(new Date(backup.exportedAt)))
+
+/** Such as "2 items and 5 photos" */
+const holds = ({ counts }: Backup) => gearAndPhotos(counts.gear, counts.photos)
 
 /** Such as "Merged the backup made on 5 Oct 2026. Added 2 items. Updated 1 kit." */
 function mergedText(backup: Backup, { added, updated }: MergeSummary): string {
@@ -57,7 +60,9 @@ function restoreProblem(error: unknown): string {
 export function RestoreSection() {
   const { repositories } = useServices()
   const gear = useLive(useMemo(() => repositories.gear.list(), [repositories]))
+  const photos = useLive(useMemo(() => repositories.photos.count(), [repositories]))
   const here = gear.status === 'ready' ? gear.value.length : 0
+  const photosHere = photos.status === 'ready' ? photos.value : 0
 
   const [chosen, setChosen] = useState<RestorableBackup>()
   const [mode, setMode] = useState<Mode>('replace')
@@ -85,9 +90,7 @@ export function RestoreSection() {
         setDone(mergedText(backup, await repositories.backup.merge(backup)))
       } else {
         await repositories.backup.restore(backup)
-        setDone(
-          `Restored ${itemCount(backup.counts.gear)} from the backup made on ${madeOn(backup)}.`,
-        )
+        setDone(`Restored ${holds(backup)} from the backup made on ${madeOn(backup)}.`)
       }
       setChosen(undefined)
       setInputKey((key) => key + 1)
@@ -99,10 +102,16 @@ export function RestoreSection() {
     }
   }
 
+  const hereNow = gearAndPhotos(here, photosHere)
   const replaces =
     here === 0
       ? "There's no gear here now, so nothing will be lost."
-      : `It replaces the ${itemCount(here)} here now, and can't be undone, so you may want a backup of what's here first.`
+      : `It replaces the ${hereNow} here now, and can't be undone, so you may want a backup of what's here first.`
+  // A .json backup leaves photos out, which is easy to forget when restoring one
+  const photosGo =
+    chosen?.counts.photos === 0 && photosHere > 0
+      ? ` This backup has no photos, so the ${photoCount(photosHere)} here will go too.`
+      : ''
 
   return (
     <section
@@ -122,7 +131,7 @@ export function RestoreSection() {
           key={inputKey}
           id="restore-file"
           type="file"
-          accept=".json,application/json"
+          accept=".json,.zip,application/json,application/zip"
           className="text-sm file:mr-3 file:rounded-md file:border file:border-input file:bg-transparent file:px-3 file:py-1.5 file:text-sm file:text-foreground"
           onChange={(event) => {
             void choose(event.target.files?.[0])
@@ -140,7 +149,7 @@ export function RestoreSection() {
       {chosen !== undefined && (
         <div className="grid max-w-prose gap-3 rounded-lg border border-border bg-background p-4">
           <p>
-            This backup was made on {madeOn(chosen)} and holds {itemCount(chosen.counts.gear)}.
+            This backup was made on {madeOn(chosen)} and holds {holds(chosen)}.
           </p>
           <fieldset className="grid gap-2">
             <legend className="mb-1 text-sm font-medium">How to restore it</legend>
@@ -161,7 +170,10 @@ export function RestoreSection() {
             ))}
           </fieldset>
           {mode === 'replace' ? (
-            <p className="text-muted-foreground">{replaces}</p>
+            <p className="text-muted-foreground">
+              {replaces}
+              {photosGo}
+            </p>
           ) : (
             <p className="text-muted-foreground">
               Anything only in the backup is added, and anything the backup has a newer copy of is
@@ -187,8 +199,8 @@ export function RestoreSection() {
                   <AlertDialogTitle>Replace everything?</AlertDialogTitle>
                   <AlertDialogDescription>
                     {here === 0
-                      ? `The ${itemCount(chosen.counts.gear)} in the backup will be added.`
-                      : `The ${itemCount(here)} here now will be replaced by the ${itemCount(chosen.counts.gear)} in the backup. This can't be undone.`}
+                      ? `The ${holds(chosen)} in the backup will be added.`
+                      : `The ${hereNow} here now will be replaced by the ${holds(chosen)} in the backup. This can't be undone.${photosGo}`}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
               ) : (

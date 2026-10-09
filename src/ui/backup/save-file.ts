@@ -1,6 +1,7 @@
-// Saves text as a file in the person's downloads, through a temporary object URL.
-export function saveFile(name: string, text: string, type: string): void {
-  const url = URL.createObjectURL(new Blob([text], { type }))
+// Saves text or a Blob as a file in the person's downloads, through a temporary object URL.
+export function saveFile(name: string, contents: string | Blob, type: string): void {
+  const blob = contents instanceof Blob ? contents : new Blob([contents], { type })
+  const url = URL.createObjectURL(blob)
   const link = document.createElement('a')
   link.href = url
   link.download = name

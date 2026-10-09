@@ -174,6 +174,13 @@ describe('photo repository', () => {
     )
   })
 
+  it('counts every photo, as photos come and go', async () => {
+    const opened = await withPhotos()
+    expect(await current(opened.repos.photos.count())).toBe(2)
+    await opened.repos.photos.remove(opened.a.id)
+    expect(await current(opened.repos.photos.count())).toBe(1)
+  })
+
   it("deletes an item's photos with it, and no one else's", async () => {
     const opened = await withPhotos()
     const zoom = await opened.repos.gear.add(lens)

@@ -82,6 +82,8 @@ export interface PhotoRepository {
   forGear(gearId: string): Live<readonly Photo[]>
   /** Each item's cover photo, by the item's ID, for lists. Items with no photos aren't there. */
   covers(): Live<ReadonlyMap<string, Photo>>
+  /** How many photos there are in all, which decides whether a backup is a .json or a .zip */
+  count(): Live<number>
   /**
    * Saves photos for an item, all of them or none, in the order given. The first becomes the cover
    * if the item has none. Rejects with GearNotFoundError if the item is gone, or RuleError if they

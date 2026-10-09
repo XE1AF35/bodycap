@@ -1,23 +1,45 @@
-// Backs everything up to a file in the person's downloads, then says where it went. The message
+// Backs everything up to a file in the person's downloads, then says where it went: a .zip once
+// there are photos to keep, and a .json until then, or whenever photos are left out. The message
 // sits in a status region that's always present, so screen readers announce it when it changes.
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { isStorageFull } from '@/data/storage'
 import { saveFile } from '@/ui/backup/save-file'
 import { Button } from '@/ui/components/ui/button'
+import { useLive } from '@/ui/hooks/useLive'
 import { useServices } from '@/ui/services'
 
-/** The label can say more where that helps, such as before a restore */
-export function BackupButton({ label = 'Back up now' }: { readonly label?: string }) {
+interface BackupButtonProps {
+  /** The label can say more where that helps, such as before a restore */
+  readonly label?: string
+  /** Makes a .json, however many photos there are */
+  readonly withoutPhotos?: boolean
+  /** The ID of a hint that says more about what it makes */
+  readonly hintId?: string
+}
+
+export function BackupButton({
+  label = 'Back up now',
+  withoutPhotos = false,
+  hintId,
+}: BackupButtonProps) {
   const { repositories } = useServices()
+  const photos = useLive(useMemo(() => repositories.photos.count(), [repositories]))
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState('')
 
-  const backUp = async () => {
+  const backUp = async (withPhotos: boolean) => {
     setBusy(true)
     try {
-      const file = await repositories.backup.create()
-      saveFile(file.name, file.text, 'application/json')
-      setMessage(`Backup saved as ${file.name}.`)
+      if (withPhotos) {
+        setMessage('Packing your photos into the backup.')
+        const archive = await repositories.backup.createZip()
+        saveFile(archive.name, archive.blob, 'application/zip')
+        setMessage(`Backup saved as ${archive.name}.`)
+      } else {
+        const file = await repositories.backup.create()
+        saveFile(file.name, file.text, 'application/json')
+        setMessage(`Backup saved as ${file.name}.`)
+      }
     } catch (error) {
       setMessage(
         isStorageFull(error)
@@ -33,9 +55,11 @@ export function BackupButton({ label = 'Back up now' }: { readonly label?: strin
     <div className="flex flex-wrap items-center gap-3">
       <Button
         variant="outline"
-        disabled={busy}
+        // Until the photos are counted, it can't tell which file to make
+        disabled={busy || photos.status === 'loading'}
+        aria-describedby={hintId}
         onClick={() => {
-          void backUp()
+          void backUp(!withoutPhotos && photos.status === 'ready' && photos.value > 0)
         }}
       >
         {label}

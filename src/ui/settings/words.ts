@@ -13,11 +13,24 @@ export function itemCount(count: number): string {
   return counted(count, 'item', 'items')
 }
 
+/** Such as "2 items", or "2 items and 5 photos" once there are photos */
+export function gearAndPhotos(items: number, photos: number): string {
+  return photos === 0
+    ? itemCount(items)
+    : `${itemCount(items)} and ${counted(photos, 'photo', 'photos')}`
+}
+
+/** Such as "1 photo" or "5 photos" */
+export function photoCount(count: number): string {
+  return counted(count, 'photo', 'photos')
+}
+
 const KINDS: readonly (readonly [BackupList, string, string])[] = [
   ['gear', 'item', 'items'],
   ['kits', 'kit', 'kits'],
   ['loans', 'loan', 'loans'],
   ['maintenance', 'maintenance record', 'maintenance records'],
+  ['photos', 'photo', 'photos'],
 ]
 
 /** Such as "2 items and 1 kit", leaving out kinds there are none of, or undefined if there are none */

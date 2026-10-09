@@ -25,6 +25,7 @@ function changesText(changes: number): string {
 export function BackupSection() {
   const { repositories } = useServices()
   const settings = useLive(useMemo(() => repositories.settings.get(), [repositories]))
+  const photos = useLive(useMemo(() => repositories.photos.count(), [repositories]))
   const [today] = useState(() => toIsoDate(new Date()))
   const savedDays = settings.status === 'ready' ? settings.value.backupReminderDays : undefined
   const reminder = useChoice(String(savedDays ?? BACKUP_DUE_DAYS), (days) =>
@@ -55,13 +56,26 @@ export function BackupSection() {
         Backup
       </h2>
       <p className="max-w-prose text-muted-foreground">
-        A backup is one file holding all your gear. Keep it somewhere other than this device, such
-        as cloud storage or a USB drive, so your gear survives if this browser loses it.
+        A backup is one file holding all your gear: a .json file, or a .zip once there are photos to
+        keep too. Keep it somewhere other than this device, such as cloud storage or a USB drive, so
+        your gear survives if this browser loses it.
       </p>
       {status.map((line) => (
         <p key={line}>{line}</p>
       ))}
       <BackupButton />
+      {photos.status === 'ready' && photos.value > 0 && (
+        <div className="grid gap-1.5">
+          <BackupButton
+            label="Back up without photos"
+            withoutPhotos
+            hintId="backup-without-photos-hint"
+          />
+          <p id="backup-without-photos-hint" className="text-sm text-muted-foreground">
+            A .json file with everything but the photos, which is much smaller.
+          </p>
+        </div>
+      )}
       <div className="mt-3 grid gap-1.5">
         <Label htmlFor="backup-reminder">Remind me to back up</Label>
         <NativeSelect

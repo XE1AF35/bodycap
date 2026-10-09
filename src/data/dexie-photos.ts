@@ -48,6 +48,8 @@ export function createPhotoRepository(
         return new Map(covers.map((photo) => [photo.gearId, photo]))
       }),
 
+    count: () => live(() => db.photos.count()),
+
     add: (gearId, shrunk) =>
       db.transaction('rw', [db.gear, db.photos, db.settings], async () => {
         if ((await db.gear.get(gearId)) === undefined) throw new GearNotFoundError(gearId)
