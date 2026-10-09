@@ -2,8 +2,8 @@
 // they were chosen in, each item keeps exactly one cover through every change, photos go when their
 // item is deleted, and each change counts towards the backup reminder.
 import { afterEach, describe, expect, it } from 'vitest'
-import { readBackup } from '@/core/backup/read'
 import type { NewPhoto } from '@/core/photos'
+import { readBackupFile } from '@/data/backup-file'
 import { GearNotFoundError, RecordNotFoundError, RuleError } from '@/data/repositories'
 import { body, closeDatabases, current, lens, NOW, openRepositories } from './support'
 
@@ -185,7 +185,7 @@ describe('photo repository', () => {
   it('takes a restored backup as everything, so photos here go with the rest', async () => {
     const opened = await withPhotos()
     const file = await opened.repos.backup.create()
-    const backup = readBackup(file.text)
+    const backup = await readBackupFile(new Blob([file.text]))
     if (!backup.ok) throw new Error(backup.error)
     await opened.repos.backup.restore(backup.value)
     expect(await opened.db.photos.count()).toBe(0)

@@ -94,7 +94,11 @@ describe('backup', () => {
   it('says how long ago the last backup was, and how many changes since', async () => {
     const services = testServices()
     const threeDaysAgo = new Date(Date.now() - 3 * 86_400_000).toISOString()
-    await services.repositories.backup.restore({ ...backup, exportedAt: threeDaysAgo })
+    await services.repositories.backup.restore({
+      ...backup,
+      exportedAt: threeDaysAgo,
+      storedPhotos: [],
+    })
     await services.repositories.gear.add(lens)
     await renderSettings(services)
     expect(await region('Backup').findByText('Last backup: 3 days ago.')).toBeInTheDocument()
@@ -133,7 +137,11 @@ describe('preferences', () => {
   it('reminds about backups after the time chosen here', async () => {
     const services = testServices()
     const eightDaysAgo = new Date(Date.now() - 8 * 86_400_000).toISOString()
-    await services.repositories.backup.restore({ ...backup, exportedAt: eightDaysAgo })
+    await services.repositories.backup.restore({
+      ...backup,
+      exportedAt: eightDaysAgo,
+      storedPhotos: [],
+    })
     await services.repositories.gear.add(lens)
     const { user } = await renderSettings(services)
     const remind = region('Backup').getByRole('combobox', { name: 'Remind me to back up' })

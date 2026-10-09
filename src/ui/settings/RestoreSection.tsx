@@ -5,7 +5,7 @@ import { useMemo, useState } from 'react'
 import type { Backup } from '@/core/backup/format'
 import { formatDate, toIsoDate } from '@/core/dates'
 import { readBackupFile } from '@/data/backup-file'
-import { RuleError, type MergeSummary } from '@/data/repositories'
+import { RuleError, type MergeSummary, type RestorableBackup } from '@/data/repositories'
 import { isStorageFull } from '@/data/storage'
 import { BackupButton } from '@/ui/backup/BackupButton'
 import {
@@ -59,7 +59,7 @@ export function RestoreSection() {
   const gear = useLive(useMemo(() => repositories.gear.list(), [repositories]))
   const here = gear.status === 'ready' ? gear.value.length : 0
 
-  const [chosen, setChosen] = useState<Backup>()
+  const [chosen, setChosen] = useState<RestorableBackup>()
   const [mode, setMode] = useState<Mode>('replace')
   const [problem, setProblem] = useState<string>()
   const [done, setDone] = useState('')
@@ -78,7 +78,7 @@ export function RestoreSection() {
     else setProblem(result.error)
   }
 
-  const restore = async (backup: Backup) => {
+  const restore = async (backup: RestorableBackup) => {
     setBusy(true)
     try {
       if (mode === 'merge') {

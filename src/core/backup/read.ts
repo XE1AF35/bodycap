@@ -15,10 +15,10 @@ import { BACKUP_APP, FORMAT_VERSION, type Backup, type BackupList } from './form
 import { migrateBackup } from './migrations'
 import { backupSchema } from './schema'
 
-const NOT_A_BACKUP = "This file isn't a Bodycap backup."
+export const NOT_A_BACKUP = "This file isn't a Bodycap backup."
 const NEWER = 'This backup was made by a newer version of Bodycap. Update Bodycap, then try again.'
-const DAMAGED = "This backup is damaged, so it can't be restored."
-const INCOMPLETE = "This backup is incomplete, so it can't be restored."
+export const DAMAGED = "This backup is damaged, so it can't be restored."
+export const INCOMPLETE = "This backup is incomplete, so it can't be restored."
 
 // Gear comes first, since the other lists are checked against it
 const LISTS = [

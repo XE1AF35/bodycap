@@ -2,6 +2,7 @@
 // backup store so both read and write records the same way.
 import type { Gear } from '@/core/gear'
 import { isCurrencyCode } from '@/core/money'
+import type { Photo, PhotoInfo } from '@/core/photos'
 import { normaliseSerial } from '@/core/serials'
 import type { BodycapDatabase, GearRecord, SettingRecord } from './db'
 import type { Settings } from './repositories'
@@ -16,6 +17,24 @@ export function toGear(record: GearRecord): Gear {
   const gear = { ...record }
   delete gear.serialKey
   return gear
+}
+
+/** A stored photo's details, leaving its images behind, as a backup's data lists them */
+export function toPhotoInfo(photo: Photo): PhotoInfo {
+  const { id, gearId, isCover, mimeType, width, height, bytes, thumbnailBytes } = photo
+  const { createdAt, updatedAt } = photo
+  return {
+    id,
+    gearId,
+    isCover,
+    mimeType,
+    width,
+    height,
+    bytes,
+    thumbnailBytes,
+    createdAt,
+    updatedAt,
+  }
 }
 
 /** The keys settings are stored under */

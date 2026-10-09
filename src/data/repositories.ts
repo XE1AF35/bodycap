@@ -123,20 +123,41 @@ export interface BackupFile {
   readonly text: string
 }
 
+/** A backup with photos, ready to download */
+export interface BackupArchive {
+  /** Such as bodycap-backup-2026-10-05.zip */
+  readonly name: string
+  readonly blob: Blob
+}
+
+/** A backup that readBackupFile has checked, with each photo it lists ready to store */
+export interface RestorableBackup extends Backup {
+  /** In the order the backup lists them. None for a .json backup, which leaves photos out. */
+  readonly storedPhotos: readonly Photo[]
+}
+
 export interface BackupStore {
-  /** Backs up everything, recording it as the latest backup and counting changes from zero */
+  /**
+   * Backs up everything but photos as a .json file, recording it as the latest backup and
+   * counting changes from zero
+   */
   create(): Promise<BackupFile>
   /**
-   * Replaces everything with a backup's contents, in one go: if anything fails, nothing changes.
-   * Check the file with readBackupFile first.
+   * Backs up everything, photos included, as a .zip file, and records it as the latest backup.
+   * Changes saved while the file is being made aren't in it, so they still count.
    */
-  restore(backup: Backup): Promise<void>
+  createZip(): Promise<BackupArchive>
+  /**
+   * Replaces everything with a backup's contents, photos included, in one go: if anything fails,
+   * nothing changes. Check the file with readBackupFile first.
+   */
+  restore(backup: RestorableBackup): Promise<void>
   /**
    * Adds a backup's contents to what's here, keeping whichever copy of each record changed last,
-   * in one go: if anything fails, nothing changes. Rejects with RuleError if the two can't be
-   * merged. Check the file with readBackupFile first.
+   * and one cover for each item, in one go: if anything fails, nothing changes. Rejects with
+   * RuleError if the two can't be merged. Check the file with readBackupFile first.
    */
-  merge(backup: Backup): Promise<MergeSummary>
+  merge(backup: RestorableBackup): Promise<MergeSummary>
 }
 
 /** How many records of each kind a merge added, and how many it replaced with newer copies */

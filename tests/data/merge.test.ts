@@ -5,7 +5,7 @@ import { createBackup, type Backup } from '@/core/backup/format'
 import type { Gear } from '@/core/gear'
 import type { Loan } from '@/core/loans'
 import type { MaintenanceRecord } from '@/core/maintenance'
-import { RuleError } from '@/data/repositories'
+import { RuleError, type RestorableBackup } from '@/data/repositories'
 import { body, closeDatabases, current, lens, NOW, openRepositories } from './support'
 
 afterEach(closeDatabases)
@@ -24,12 +24,14 @@ async function here() {
   return { ...opened, zoom, camera, clean }
 }
 
-/** A backup holding these lists, and nothing else */
-const backupOf = (lists: Partial<Backup['data']>): Backup =>
-  createBackup(
+/** A .json backup holding these lists, and nothing else */
+const backupOf = (lists: Partial<Backup['data']>): RestorableBackup => ({
+  ...createBackup(
     { gear: [], kits: [], loans: [], maintenance: [], photos: [], settings: {}, ...lists },
     { schemaVersion: 2, appVersion: '0.2.0', exportedAt: EXPORTED_AT },
-  )
+  ),
+  storedPhotos: [],
+})
 
 const newGear: Gear = {
   ...body,
