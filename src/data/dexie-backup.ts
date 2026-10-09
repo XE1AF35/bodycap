@@ -12,7 +12,6 @@ import {
 import { planMerge } from '@/core/backup/merge'
 import { toIsoDate } from '@/core/dates'
 import type { PhotoInfo } from '@/core/photos'
-import { zipBackup } from './backup-zip'
 import type { BodycapDatabase, PhotoImageRecord, PhotoRecord } from './db'
 import { countChange, SETTING, toGear, toPhotoInfo, toRecord, toSettings } from './records'
 import { RuleError, type BackupStore, type PhotoWithBytes } from './repositories'
@@ -94,16 +93,19 @@ export function createBackupStore(
         return { name: backupFileName(toIsoDate(at, timeZone)), text }
       }),
 
-    // Changes made while the file is being made wait for this transaction, so they count after it
-    createZip: () =>
-      db.transaction('rw', everything, async () => {
+    createZip: async () => {
+      // Loaded only when needed, and before the transaction, which can only wait on the database
+      const { zipBackup } = await import('./backup-zip')
+      // Changes made while the file is being made wait for this transaction, so they count after it
+      return db.transaction('rw', everything, async () => {
         const at = now()
         const { data, photos } = await readAll()
         const backup = createBackup(data, infoAt(at))
         const blob = await zipBackup(JSON.stringify(backup, null, 2), photos, readImage, at)
         await recordBackup(backup.exportedAt)
         return { name: backupFileName(toIsoDate(at, timeZone), 'zip'), blob }
-      }),
+      })
+    },
 
     restore: (backup) =>
       db.transaction('rw', everything, async () => {
