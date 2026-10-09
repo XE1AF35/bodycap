@@ -2,7 +2,7 @@
 // closes on Escape, and gives focus back to the button.
 import { useNavigate } from '@tanstack/react-router'
 import { Trash2 } from 'lucide-react'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import type { Gear } from '@/core/gear'
 import { isStorageFull } from '@/data/storage'
 import {
@@ -19,6 +19,7 @@ import {
 } from '@/ui/components/ui/alert-dialog'
 import { Button } from '@/ui/components/ui/button'
 import { gearName } from '@/ui/gear/labels'
+import { useLive } from '@/ui/hooks/useLive'
 import { useServices } from '@/ui/services'
 
 export function DeleteGearButton({ item }: { readonly item: Gear }) {
@@ -26,6 +27,10 @@ export function DeleteGearButton({ item }: { readonly item: Gear }) {
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
   const [problem, setProblem] = useState<string>()
+  const photos = useLive(
+    useMemo(() => repositories.photos.forGear(item.id), [repositories, item.id]),
+  )
+  const photoCount = photos.status === 'ready' ? photos.value.length : 0
 
   const confirm = async () => {
     try {
@@ -60,7 +65,10 @@ export function DeleteGearButton({ item }: { readonly item: Gear }) {
           </AlertDialogMedia>
           <AlertDialogTitle>Delete {gearName(item)}?</AlertDialogTitle>
           <AlertDialogDescription>
-            It goes from Bodycap for good. Only a backup made before now could bring it back.
+            It goes from Bodycap for good.
+            {photoCount > 0 &&
+              ` ${photoCount === 1 ? 'Its photo goes' : `Its ${String(photoCount)} photos go`} with it.`}{' '}
+            Only a backup made before now could bring it back.
           </AlertDialogDescription>
         </AlertDialogHeader>
         {problem !== undefined && (

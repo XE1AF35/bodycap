@@ -53,6 +53,7 @@ describe('gear detail', () => {
     expect(
       screen.getAllByRole('heading', { level: 2 }).map((heading) => heading.textContent),
     ).toEqual([
+      'Photos',
       'Works with your cameras',
       'Basics',
       'Purchase',

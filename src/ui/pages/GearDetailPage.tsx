@@ -14,6 +14,7 @@ import { MountBadge } from '@/ui/gear/MountBadge'
 import { StatusDot } from '@/ui/gear/StatusDot'
 import { ItemLoans } from '@/ui/gear/loans/ItemLoans'
 import { ItemMaintenance } from '@/ui/gear/maintenance/ItemMaintenance'
+import { ItemPhotos } from '@/ui/gear/photos/ItemPhotos'
 import { ItemKits } from '@/ui/kits/ItemKits'
 import { CompatibilityPanel } from '@/ui/gear/CompatibilityPanel'
 import { StatusActions } from '@/ui/gear/status/StatusActions'
@@ -110,6 +111,7 @@ export function GearDetailPage() {
         }
       >
         <StatusActions item={item} />
+        <ItemPhotos item={item} />
         <ItemLoans item={item} />
         <ItemKits item={item} />
         <CompatibilityPanel item={item} />

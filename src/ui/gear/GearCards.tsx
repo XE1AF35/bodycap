@@ -4,6 +4,8 @@ import { Link } from '@tanstack/react-router'
 import { formatDate } from '@/core/dates'
 import { CATEGORY_LABELS, type Gear } from '@/core/gear'
 import { formatMoney } from '@/core/money'
+import type { Photo } from '@/core/photos'
+import { CoverThumbnail } from '@/ui/gear/CoverThumbnail'
 import { MountBadge } from '@/ui/gear/MountBadge'
 import { StatusDot } from '@/ui/gear/StatusDot'
 import { gearName } from '@/ui/gear/labels'
@@ -31,13 +33,20 @@ function Bought({ item }: { readonly item: Gear }) {
   )
 }
 
-export function GearCards({ items }: { readonly items: readonly Gear[] }) {
+interface GearCardsProps {
+  readonly items: readonly Gear[]
+  /** Each item's cover photo, by the item's ID */
+  readonly covers: ReadonlyMap<string, Photo>
+}
+
+export function GearCards({ items, covers }: GearCardsProps) {
   return (
     <ul aria-label="Your gear" className="grid gap-3 md:hidden">
       {items.map((item) => (
         <li key={item.id} className="rounded-lg border border-border bg-card p-4">
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0">
+          <div className="flex items-start gap-3">
+            <CoverThumbnail photo={covers.get(item.id)} />
+            <div className="min-w-0 flex-1">
               <Link
                 to="/gear/$gearId"
                 params={{ gearId: item.id }}

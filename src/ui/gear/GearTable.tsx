@@ -5,6 +5,7 @@ import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react'
 import { formatDate } from '@/core/dates'
 import { CATEGORY_LABELS, type Gear } from '@/core/gear'
 import { formatMoney } from '@/core/money'
+import type { Photo } from '@/core/photos'
 import type { SortKey } from '@/core/search'
 import {
   Table,
@@ -15,18 +16,21 @@ import {
   TableHeader,
   TableRow,
 } from '@/ui/components/ui/table'
+import { CoverThumbnail } from '@/ui/gear/CoverThumbnail'
 import { MountBadge } from '@/ui/gear/MountBadge'
 import { StatusDot } from '@/ui/gear/StatusDot'
 import { gearName } from '@/ui/gear/labels'
 
 interface GearTableProps {
   readonly items: readonly Gear[]
+  /** Each item's cover photo, by the item's ID */
+  readonly covers: ReadonlyMap<string, Photo>
   readonly sort: SortKey
   readonly descending: boolean
   readonly onSort: (key: SortKey) => void
 }
 
-interface SortableHeadProps extends Omit<GearTableProps, 'items'> {
+interface SortableHeadProps extends Omit<GearTableProps, 'items' | 'covers'> {
   readonly sortKey: SortKey
   readonly label: string
 }
@@ -53,7 +57,7 @@ function SortableHead({ sortKey, label, sort, descending, onSort }: SortableHead
   )
 }
 
-export function GearTable({ items, ...sorting }: GearTableProps) {
+export function GearTable({ items, covers, ...sorting }: GearTableProps) {
   return (
     <div className="hidden overflow-hidden rounded-lg border border-border bg-card md:block">
       <Table>
@@ -76,16 +80,21 @@ export function GearTable({ items, ...sorting }: GearTableProps) {
           {items.map((item) => (
             <TableRow key={item.id}>
               <th scope="row" className="px-2 py-2.5 text-left font-normal">
-                <Link
-                  to="/gear/$gearId"
-                  params={{ gearId: item.id }}
-                  className="font-medium underline-offset-4 hover:underline"
-                >
-                  {gearName(item)}
-                </Link>
-                {item.nickname !== undefined && (
-                  <div className="text-xs text-muted-foreground">{item.nickname}</div>
-                )}
+                <div className="flex items-center gap-3">
+                  <CoverThumbnail photo={covers.get(item.id)} />
+                  <div>
+                    <Link
+                      to="/gear/$gearId"
+                      params={{ gearId: item.id }}
+                      className="font-medium underline-offset-4 hover:underline"
+                    >
+                      {gearName(item)}
+                    </Link>
+                    {item.nickname !== undefined && (
+                      <div className="text-xs text-muted-foreground">{item.nickname}</div>
+                    )}
+                  </div>
+                </div>
               </th>
               <TableCell>{CATEGORY_LABELS[item.category]}</TableCell>
               <TableCell>

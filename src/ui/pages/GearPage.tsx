@@ -1,9 +1,10 @@
 // The gear list: search, filters, and sort from the address, a count read out politely as it
-// changes, and the matching items as a table or cards.
+// changes, and the matching items as a table or cards, each with its cover photo.
 import { Link, useNavigate, useSearch } from '@tanstack/react-router'
 import { Plus } from 'lucide-react'
 import { useMemo } from 'react'
 import type { Gear } from '@/core/gear'
+import type { Photo } from '@/core/photos'
 import { LOCALE } from '@/core/locale'
 import { filterAndSortGear, type SortKey } from '@/core/search'
 import { EmptyState } from '@/ui/components/EmptyState'
@@ -19,17 +20,22 @@ import { useServices } from '@/ui/services'
 const counts = new Intl.NumberFormat(LOCALE)
 // One shared empty list, so the filtering below isn't redone on every render while loading
 const NO_GEAR: readonly Gear[] = []
+const NO_COVERS: ReadonlyMap<string, Photo> = new Map()
 
 export function GearPage() {
   const { repositories } = useServices()
   const live = useMemo(() => repositories.gear.list(), [repositories])
   const gear = useLive(live)
+  const coverLive = useMemo(() => repositories.photos.covers(), [repositories])
+  const covers = useLive(coverLive)
   const search = useSearch({ from: '/gear' })
   const navigate = useNavigate({ from: '/gear' })
 
   const sort = search.sort ?? 'name'
   const descending = search.desc === true
   const all = gear.status === 'ready' ? gear.value : NO_GEAR
+  // The list shows without covers until they've loaded, or if they can't be
+  const coverPhotos = covers.status === 'ready' ? covers.value : NO_COVERS
   const shown = useMemo(
     () =>
       filterAndSortGear(all, {
@@ -98,8 +104,14 @@ export function GearPage() {
         </EmptyState>
       ) : (
         <>
-          <GearTable items={shown} sort={sort} descending={descending} onSort={sortBy} />
-          <GearCards items={shown} />
+          <GearTable
+            items={shown}
+            covers={coverPhotos}
+            sort={sort}
+            descending={descending}
+            onSort={sortBy}
+          />
+          <GearCards items={shown} covers={coverPhotos} />
         </>
       )}
     </Page>

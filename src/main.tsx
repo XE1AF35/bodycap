@@ -10,6 +10,7 @@ import { createRepositories } from '@/data/dexie-repositories'
 import { createStorageHelpers } from '@/data/storage'
 import { createAppRouter } from '@/router'
 import { App } from '@/ui/App'
+import { compressPhoto } from '@/ui/photos/compress'
 import { createInstallOffer } from '@/ui/pwa/install-offer'
 import { registerServiceWorker } from '@/ui/pwa/register'
 import { createUpdateOffer } from '@/ui/pwa/update-offer'
@@ -28,6 +29,7 @@ const services = {
   updates: createUpdateOffer(),
   // Listening from the start, as the browser may offer before the app has rendered
   install: createInstallOffer(window),
+  compressPhoto: (file: File) => compressPhoto(file),
 }
 const router = createAppRouter(createHashHistory())
 
