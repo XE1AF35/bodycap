@@ -16,8 +16,10 @@ blob-report/
 .env.*
 !.env.example
 
-# Backups exported from the app (they hold gear lists, serial numbers, and values)
+# Files exported from the app (they hold gear lists, serial numbers, values, and photos)
 bodycap-backup-*.json
+bodycap-backup-*.zip
+bodycap-gear-*.csv
 
 # Logs
 *.log
