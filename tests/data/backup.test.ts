@@ -2,15 +2,15 @@
 // maintenance, and photos, as .json and as .zip, all-or-nothing restore and merge, and the backup
 // reminder's bookkeeping.
 import { IDBFactory, IDBKeyRange } from 'fake-indexeddb'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it } from 'vitest'
 import { readBackup } from '@/core/backup/read'
 import type { GearFields } from '@/core/gear'
 import { addToKit, setChecklist } from '@/core/kits'
-import type { NewPhoto, Photo } from '@/core/photos'
+import type { NewPhoto } from '@/core/photos'
 import { readBackupFile } from '@/data/backup-file'
 import { BodycapDatabase } from '@/data/db'
 import { createRepositories } from '@/data/dexie-repositories'
-import type { Live, RestorableBackup } from '@/data/repositories'
+import type { Live, PhotoWithBytes, RestorableBackup } from '@/data/repositories'
 
 const EXPORTED_AT = '2026-10-04T12:30:00.000Z'
 
@@ -240,15 +240,25 @@ const shrunk = (label: string): NewPhoto => ({
   height: 1067,
 })
 
-/** Photos as stored, with their images read, so two copies can be compared */
-const readable = (photos: readonly Photo[]) =>
-  Promise.all(
-    photos.map(async ({ image, thumbnail, ...info }) => ({
-      ...info,
-      image: await image.text(),
-      thumbnail: await thumbnail.text(),
-    })),
-  )
+const text = (bytes: ArrayBuffer | undefined) => new TextDecoder().decode(bytes)
+
+/** Every photo a database holds, with its two images as text, so two copies can be compared */
+async function storedPhotos(db: BodycapDatabase) {
+  const images = new Map((await db.photoImages.toArray()).map(({ id, image }) => [id, image]))
+  return (await db.photos.toArray()).map(({ thumbnail, ...info }) => ({
+    ...info,
+    image: text(images.get(info.id)),
+    thumbnail: text(thumbnail),
+  }))
+}
+
+/** A backup's photos in the same form */
+const backedUpPhotos = (photos: readonly PhotoWithBytes[]) =>
+  photos.map(({ image, thumbnail, ...info }) => ({
+    ...info,
+    image: text(image),
+    thumbnail: text(thumbnail),
+  }))
 
 /** A database holding a body with two photos and a lens with one, backed up as a .zip */
 async function zipped() {
@@ -267,9 +277,7 @@ describe('backup.createZip', () => {
     expect(archive.name).toBe('bodycap-backup-2026-10-05.zip')
     expect(archive.blob.type).toBe('application/zip')
     expect(backup.counts).toEqual({ gear: 2, kits: 0, loans: 0, maintenance: 0, photos: 3 })
-    expect(await readable(backup.storedPhotos)).toEqual(
-      await readable(await source.db.photos.toArray()),
-    )
+    expect(backedUpPhotos(backup.storedPhotos)).toEqual(await storedPhotos(source.db))
   })
 
   it('records the backup, then counts changes from zero again', async () => {
@@ -280,20 +288,13 @@ describe('backup.createZip', () => {
     })
   })
 
-  it('still counts changes saved while the .zip was being made', async () => {
+  it('counts a change saved while the .zip is being made once it is done, and leaves it out', async () => {
     const source = open()
     const camera = await source.repos.gear.add(soldBody)
     await source.repos.photos.add(camera.id, [shrunk('front')])
-    // The first photo read for the .zip waits while the lens is saved, then reads a copy of itself,
-    // which goes to the real arrayBuffer
-    const reading = vi.spyOn(Blob.prototype, 'arrayBuffer').mockImplementationOnce(async function (
-      this: Blob,
-    ) {
-      await source.repos.gear.add(lens)
-      return this.slice().arrayBuffer()
-    })
-    const archive = await source.repos.backup.createZip()
-    reading.mockRestore()
+    const making = source.repos.backup.createZip()
+    const saving = source.repos.gear.add(lens)
+    const [archive] = await Promise.all([making, saving])
     expect((await chosen(archive.blob)).counts.gear).toBe(1)
     expect(await current(source.repos.settings.get())).toMatchObject({ changesSinceBackup: 1 })
   })
@@ -306,9 +307,7 @@ describe('restoring and merging photos', () => {
     const item = await target.repos.gear.add(adapter)
     await target.repos.photos.add(item.id, [shrunk('old')])
     await target.repos.backup.restore(backup)
-    expect(await readable(await target.db.photos.toArray())).toEqual(
-      await readable(await source.db.photos.toArray()),
-    )
+    expect(await storedPhotos(target.db)).toEqual(await storedPhotos(source.db))
     expect(await current(target.repos.gear.list())).toEqual(await current(source.repos.gear.list()))
   })
 
@@ -316,13 +315,14 @@ describe('restoring and merging photos', () => {
     const { backup } = await zipped()
     const target = open()
     const item = await target.repos.gear.add(adapter)
-    const [kept] = await target.repos.photos.add(item.id, [shrunk('kept')])
+    await target.repos.photos.add(item.id, [shrunk('kept')])
+    const before = await storedPhotos(target.db)
     const [first] = backup.storedPhotos
     if (first === undefined) throw new Error('The backup has no photos')
     await expect(
       target.repos.backup.restore({ ...backup, storedPhotos: [first, first] }),
     ).rejects.toThrow()
-    expect(await target.db.photos.toArray()).toEqual([kept])
+    expect(await storedPhotos(target.db)).toEqual(before)
     expect(await current(target.repos.gear.list())).toEqual([item])
   })
 
@@ -334,9 +334,7 @@ describe('restoring and merging photos', () => {
       added: { gear: 2, kits: 0, loans: 0, maintenance: 0, photos: 3 },
       updated: { gear: 0, kits: 0, loans: 0, maintenance: 0, photos: 0 },
     })
-    expect(await readable(await target.db.photos.toArray())).toEqual(
-      await readable(backup.storedPhotos),
-    )
+    expect(await storedPhotos(target.db)).toEqual(backedUpPhotos(backup.storedPhotos))
     expect(await current(target.repos.settings.get())).toMatchObject({ changesSinceBackup: 5 })
     // The same backup again changes nothing
     expect(await target.repos.backup.merge(backup)).toMatchObject({

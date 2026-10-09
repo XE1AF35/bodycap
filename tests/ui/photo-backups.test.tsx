@@ -9,6 +9,7 @@ import { createBackup } from '@/core/backup/format'
 import { formatDate, toIsoDate } from '@/core/dates'
 import type { Gear, GearFields } from '@/core/gear'
 import type { NewPhoto, PhotoInfo } from '@/core/photos'
+import { readBackupFile } from '@/data/backup-file'
 import type { Live } from '@/data/repositories'
 import type { Services } from '@/ui/services'
 import { renderApp, stubDownloads, testServices } from './support'
@@ -97,34 +98,17 @@ function current<T>(live: Live<T>): Promise<T> {
   })
 }
 
-/**
- * Services holding the lens, with `photoCount` photos of it. Making a .zip reads photos back from
- * storage, which jsdom's Blobs don't survive, so a stand-in makes it here. The data tests make
- * real ones.
- */
+/** Services holding the lens, with `photoCount` photos of it */
 async function servicesWith(photoCount: number) {
-  const base = testServices()
-  const item = await base.repositories.gear.add(lens)
+  const services = testServices()
+  const item = await services.repositories.gear.add(lens)
   if (photoCount > 0) {
-    await base.repositories.photos.add(
+    await services.repositories.photos.add(
       item.id,
       Array.from({ length: photoCount }, () => shrunk()),
     )
   }
-  const createZip = vi.fn(() =>
-    Promise.resolve({
-      name: 'bodycap-backup-2026-10-09.zip',
-      blob: new Blob(['zip'], { type: 'application/zip' }),
-    }),
-  )
-  const services: Services = {
-    ...base,
-    repositories: {
-      ...base.repositories,
-      backup: { ...base.repositories.backup, createZip },
-    },
-  }
-  return { services, createZip }
+  return { services }
 }
 
 async function renderSettings(services: Services) {
@@ -138,35 +122,34 @@ const region = (name: string) => within(screen.getByRole('region', { name }))
 describe('backing up photos', () => {
   it('backs up as a .json while there are no photos, with nothing to leave out', async () => {
     const saved = stubDownloads()
-    const { services, createZip } = await servicesWith(0)
+    const { services } = await servicesWith(0)
     const { user } = await renderSettings(services)
     await user.click(region('Backup').getByRole('button', { name: 'Back up now' }))
     await waitFor(() => {
       expect(saved.map(({ name }) => name)).toEqual([expect.stringMatching(/\.json$/)])
     })
-    expect(createZip).not.toHaveBeenCalled()
     expect(region('Backup').queryByRole('button', { name: 'Back up without photos' })).toBeNull()
   })
 
   it('backs up photos too, as a .zip, once there are some', async () => {
     const saved = stubDownloads()
-    const { services, createZip } = await servicesWith(2)
+    const { services } = await servicesWith(2)
     const { user } = await renderSettings(services)
     const backup = region('Backup')
     await user.click(await backup.findByRole('button', { name: 'Back up now' }))
-    expect(
-      await backup.findByText('Backup saved as bodycap-backup-2026-10-09.zip.'),
-    ).toBeInTheDocument()
-    expect(createZip).toHaveBeenCalledOnce()
-    expect(saved).toEqual([
-      { name: 'bodycap-backup-2026-10-09.zip', blob: expect.any(Blob) as unknown },
-    ])
-    expect(saved[0]?.blob.type).toBe('application/zip')
+    const name = `bodycap-backup-${toIsoDate(new Date())}.zip`
+    expect(await backup.findByText(`Backup saved as ${name}.`)).toBeInTheDocument()
+    expect(saved.map((file) => file.name)).toEqual([name])
+    const [file] = saved
+    expect(file?.blob.type).toBe('application/zip')
+    // The same file restores, photos and all
+    const read = await readBackupFile(file?.blob ?? new Blob())
+    expect(read).toMatchObject({ ok: true, value: { counts: { gear: 1, photos: 2 } } })
   })
 
   it('can still back up everything but the photos, as a smaller .json', async () => {
     const saved = stubDownloads()
-    const { services, createZip } = await servicesWith(2)
+    const { services } = await servicesWith(2)
     const { user } = await renderSettings(services)
     const leaveOut = await region('Backup').findByRole('button', {
       name: 'Back up without photos',
@@ -178,7 +161,6 @@ describe('backing up photos', () => {
     await waitFor(() => {
       expect(saved.map(({ name }) => name)).toEqual([expect.stringMatching(/\.json$/)])
     })
-    expect(createZip).not.toHaveBeenCalled()
   })
 })
 

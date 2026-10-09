@@ -5,7 +5,7 @@ import { MAX_BACKUP_BYTES } from '@/core/backup/format'
 import { readBackup } from '@/core/backup/read'
 import { MAX_ZIP_BACKUP_BYTES, readZipBackup } from '@/core/backup/zip'
 import { err, ok, type Result } from '@/core/result'
-import { blobPart } from './backup-zip'
+import { ownBuffer } from './backup-zip'
 import type { RestorableBackup } from './repositories'
 
 /** The parts of a File this needs, so tests can pass a fake */
@@ -53,8 +53,8 @@ async function readZip(file: BackupFileSource): Promise<Result<RestorableBackup>
     ...backup,
     storedPhotos: photos.map(({ image, thumbnail, ...info }) => ({
       ...info,
-      image: new Blob([blobPart(image)], { type: info.mimeType }),
-      thumbnail: new Blob([blobPart(thumbnail)], { type: info.mimeType }),
+      image: ownBuffer(image),
+      thumbnail: ownBuffer(thumbnail),
     })),
   })
 }

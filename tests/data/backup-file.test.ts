@@ -91,14 +91,17 @@ describe('readBackupFile', () => {
       value: {
         ...withPhoto,
         storedPhotos: [
-          { ...photo, image: expect.any(Blob) as unknown, thumbnail: expect.any(Blob) as unknown },
+          {
+            ...photo,
+            image: expect.any(ArrayBuffer) as unknown,
+            thumbnail: expect.any(ArrayBuffer) as unknown,
+          },
         ],
       },
     })
     const [stored] = result.ok ? result.value.storedPhotos : []
-    expect(await stored?.image.text()).toBe(IMAGE)
-    expect(await stored?.thumbnail.text()).toBe(THUMBNAIL)
-    expect([stored?.image.type, stored?.thumbnail.type]).toEqual(['image/jpeg', 'image/jpeg'])
+    const text = (bytes: ArrayBuffer | undefined) => new TextDecoder().decode(bytes)
+    expect([text(stored?.image), text(stored?.thumbnail)]).toEqual([IMAGE, THUMBNAIL])
   })
 
   it('tells a .zip by its content, whatever it is called', async () => {

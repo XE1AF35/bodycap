@@ -99,6 +99,7 @@ describe('database', () => {
       { name: 'loans', key: 'id', indexes: ['gearId', 'dueDate', '[gearId+dateOut]'] },
       { name: 'maintenance', key: 'id', indexes: ['gearId', 'date', '[gearId+date]'] },
       { name: 'photos', key: 'id', indexes: ['gearId'] },
+      { name: 'photoImages', key: 'id', indexes: [] },
     ])
   })
 })

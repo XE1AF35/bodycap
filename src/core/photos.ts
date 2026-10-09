@@ -57,14 +57,19 @@ export interface PhotoInfo extends PhotoFields {
   readonly updatedAt: string
 }
 
-/** A stored photo: its details, the image, and its thumbnail */
+/**
+ * A photo as lists and the gallery show it: its details and its thumbnail. The full-size image is
+ * read on its own, only when it's needed.
+ */
 export interface Photo extends PhotoInfo {
-  readonly image: Blob
   readonly thumbnail: Blob
 }
 
 /** A photo shrunk in the browser and ready to save, before it has an ID */
-export type NewPhoto = Pick<Photo, 'image' | 'thumbnail' | 'mimeType' | 'width' | 'height'>
+export interface NewPhoto extends Pick<PhotoInfo, 'mimeType' | 'width' | 'height'> {
+  readonly image: Blob
+  readonly thumbnail: Blob
+}
 
 const isSide = (pixels: number) => Number.isInteger(pixels) && pixels >= 1 && pixels <= PHOTO_EDGE
 

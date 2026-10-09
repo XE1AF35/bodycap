@@ -7,7 +7,7 @@ import type { Kit, KitDetails, KitFields } from '@/core/kits'
 import type { Loan, LoanDetails } from '@/core/loans'
 import type { MaintenanceDetails, MaintenanceRecord } from '@/core/maintenance'
 import type { CurrencyCode } from '@/core/money'
-import type { NewPhoto, Photo } from '@/core/photos'
+import type { NewPhoto, Photo, PhotoInfo } from '@/core/photos'
 
 /** A query that gives fresh results whenever its data changes, until unsubscribed */
 export interface Live<T> {
@@ -84,6 +84,8 @@ export interface PhotoRepository {
   covers(): Live<ReadonlyMap<string, Photo>>
   /** How many photos there are in all, which decides whether a backup is a .json or a .zip */
   count(): Live<number>
+  /** A photo's full-size image, read only when it's opened. Undefined once it's deleted. */
+  image(id: string): Live<Blob | undefined>
   /**
    * Saves photos for an item, all of them or none, in the order given. The first becomes the cover
    * if the item has none. Rejects with GearNotFoundError if the item is gone, or RuleError if they
@@ -132,10 +134,16 @@ export interface BackupArchive {
   readonly blob: Blob
 }
 
+/** A photo from a backup, with its image and thumbnail as bytes, ready to store */
+export interface PhotoWithBytes extends PhotoInfo {
+  readonly image: ArrayBuffer
+  readonly thumbnail: ArrayBuffer
+}
+
 /** A backup that readBackupFile has checked, with each photo it lists ready to store */
 export interface RestorableBackup extends Backup {
   /** In the order the backup lists them. None for a .json backup, which leaves photos out. */
-  readonly storedPhotos: readonly Photo[]
+  readonly storedPhotos: readonly PhotoWithBytes[]
 }
 
 export interface BackupStore {

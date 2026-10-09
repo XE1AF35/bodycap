@@ -4,7 +4,7 @@ import type { Gear } from '@/core/gear'
 import { isCurrencyCode } from '@/core/money'
 import type { Photo, PhotoInfo } from '@/core/photos'
 import { normaliseSerial } from '@/core/serials'
-import type { BodycapDatabase, GearRecord, SettingRecord } from './db'
+import type { BodycapDatabase, GearRecord, PhotoRecord, SettingRecord } from './db'
 import type { Settings } from './repositories'
 
 export function toRecord(gear: Gear): GearRecord {
@@ -20,7 +20,7 @@ export function toGear(record: GearRecord): Gear {
 }
 
 /** A stored photo's details, leaving its images behind, as a backup's data lists them */
-export function toPhotoInfo(photo: Photo): PhotoInfo {
+export function toPhotoInfo(photo: PhotoInfo): PhotoInfo {
   const { id, gearId, isCover, mimeType, width, height, bytes, thumbnailBytes } = photo
   const { createdAt, updatedAt } = photo
   return {
@@ -34,6 +34,14 @@ export function toPhotoInfo(photo: Photo): PhotoInfo {
     thumbnailBytes,
     createdAt,
     updatedAt,
+  }
+}
+
+/** A stored photo as the app shows it, with its thumbnail as a Blob of its own type */
+export function toPhoto(record: PhotoRecord): Photo {
+  return {
+    ...toPhotoInfo(record),
+    thumbnail: new Blob([record.thumbnail], { type: record.mimeType }),
   }
 }
 

@@ -3,7 +3,7 @@
 // since WebP and JPEG are already compressed, and only data.json is deflated.
 import { strToU8, Zip, ZipDeflate, ZipPassThrough, type FlateError } from 'fflate'
 import { photoEntryNames, ZIP_DATA_NAME } from '@/core/backup/zip'
-import type { Photo } from '@/core/photos'
+import type { PhotoInfo } from '@/core/photos'
 
 /** Output is gathered into a Blob this often, so a large backup isn't held twice in memory */
 const FLUSH_BYTES = 8_000_000
@@ -18,10 +18,28 @@ export function blobPart(bytes: Uint8Array): Uint8Array<ArrayBuffer> {
     : bytes.slice()
 }
 
-/** A .zip backup holding `dataJson` as data.json, then each photo's image and thumbnail */
+/** The bytes on an ArrayBuffer of their own, as photos are stored */
+export function ownBuffer(bytes: Uint8Array): ArrayBuffer {
+  const { buffer, byteOffset, byteLength } = bytes
+  return buffer instanceof ArrayBuffer && byteOffset === 0 && byteLength === buffer.byteLength
+    ? buffer
+    : bytes.slice().buffer
+}
+
+/** What the .zip needs of a photo besides its full-size image */
+export interface ZipPhoto extends Pick<PhotoInfo, 'id' | 'mimeType'> {
+  readonly thumbnail: ArrayBuffer
+}
+
+/**
+ * A .zip backup holding `dataJson` as data.json, then each photo's image and thumbnail. Each image
+ * is read as it goes in, so only one is held at a time. Inside a transaction, `readImage` may only
+ * wait on the database, and nothing else here waits at all.
+ */
 export async function zipBackup(
   dataJson: string,
-  photos: readonly Photo[],
+  photos: readonly ZipPhoto[],
+  readImage: (id: string) => Promise<ArrayBuffer>,
   madeAt: Date,
 ): Promise<Blob> {
   const parts: Blob[] = []
@@ -52,8 +70,8 @@ export async function zipBackup(
   add(new ZipDeflate(ZIP_DATA_NAME, { level: 6 }), strToU8(dataJson))
   for (const photo of photos) {
     const names = photoEntryNames(photo)
-    add(new ZipPassThrough(names.image), new Uint8Array(await photo.image.arrayBuffer()))
-    add(new ZipPassThrough(names.thumbnail), new Uint8Array(await photo.thumbnail.arrayBuffer()))
+    add(new ZipPassThrough(names.image), new Uint8Array(await readImage(photo.id)))
+    add(new ZipPassThrough(names.thumbnail), new Uint8Array(photo.thumbnail))
   }
   zip.end()
   if (failure !== undefined) throw failure

@@ -50,7 +50,6 @@ describe('photo repository', () => {
         height: 1067,
         bytes: 7,
         thumbnailBytes: 7,
-        image: expect.any(Blob) as unknown,
         thumbnail: expect.any(Blob) as unknown,
         createdAt: NOW,
         updatedAt: NOW,
@@ -65,8 +64,10 @@ describe('photo repository', () => {
     ])
     const saved = await current(repos.photos.forGear(item.id))
     expect(saved.map(({ id }) => id)).toEqual(added.map(({ id }) => id))
-    expect(await saved[0]?.image.text()).toBe('image a')
+    expect(await current(repos.photos.image(added[0]?.id ?? ''))).toEqual(expect.any(Blob))
+    expect(await (await current(repos.photos.image(added[0]?.id ?? '')))?.text()).toBe('image a')
     expect(await saved[1]?.thumbnail.text()).toBe('thumb b')
+    expect(saved[1]?.thumbnail.type).toBe('image/webp')
     expect(await changes(opened)).toBe(3)
   })
 
@@ -154,6 +155,15 @@ describe('photo repository', () => {
     ])
   })
 
+  it("reads a photo's full-size image on its own, and none once it's deleted", async () => {
+    const opened = await withPhotos()
+    const image = await current(opened.repos.photos.image(opened.b.id))
+    expect([await image?.text(), image?.type]).toEqual(['image b', 'image/webp'])
+    await opened.repos.photos.remove(opened.b.id)
+    expect(await current(opened.repos.photos.image(opened.b.id))).toBeUndefined()
+    expect(await opened.db.photoImages.count()).toBe(1)
+  })
+
   it('does nothing when the photo is already gone', async () => {
     const opened = await withPhotos()
     await opened.repos.photos.remove(opened.b.id)
@@ -186,7 +196,8 @@ describe('photo repository', () => {
     const zoom = await opened.repos.gear.add(lens)
     const [zoomCover] = await opened.repos.photos.add(zoom.id, [shrunk('z')])
     await opened.repos.gear.remove(opened.item.id)
-    expect(await opened.db.photos.toArray()).toEqual([zoomCover])
+    expect(await opened.db.photos.toCollection().primaryKeys()).toEqual([zoomCover?.id])
+    expect(await opened.db.photoImages.toCollection().primaryKeys()).toEqual([zoomCover?.id])
   })
 
   it('takes a restored backup as everything, so photos here go with the rest', async () => {
@@ -196,6 +207,7 @@ describe('photo repository', () => {
     if (!backup.ok) throw new Error(backup.error)
     await opened.repos.backup.restore(backup.value)
     expect(await opened.db.photos.count()).toBe(0)
+    expect(await opened.db.photoImages.count()).toBe(0)
     expect(await current(opened.repos.photos.covers())).toEqual(new Map())
   })
 })

@@ -89,13 +89,15 @@ export function createRepositories(
     remove: (id) =>
       db.transaction(
         'rw',
-        [db.gear, db.kits, db.loans, db.maintenance, db.photos, db.settings],
+        [db.gear, db.kits, db.loans, db.maintenance, db.photos, db.photoImages, db.settings],
         async () => {
           if ((await db.gear.get(id)) === undefined) return
           await db.gear.delete(id)
           await db.loans.where('gearId').equals(id).delete()
           await db.maintenance.where('gearId').equals(id).delete()
-          await db.photos.where('gearId').equals(id).delete()
+          const photoIds = await db.photos.where('gearId').equals(id).primaryKeys()
+          await db.photos.bulkDelete(photoIds)
+          await db.photoImages.bulkDelete(photoIds)
           const at = now().toISOString()
           const kits = await db.kits.where('gearIds').equals(id).distinct().toArray()
           await db.kits.bulkPut(kits.map((kit) => ({ ...removeFromKit(kit, id), updatedAt: at })))

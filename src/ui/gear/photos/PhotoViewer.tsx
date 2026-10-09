@@ -2,7 +2,7 @@
 // making it the cover, or deleting it once the person confirms. Keeping these in the dialog leaves
 // one stop per photo in the gallery for keyboards, and room for the photos on a phone.
 import { Trash2 } from 'lucide-react'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import type { Gear } from '@/core/gear'
 import type { Photo } from '@/core/photos'
 import {
@@ -28,6 +28,7 @@ import {
 } from '@/ui/components/ui/dialog'
 import { gearName } from '@/ui/gear/labels'
 import { saveProblem } from '@/ui/gear/save-problem'
+import { useLive } from '@/ui/hooks/useLive'
 import { BlobImage } from '@/ui/photos/BlobImage'
 import { useServices } from '@/ui/services'
 
@@ -38,6 +39,30 @@ export function CoverMark() {
       <span aria-hidden="true" className="size-1.5 rounded-full bg-signal" />
       Cover
     </span>
+  )
+}
+
+/**
+ * The photo full size, read only while the viewer is open. Until it arrives, the thumbnail stands
+ * in, scaled up, so the dialog has its shape from the start.
+ */
+function FullImage({ photo, alt }: { readonly photo: Photo; readonly alt: string }) {
+  const { repositories } = useServices()
+  const image = useLive(
+    useMemo(() => repositories.photos.image(photo.id), [repositories, photo.id]),
+  )
+  if (image.status === 'error') {
+    return <p role="alert">This photo couldn't be loaded. Reload the page to try again.</p>
+  }
+  const full = image.status === 'ready' ? image.value : undefined
+  return (
+    <BlobImage
+      blob={full ?? photo.thumbnail}
+      alt={alt}
+      width={photo.width}
+      height={photo.height}
+      className="max-h-[70dvh] w-full rounded-md bg-muted object-contain"
+    />
   )
 }
 
@@ -112,13 +137,7 @@ export function PhotoViewer({ item, photo, number, total, onDelete }: PhotoViewe
         <DialogHeader>
           <DialogTitle>{`Photo ${String(number)} of ${String(total)}`}</DialogTitle>
         </DialogHeader>
-        <BlobImage
-          blob={photo.image}
-          alt={`${gearName(item)}, ${position}`}
-          width={photo.width}
-          height={photo.height}
-          className="max-h-[70dvh] w-full rounded-md bg-muted object-contain"
-        />
+        <FullImage photo={photo} alt={`${gearName(item)}, ${position}`} />
         {photo.isCover && (
           <p className="text-sm text-muted-foreground">This is the item's cover photo.</p>
         )}

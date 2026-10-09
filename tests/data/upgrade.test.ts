@@ -80,7 +80,8 @@ describe('upgrading from version 1', () => {
       await db.loans.count(),
       await db.maintenance.count(),
       await db.photos.count(),
-    ]).toEqual([0, 0, 0, 0])
+      await db.photoImages.count(),
+    ]).toEqual([0, 0, 0, 0, 0])
   })
 })
 
@@ -143,6 +144,6 @@ describe('upgrading from version 2', () => {
         .equals(gear[0]?.id ?? '')
         .toArray(),
     ).toEqual([clean])
-    expect(await db.photos.count()).toBe(0)
+    expect([await db.photos.count(), await db.photoImages.count()]).toEqual([0, 0])
   })
 })
