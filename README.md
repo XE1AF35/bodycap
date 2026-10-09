@@ -19,6 +19,9 @@ it keeps everything in your own browser, works offline, and never needs an accou
   sees a read-only copy and can add its gear to their own wishlist.
 - **Loans**: who has an item, how to reach them, and when it's due back. What's out shows on the
   dashboard, and an overdue loan needs attention. Each item keeps a history of its loans.
+- **Photos** of each item, up to 12, taken with a phone's camera or chosen from your files.
+  Bodycap shrinks each one in your browser and leaves behind the details a camera hides in the
+  file, including where it was taken. The cover photo shows beside the item in your gear list.
 - **A maintenance log** for each item: sensor cleans, firmware updates, and repairs, with what they
   cost and who did them.
 - **What works with what**: a lens's page lists your cameras, and a body's page lists your lenses,
@@ -34,6 +37,10 @@ it keeps everything in your own browser, works offline, and never needs an accou
   serial entered twice, and a reminder when it's time for a backup. Below that, your gear in
   numbers: bodies and lenses by mount, how long ago gear was bought, the warranties still running,
   and how much of your gear is in kits.
+- **A spreadsheet and an insurance list**: download your gear as a CSV file for Excel, Numbers, or
+  Google Sheets, or print a list of everything you have, with serial numbers, what you paid, and
+  what it's insured for, totalled in each currency. Printing it, or saving it as a PDF, always
+  comes out dark on white, whichever theme you use.
 - **Money in any currency**, NZD by default, with each amount keeping its own currency. Settings can
   choose the currency new amounts start in.
 
@@ -43,14 +50,21 @@ Everything is stored in your browser on your device, and nothing is sent anywher
 accounts, no analytics, and no tracking.
 
 That makes **backups important**. In Settings, Back up now saves one file with all your gear,
-kits, loans, and maintenance. Keep it somewhere other than your device, such as cloud storage or a
-USB drive. The dashboard reminds you when it's time for another, two weeks after the last one by
+kits, loans, and maintenance: a `.json` file, or a `.zip` once you have photos, holding them too.
+Settings can also make a much smaller `.json` without the photos. Keep your backup somewhere other
+than your device, such as cloud storage or a USB drive. The dashboard reminds you when it's time for another, two weeks after the last one by
 default, and Settings can make that a week or a month.
 
-Restore shows what a backup holds before anything changes, and nothing changes until you confirm.
-It can replace everything with what's in the backup, or add the backup to what's there, such as
-to bring together gear from two devices. Adding never removes anything, and where the same record
-is in both, the copy changed most recently is kept.
+Restore takes either kind of file. It shows what a backup holds before anything changes, and
+nothing changes until you confirm. It can replace everything with what's in the backup, or add the
+backup to what's there, such as to bring together gear from two devices. Adding never removes
+anything, and where the same record is in both, the copy changed most recently is kept. If a backup
+without photos would replace the photos you have, it says so first.
+
+**Photos never leave your device** either. Each one is redrawn in your browser before it's saved,
+which leaves behind everything else in the original file, such as where it was taken and the
+camera's serial number. The CSV file and the insurance list are for reading and printing, not
+backups: they leave out kits, loans, maintenance, and photos, and can't be restored.
 
 **Shared kit links** say what each item is (its brand, model, mount, and focal lengths) and
 nothing about whose it is: no serial numbers, and nothing about where or when it was bought, where
@@ -85,7 +99,6 @@ the storage it needs, and it says so if that happens.
 
 ## Coming later
 
-- Photos, CSV export, and a printable list for insurance
 - A shoots log and spending charts
 - Optional AI features, with everything else always working without them
 
@@ -94,8 +107,8 @@ the storage it needs, and it says so if that happens.
 Bodycap is a static site built with React 19, Vite 8, and TypeScript in strict mode. Data lives in
 IndexedDB through Dexie, behind small repositories so another store could replace it. The UI uses
 TanStack Router (with hash URLs, since GitHub Pages can't serve app routes), Tailwind CSS 4, and
-shadcn components on Base UI. Zod checks backup files, and vite-plugin-pwa with Workbox provides
-offline support.
+shadcn components on Base UI. Zod checks backup files, fflate writes and reads `.zip` backups, and
+vite-plugin-pwa with Workbox provides offline support.
 
 ### Getting started
 
@@ -129,10 +142,12 @@ Before the first `pnpm e2e`, install the test browsers with
 
 ```text
 src/core/   Domain logic with no React, storage, or browser APIs: validation, lifecycle rules,
-            kits, loans, maintenance, mount compatibility, the system map, value totals, stats,
-            alerts, search, shared kit links, and the backup format, its upgrades, and merging
+            kits, loans, maintenance, photo rules, mount compatibility, the system map, value
+            totals, stats, alerts, search, shared kit links, the CSV file, the insurance list, and
+            the backup format, its .zip layout, its upgrades, and merging
 src/data/   The only code that uses Dexie: the database and its upgrades, repositories, backup,
-            restore, and merge, and storage helpers
+            restore, and merge, and storage helpers. Photos are stored as bytes, since Safari
+            won't store a Blob in a private window
 src/ui/     React components and pages, which reach storage only through the repositories
 build/      Build helpers: the Content Security Policy, version.json, and the checks on the
             built site
@@ -152,9 +167,11 @@ ESLint keeps those boundaries: `src/core` can't import React, Dexie, or browser 
 - **End-to-end tests** run in Playwright against the built site, with its real base path, security
   policy, and service worker: adding gear and packing a kit with only a keyboard, lending and
   returning, logging maintenance, search, a backup restored into an empty browser and merged into
-  another, a kit shared into another browser's wishlist, offline use, the install manifest, focus
-  outlines, layouts that must fit on a phone, and axe accessibility checks against WCAG 2.2 AA on
-  every screen and the main dialogs in both themes. Every test fails on a console error or a
+  another, a photo with a GPS location stored without it, a `.zip` backup with photos restored
+  into an empty browser byte for byte, the CSV file, the insurance list in print, a kit shared into
+  another browser's wishlist, offline use, the install manifest, focus outlines, layouts that must
+  fit on a phone, and axe accessibility checks against WCAG 2.2 AA on every screen and the main
+  dialogs in both themes. Every test fails on a console error or a
   security policy violation. CI runs them in Chromium; locally, WebKit also runs the storage and
   offline tests.
 
@@ -170,6 +187,13 @@ ESLint keeps those boundaries: `src/core` can't import React, Dexie, or browser 
   restore or merge.
 - Shared kit links are treated the same way: size-capped, checked field by field, and held to the
   same rules as the gear form, so a changed link can't bring in anything the app wouldn't save.
+- A `.zip` backup is checked before anything in it is unpacked: it may hold only the names Bodycap
+  writes, each no bigger than Bodycap would make it, so a hostile file can't unpack to more than
+  it holds. Nothing in the file chooses where anything goes, and every photo must be exactly the
+  size its data says.
+- Photos are redrawn on a canvas and encoded again before they're stored, so nothing hidden in the
+  original file, such as its location, is kept.
+- CSV cells that a spreadsheet would run as a formula start with an apostrophe, as OWASP advises.
 - Charts are SVG drawn with attributes, not inline styles, so the security policy needs no
   exceptions for them.
 
@@ -192,8 +216,9 @@ pnpm only installs versions that have been public for at least a day, refuses pa
 publishing trust has dropped, and runs no install scripts. Dependabot suggests updates weekly, a
 week after each release. Workflow actions are pinned to full commit SHAs.
 
-As of October 2026, the site loads 183 kB of gzipped JavaScript at first, about 252 kB across all
-its pages, and 9 kB of CSS.
+As of October 2026, the site loads 185 kB of gzipped JavaScript at first, about 268 kB across all
+its pages, and 10 kB of CSS. The code for making and reading `.zip` backups loads only when it's
+needed.
 
 ## Licence
 
