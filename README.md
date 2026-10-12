@@ -5,7 +5,11 @@ it keeps everything in your own browser, works offline, and never needs an accou
 
 **Open it at <https://xe1af35.github.io/bodycap/>**
 
+![The Bodycap dashboard, with a gear count, its value, backup status, and a breakdown by lens mount](docs/screenshots/dashboard.png)
+
 ## What it does
+
+![The gear list, with search, filters by category, status, and mount, and a table of gear](docs/screenshots/gear.png)
 
 - **Your gear in one place**: bodies, lenses, flashes, tripods, bags, filters, memory cards,
   batteries, drones, mount adapters, and anything else, with serial numbers, where and when you
