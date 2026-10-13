@@ -31,6 +31,10 @@ describe('the catalogue data', () => {
     expect(entries.filter(({ category }) => category === 'camera-body').length).toBeGreaterThan(50)
   })
 
+  it('has lenses in it', () => {
+    expect(entries.filter(({ category }) => category === 'lens').length).toBeGreaterThan(200)
+  })
+
   it('never uses an ID twice', () => {
     expect(duplicates(entries.map(({ id }) => id))).toEqual([])
   })
