@@ -4,6 +4,7 @@ import { CATEGORY_LABELS, STATUS_LABELS, type Category, type Gear, type Status }
 import { LOCALE } from './locale'
 import type { MountId } from './mounts'
 import { normaliseSerial } from './serials'
+import { fold } from './text'
 
 export type SearchItem = Pick<
   Gear,
@@ -36,14 +37,6 @@ export interface GearQuery {
   /** Name by default */
   readonly sort?: SortKey | undefined
   readonly descending?: boolean | undefined
-}
-
-/**
- * Lower case with accents removed, so searches ignore both. NFKD also turns full-width and other
- * compatibility forms into plain letters and digits.
- */
-function fold(text: string): string {
-  return text.normalize('NFKD').replace(/\p{M}/gu, '').toLowerCase()
 }
 
 /** A test for whether an item contains every word typed, in any of its text fields */

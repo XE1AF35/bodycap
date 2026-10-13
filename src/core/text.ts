@@ -26,3 +26,11 @@ const graphemes = new Intl.Segmenter(LOCALE, { granularity: 'grapheme' })
 export function characterCount(text: string): number {
   return Array.from(graphemes.segment(text)).length
 }
+
+/**
+ * Lower case with accents removed, so searches ignore both. NFKD also turns full-width and other
+ * compatibility forms into plain letters and digits.
+ */
+export function fold(text: string): string {
+  return text.normalize('NFKD').replace(/\p{M}/gu, '').toLowerCase()
+}

@@ -1,6 +1,6 @@
 // Text cleaning for what people type: tidy single-line fields, and notes that keep their line breaks.
 import { describe, expect, it } from 'vitest'
-import { characterCount, cleanLine, cleanMultiline } from '@/core/text'
+import { characterCount, cleanLine, cleanMultiline, fold } from '@/core/text'
 
 describe('cleanLine', () => {
   it.each([
@@ -39,5 +39,20 @@ describe('characterCount', () => {
     ['e\u0301', 1],
   ])('counts %j as %i characters', (text, count) => {
     expect(characterCount(text)).toBe(count)
+  })
+})
+
+describe('fold', () => {
+  it.each([
+    ['Sony A7 IV', 'sony a7 iv'],
+    // Precomposed and decomposed accents both drop
+    ['Caf\u00e9', 'cafe'],
+    ['Cafe\u0301', 'cafe'],
+    ['\u00c5ngstr\u00f6m', 'angstrom'],
+    // Full-width letters and digits become plain ones
+    ['\uff21\uff17\uff13', 'a73'],
+    ['', ''],
+  ])('folds %j into %j', (text, folded) => {
+    expect(fold(text)).toBe(folded)
   })
 })
