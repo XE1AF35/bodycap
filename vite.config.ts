@@ -116,6 +116,15 @@ export default defineConfig({
           css: { include: [/src\/index\.css/] },
         },
       },
+      {
+        extends: true,
+        test: {
+          // The build's own checks, such as the size budgets
+          name: 'build',
+          include: ['tests/build/**/*.test.ts'],
+          environment: 'node',
+        },
+      },
     ],
   },
 })

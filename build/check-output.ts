@@ -1,9 +1,12 @@
 // Checks the built app before it can be published: the web app manifest and its icons, the service
-// worker, version.json, and the security meta tags. Anything missing fails the build, rather than an install.
-import { existsSync, readFileSync } from 'node:fs'
+// worker, version.json, the security meta tags, and the size budgets. Anything missing or too big
+// fails the build, rather than an install.
+import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { gzipSync } from 'node:zlib'
 import type { Plugin } from 'vite'
 import { z } from 'zod'
+import { budgetProblems, firstLoadScripts, type ScriptSize } from './bundle-budget.ts'
 
 const iconSchema = z.object({
   src: z.string(),
@@ -62,6 +65,7 @@ export function outputProblems(outDir: string, base: string, schema: number): st
   for (const [text, what] of needed) {
     if (!html.includes(text)) problems.push(`index.html is missing ${what}.`)
   }
+  problems.push(...sizeProblems(outDir, base, html))
 
   if (!existsSync(file('manifest.webmanifest'))) {
     problems.push('There is no manifest.webmanifest.')
@@ -85,6 +89,21 @@ export function outputProblems(outDir: string, base: string, schema: number): st
     if (!existsSync(file(src))) problems.push(`The manifest's icon ${src} isn't in the build.`)
   }
   return problems
+}
+
+/** Scripts over the size budgets, measured gzipped */
+function sizeProblems(outDir: string, base: string, html: string): string[] {
+  const size = (file: string): ScriptSize => ({
+    file,
+    gzipped: gzipSync(readFileSync(join(outDir, file))).length,
+  })
+  const firstLoad = firstLoadScripts(html, base).filter((file) => existsSync(join(outDir, file)))
+  const assets = existsSync(join(outDir, 'assets')) ? readdirSync(join(outDir, 'assets')) : []
+  const lazy = assets
+    .filter((name) => name.endsWith('.js'))
+    .map((name) => `assets/${name}`)
+    .filter((file) => !firstLoad.includes(file))
+  return budgetProblems({ firstLoad: firstLoad.map(size), lazy: lazy.map(size) })
 }
 
 export function checkOutput(outDir: string, base: string, schema: number): Plugin {
