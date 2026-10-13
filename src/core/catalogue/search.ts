@@ -39,6 +39,8 @@ interface IndexedEntry {
 
 /** How well a name matched. Each is better true than false, and earlier ones count for more. */
 interface Match {
+  /** Every token typed matched, with none skipped as a half-typed filler word */
+  readonly complete: boolean
   /** Every token typed matched a whole word, not just the start of one */
   readonly whole: boolean
   /** The model matched, not an alias */
@@ -48,7 +50,13 @@ interface Match {
   readonly brand: boolean
 }
 
-const MATCH_ORDER = ['whole', 'model', 'inOrder', 'brand'] as const satisfies (keyof Match)[]
+const MATCH_ORDER = [
+  'complete',
+  'whole',
+  'model',
+  'inOrder',
+  'brand',
+] as const satisfies (keyof Match)[]
 
 /** Negative when `a` is the better match */
 function compareMatches(a: Match, b: Match): number {
@@ -86,33 +94,74 @@ interface Query {
   readonly open: boolean
 }
 
+/** Where one query token matched in a name */
+interface TokenMatch {
+  /** The first of the name's tokens it matched */
+  readonly first: number
+  /** It matched one whole word, not the start of one or several words run together */
+  readonly whole: boolean
+}
+
 /**
- * Which of the name's tokens each query token matched, each a different one, or nothing if any
- * failed. Words match by prefix. Numbers match exactly, except a last number still being typed, so
- * "24-7" finds 70.
+ * The words from `start` that `word` runs together, such as x and t for "xt", ending part-way
+ * through the last one. Nothing unless it spans at least two words, all unused.
  */
-function matchTokens({ tokens, open }: Query, name: readonly string[]): number[] | undefined {
-  const used: number[] = []
+function spanWords(
+  word: string,
+  name: readonly string[],
+  start: number,
+  used: ReadonlySet<number>,
+): number[] | undefined {
+  const span: number[] = []
+  let rest = word
+  for (let i = start; i < name.length; i++) {
+    const part = name[i] ?? ''
+    if (used.has(i) || isNumber(part)) return undefined
+    span.push(i)
+    if (span.length > 1 && part.startsWith(rest)) return span
+    if (rest.length <= part.length || !rest.startsWith(part)) return undefined
+    rest = rest.slice(part.length)
+  }
+  return undefined
+}
+
+/**
+ * Where each query token matched, each in different tokens of the name, or nothing if any failed.
+ * Words match by prefix, or by running neighbouring words together, so "xt5" finds X-T5. Numbers
+ * match exactly, except a last number still being typed, so "24-7" finds 70.
+ */
+function matchTokens({ tokens, open }: Query, name: readonly string[]): TokenMatch[] | undefined {
+  const used = new Set<number>()
+  const matched: TokenMatch[] = []
   const last = tokens.length - 1
   for (const [t, token] of tokens.entries()) {
     const prefix = !isNumber(token) || (open && t === last)
     const index = name.findIndex(
-      (word, i) => !used.includes(i) && (prefix ? word.startsWith(token) : word === token),
+      (word, i) => !used.has(i) && (prefix ? word.startsWith(token) : word === token),
     )
-    if (index === -1) return undefined
-    used.push(index)
+    if (index !== -1) {
+      used.add(index)
+      matched.push({ first: index, whole: name[index] === token })
+      continue
+    }
+    if (isNumber(token)) return undefined
+    const first = name.findIndex((_, i) => spanWords(token, name, i, used) !== undefined)
+    if (first === -1) return undefined
+    for (const i of spanWords(token, name, first, used) ?? []) used.add(i)
+    matched.push({ first, whole: false })
   }
-  return used
+  return matched
 }
 
 function matchName(query: Query, name: IndexedName): Match | undefined {
-  const used = matchTokens(query, name.tokens)
-  if (used === undefined) return undefined
+  const matched = matchTokens(query, name.tokens)
+  if (matched === undefined) return undefined
   return {
-    whole: used.every((index, t) => name.tokens[index] === query.tokens[t]),
+    complete: true,
+    whole: matched.every(({ whole }) => whole),
     model: !name.alias,
-    inOrder: used.every((index, t) => index > (used[t - 1] ?? -1)),
-    brand: used.some((index) => index < name.brandTokens),
+    inOrder: matched.every(({ first }, t) => first > (matched[t - 1]?.first ?? -1)),
+    brand: matched.some(({ first }) => first < name.brandTokens),
   }
 }
 
@@ -124,7 +173,8 @@ function matchTyping(query: Query, name: IndexedName): Match | undefined {
   if (typing === undefined || ![...FILLER, 'f'].some((filler) => filler.startsWith(typing))) {
     return undefined
   }
-  return matchName({ tokens: query.tokens.slice(0, -1), open: false }, name)
+  const skipped = matchName({ tokens: query.tokens.slice(0, -1), open: false }, name)
+  return skipped && { ...skipped, complete: false }
 }
 
 /** The best match among an entry's names */
@@ -140,7 +190,7 @@ function bestMatch(query: Query, names: readonly IndexedName[]): Match | undefin
 /**
  * Builds the search once for `entries`, ready for each keystroke. A body or lens category shows
  * that category only, no category shows both, and other categories show nothing. Suggestions come
- * best first: whole words, then the model over an alias, words in the order typed, the brand
+ * best first: nothing skipped, whole words, then the model over an alias, words in the order typed, the brand
  * matched, shorter names, and then alphabetical order.
  */
 export function createCatalogueSearch(

@@ -72,6 +72,33 @@ describe('createCatalogueSearch', () => {
     expect(ids(search(text, { category: '' }))).toEqual([A7_IV.id])
   })
 
+  it.each([
+    ['xt5', 'Fujifilm', 'X-T5'],
+    ['em1 iii', 'Olympus', 'OM-D E-M1 Mark III'],
+    ['omd em1', 'Olympus', 'OM-D E-M1 Mark III'],
+    ['gh5s', 'Panasonic', 'Lumix GH5S'],
+  ])('lets %j run words of the name together', (text, brand, model) => {
+    const entry = body(brand, model)
+    expect(ids(createCatalogueSearch([entry])(text, { category: '' }))).toEqual([entry.id])
+  })
+
+  it('only runs together words that sit next to each other in the name', () => {
+    // X and T are both in the name, but not side by side
+    const apart = body('Fujifilm', 'X-S10 T')
+    expect(createCatalogueSearch([apart])('xt', { category: '' }).total).toBe(0)
+  })
+
+  it('finds nothing when a run-together word goes on past the end of the name', () => {
+    expect(createCatalogueSearch([body('Fujifilm', 'X-T')])('xtz', { category: '' }).total).toBe(0)
+  })
+
+  it('puts a run-together match after one that matched a word', () => {
+    const exact = body('Fujifilm', 'XT Special')
+    const joined = body('Fujifilm', 'X-T')
+    const result = createCatalogueSearch([joined, exact])('xt', { category: '' })
+    expect(ids(result)).toEqual([exact.id, joined.id])
+  })
+
   it('matches each name on its own, never a mix of the model and an alias', () => {
     // "a7" is in the model and "m4" only in the alias ILCE-7M4
     expect(search('a7m4', { category: '' }).total).toBe(0)
@@ -165,6 +192,12 @@ describe('the order of suggestions', () => {
     const a9 = body('Sony', 'a9 II')
     const a7 = body('Sony', 'a7 IV')
     expect(order([longer, a9, a7], 'sony')).toEqual([a7.id, a9.id, longer.id])
+  })
+
+  it('puts a full match before one that skipped a half-typed f or mm at the end', () => {
+    const z5 = body('Nikon', 'Z5')
+    const zf = body('Nikon', 'Zf', ['Z f'])
+    expect(order([z5, zf], 'z f')).toEqual([zf.id, z5.id])
   })
 
   it('shows the first 10 and counts them all', () => {
