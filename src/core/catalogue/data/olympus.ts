@@ -1,0 +1,70 @@
+// Olympus Micro Four Thirds camera bodies. Names, mounts, and sensor formats as Olympus publishes them,
+// cross-checked against reference lists and launch coverage.
+import type { CatalogueEntry } from '../schema'
+
+export const OLYMPUS_BODIES: readonly CatalogueEntry[] = [
+  {
+    id: 'olympus-om-d-e-m1x',
+    brand: 'Olympus',
+    model: 'OM-D E-M1X',
+    category: 'camera-body',
+    mount: 'micro-four-thirds',
+    sensorFormat: 'micro-four-thirds',
+  },
+  {
+    id: 'olympus-om-d-e-m1-mark-iii',
+    brand: 'Olympus',
+    model: 'OM-D E-M1 Mark III',
+    category: 'camera-body',
+    mount: 'micro-four-thirds',
+    sensorFormat: 'micro-four-thirds',
+  },
+  {
+    id: 'olympus-om-d-e-m5-mark-iii',
+    brand: 'Olympus',
+    model: 'OM-D E-M5 Mark III',
+    category: 'camera-body',
+    mount: 'micro-four-thirds',
+    sensorFormat: 'micro-four-thirds',
+  },
+  {
+    id: 'olympus-om-d-e-m10-mark-iii',
+    brand: 'Olympus',
+    model: 'OM-D E-M10 Mark III',
+    category: 'camera-body',
+    mount: 'micro-four-thirds',
+    sensorFormat: 'micro-four-thirds',
+  },
+  {
+    id: 'olympus-om-d-e-m10-mark-iv',
+    brand: 'Olympus',
+    model: 'OM-D E-M10 Mark IV',
+    category: 'camera-body',
+    mount: 'micro-four-thirds',
+    sensorFormat: 'micro-four-thirds',
+  },
+  {
+    id: 'olympus-pen-e-p7',
+    brand: 'Olympus',
+    model: 'PEN E-P7',
+    category: 'camera-body',
+    mount: 'micro-four-thirds',
+    sensorFormat: 'micro-four-thirds',
+  },
+  {
+    id: 'olympus-pen-e-pl9',
+    brand: 'Olympus',
+    model: 'PEN E-PL9',
+    category: 'camera-body',
+    mount: 'micro-four-thirds',
+    sensorFormat: 'micro-four-thirds',
+  },
+  {
+    id: 'olympus-pen-e-pl10',
+    brand: 'Olympus',
+    model: 'PEN E-PL10',
+    category: 'camera-body',
+    mount: 'micro-four-thirds',
+    sensorFormat: 'micro-four-thirds',
+  },
+]
