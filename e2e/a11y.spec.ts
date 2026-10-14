@@ -17,8 +17,11 @@ import {
 
 const WCAG_AA = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']
 
-async function expectNoViolations(page: Page) {
-  const { violations } = await new AxeBuilder({ page }).withTags(WCAG_AA).analyze()
+async function expectNoViolations(page: Page, allowed: readonly string[] = []) {
+  const { violations } = await new AxeBuilder({ page })
+    .withTags(WCAG_AA)
+    .disableRules([...allowed])
+    .analyze()
   // Each rule, the element at fault, and axe's explanation (such as the colours and ratio measured)
   expect(
     violations.flatMap(({ id, nodes }) =>
@@ -33,6 +36,8 @@ interface Screen {
   readonly seed?: Seed
   /** Gets the screen into the state to check, once the gear is in place */
   readonly show: (page: Page) => Promise<void>
+  /** axe rules this screen is let off, each with the reason beside it */
+  readonly allowed?: readonly string[]
 }
 
 /**
@@ -163,6 +168,27 @@ const SCREENS: readonly Screen[] = [
       await at(page, '#/gear/new', 'Add gear')
       await page.getByRole('button', { name: 'Save' }).click()
       await expect(page.getByRole('heading', { name: "There's a problem" })).toBeVisible()
+    },
+  },
+  {
+    name: 'add form with model suggestions open',
+    show: async (page) => {
+      await at(page, '#/gear/new', 'Add gear')
+      await page.getByRole('combobox', { name: 'Model' }).fill('24-70 2.8')
+      await expect(page.getByRole('listbox').getByRole('option')).toHaveCount(6)
+    },
+    // Base UI hides the rest of the page from screen readers while the list is open, keeping them
+    // on the suggestions. Tab still leaves the field, which closes the list and shows the page
+    // again (catalogue.spec.ts checks that), so the hidden controls are never focused hidden.
+    allowed: ['aria-hidden-focus'],
+  },
+  {
+    name: 'add form after picking a model',
+    show: async (page) => {
+      await at(page, '#/gear/new', 'Add gear')
+      await page.getByRole('combobox', { name: 'Model' }).fill('24-70 2.8')
+      await page.getByRole('option').first().click()
+      await expect(page.getByText(/^Filled in the category/)).toBeVisible()
     },
   },
   {
@@ -383,7 +409,7 @@ for (const theme of ['dark', 'light'] as const) {
         await expect(page.locator('html')).toHaveClass(
           theme === 'dark' ? /\bdark\b/ : /^(?!.*\bdark\b)/,
         )
-        await expectNoViolations(page)
+        await expectNoViolations(page, screen.allowed)
       })
     }
   })

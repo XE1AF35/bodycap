@@ -63,6 +63,8 @@ export function ModelField({
         status={status}
         empty="No known model matches. Keep typing to add it as it is."
         autoComplete="off"
+        // The open suggestions hide the label along with the rest of the page, and only this looks past that
+        aria-labelledby={`${field.id}-label`}
         {...aria(field)}
       />
       {/* Always present, so screen readers notice when it fills */}

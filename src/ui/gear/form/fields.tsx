@@ -29,7 +29,7 @@ export function Messages({ id, hint, error }: Pick<FieldProps, 'id' | 'hint' | '
 
 export function FieldLabel({ id, label, required }: Pick<FieldProps, 'id' | 'label' | 'required'>) {
   return (
-    <Label htmlFor={id}>
+    <Label htmlFor={id} id={`${id}-label`}>
       {label}
       {/* The control says it's required to screen readers itself, with aria-required */}
       {required === true && (

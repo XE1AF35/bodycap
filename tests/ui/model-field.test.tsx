@@ -28,6 +28,16 @@ describe('model suggestions', () => {
     expect(await screen.findByText(/models? found/)).toHaveAttribute('role', 'status')
   })
 
+  it('keeps its name while the open suggestions hide the rest of the form', async () => {
+    const user = await renderAdd()
+    await user.type(model(), 'a7 iv')
+    await screen.findByRole('option', { name: /a7 IV/ })
+    // The label is hidden along with everything else, which only aria-labelledby looks past
+    const label = document.getElementById(model().getAttribute('aria-labelledby') ?? '')
+    expect(label).toHaveTextContent(/^Model/)
+    expect(label?.closest('[aria-hidden="true"]')).not.toBeNull()
+  })
+
   it('fills in a camera body picked by keyboard, and says what it filled', async () => {
     const user = await renderAdd()
     await user.type(textbox('Nickname'), 'Main body')
