@@ -1,6 +1,8 @@
 // The words for gear fields and sort orders, shared by the list, the detail page, and the form.
-import type { Gear, GearFields } from '@/core/gear'
-import { MOUNT_LABELS } from '@/core/mounts'
+import type { CatalogueEntry } from '@/core/catalogue/schema'
+import { CATEGORY_LABELS, type Gear, type GearFields } from '@/core/gear'
+import { MOUNT_CODES, MOUNT_LABELS, SENSOR_FORMAT_LABELS } from '@/core/mounts'
+import { formatAperture, formatFocalLength } from '@/core/optics'
 import type { SortKey } from '@/core/search'
 
 export const FIELD_LABELS: Record<keyof GearFields, string> = {
@@ -58,4 +60,24 @@ export const SORT_LABELS: Record<SortKey, readonly [string, string]> = {
   status: ['Status, A to Z', 'Status, Z to A'],
   purchaseDate: ['Purchase date, oldest first', 'Purchase date, newest first'],
   updatedAt: ['Last changed, oldest first', 'Last changed, newest first'],
+}
+
+/** What a suggested model is: its category, mount, and sensor format, or a lens's coverage and optics */
+export function catalogueDetails(entry: CatalogueEntry): string {
+  const parts = [CATEGORY_LABELS[entry.category], `${MOUNT_CODES[entry.mount]} mount`]
+  if (entry.category === 'camera-body') parts.push(SENSOR_FORMAT_LABELS[entry.sensorFormat])
+  else {
+    parts.push(SENSOR_FORMAT_LABELS[entry.lensCoverage])
+    parts.push(`${formatFocalLength(entry) ?? ''} ${formatAperture(entry) ?? ''}`.trim())
+  }
+  return parts.join(' \u00b7 ')
+}
+
+/** Said after a model is picked: what it filled in, and that it can all be changed */
+export function catalogueFilled(entry: CatalogueEntry): string {
+  const filled =
+    entry.category === 'camera-body'
+      ? 'the category, brand, mount, and sensor format'
+      : 'the category, brand, mount, lens coverage, focal length, and aperture'
+  return `Filled in ${filled}. Change anything that's different on yours.`
 }

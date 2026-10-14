@@ -39,7 +39,8 @@ const FE_500 = {
   maxApertureTele: 6.3,
 } as const satisfies CatalogueEntry
 
-const ids = (result: { entries: readonly CatalogueEntry[] }) => result.entries.map(({ id }) => id)
+const ids = (result?: { entries: readonly CatalogueEntry[] }) =>
+  result?.entries.map(({ id }) => id) ?? []
 
 describe('createCatalogueSearch', () => {
   const search = createCatalogueSearch([A7_IV, FE_50_F18, FE_28_70, EOS_5D_IV, FE_24_70_GM, FE_500])
@@ -50,13 +51,13 @@ describe('createCatalogueSearch', () => {
 
   it('shows only the chosen category', () => {
     const lenses = search('sony', { category: 'lens' })
-    expect(lenses.total).toBe(4)
-    expect(lenses.entries.every(({ category }) => category === 'lens')).toBe(true)
+    expect(lenses?.total).toBe(4)
+    expect(lenses?.entries.every(({ category }) => category === 'lens')).toBe(true)
     expect(ids(search('sony', { category: 'camera-body' }))).toEqual([A7_IV.id])
   })
 
   it('suggests nothing for categories the catalogue has no models for', () => {
-    expect(search('sony', { category: 'tripod' })).toEqual({ entries: [], total: 0 })
+    expect(search('sony', { category: 'tripod' })).toBeUndefined()
   })
 
   it.each([
@@ -85,11 +86,11 @@ describe('createCatalogueSearch', () => {
   it('only runs together words that sit next to each other in the name', () => {
     // X and T are both in the name, but not side by side
     const apart = body('Fujifilm', 'X-S10 T')
-    expect(createCatalogueSearch([apart])('xt', { category: '' }).total).toBe(0)
+    expect(createCatalogueSearch([apart])('xt', { category: '' })?.total).toBe(0)
   })
 
   it('finds nothing when a run-together word goes on past the end of the name', () => {
-    expect(createCatalogueSearch([body('Fujifilm', 'X-T')])('xtz', { category: '' }).total).toBe(0)
+    expect(createCatalogueSearch([body('Fujifilm', 'X-T')])('xtz', { category: '' })?.total).toBe(0)
   })
 
   it('puts a run-together match after one that matched a word', () => {
@@ -101,7 +102,7 @@ describe('createCatalogueSearch', () => {
 
   it('matches each name on its own, never a mix of the model and an alias', () => {
     // "a7" is in the model and "m4" only in the alias ILCE-7M4
-    expect(search('a7m4', { category: '' }).total).toBe(0)
+    expect(search('a7m4', { category: '' })?.total).toBe(0)
   })
 
   it.each(['5D Mark IV', '5d mk iv', '5D IV', 'eos 5d mark'])(
@@ -203,8 +204,8 @@ describe('the order of suggestions', () => {
   it('shows the first 10 and counts them all', () => {
     const many = Array.from({ length: 12 }, (_, i) => body('Sony', `Model ${String(i + 1)}`))
     const result = createCatalogueSearch(many)('sony', { category: '' })
-    expect(result.entries).toHaveLength(10)
-    expect(result.total).toBe(12)
+    expect(result?.entries).toHaveLength(10)
+    expect(result?.total).toBe(12)
   })
 
   it.each([
@@ -214,8 +215,12 @@ describe('the order of suggestions', () => {
     ['one character among spaces', ' a '],
     ['one alpha sign', '\u03b1'],
     ['punctuation only', '--'],
-  ])('suggests nothing for %s', (_, text) => {
-    expect(createCatalogueSearch([A7_IV])(text, { category: '' })).toEqual({
+  ])('does not search %s', (_, text) => {
+    expect(createCatalogueSearch([A7_IV])(text, { category: '' })).toBeUndefined()
+  })
+
+  it('tells finding nothing apart from not searching', () => {
+    expect(createCatalogueSearch([A7_IV])('zz', { category: '' })).toEqual({
       entries: [],
       total: 0,
     })

@@ -64,7 +64,6 @@ function compareMatches(a: Match, b: Match): number {
   return 0
 }
 
-const NOTHING: CatalogueResults = { entries: [], total: 0 }
 const collator = new Intl.Collator(LOCALE)
 
 // Words that say nothing about which model it is, so "Mark IV" and "Mk IV" both come down to "IV",
@@ -189,13 +188,14 @@ function bestMatch(query: Query, names: readonly IndexedName[]): Match | undefin
 
 /**
  * Builds the search once for `entries`, ready for each keystroke. A body or lens category shows
- * that category only, no category shows both, and other categories show nothing. Suggestions come
+ * that category only, and no category shows both. Nothing is searched, giving undefined, for other
+ * categories or fewer than two characters, so that can be told apart from finding nothing. Suggestions come
  * best first: nothing skipped, whole words, then the model over an alias, words in the order typed, the brand
  * matched, shorter names, and then alphabetical order.
  */
 export function createCatalogueSearch(
   entries: readonly CatalogueEntry[],
-): (text: string, query: CatalogueQuery) => CatalogueResults {
+): (text: string, query: CatalogueQuery) => CatalogueResults | undefined {
   const index: IndexedEntry[] = entries.map((entry) => {
     const brandTokens = tokenise(entry.brand).length
     const name = (text: string, alias: boolean): IndexedName => ({
@@ -211,10 +211,10 @@ export function createCatalogueSearch(
   })
 
   return (text, { category }) => {
-    if (category !== '' && category !== 'camera-body' && category !== 'lens') return NOTHING
-    if (characterCount(fold(text).replaceAll(/\s/gu, '')) < MIN_CHARACTERS) return NOTHING
+    if (category !== '' && category !== 'camera-body' && category !== 'lens') return undefined
+    if (characterCount(fold(text).replaceAll(/\s/gu, '')) < MIN_CHARACTERS) return undefined
     const query: Query = { tokens: tokenise(text), open: !/\s$/u.test(text) }
-    if (query.tokens.length === 0) return NOTHING
+    if (query.tokens.length === 0) return undefined
 
     const found = index.flatMap((indexed) => {
       if (category !== '' && indexed.entry.category !== category) return []

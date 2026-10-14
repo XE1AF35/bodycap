@@ -42,7 +42,9 @@ async function renderAdd(services = testServices()) {
 async function fillBasics(user: UserEvent, category: string, brand: string, model: string) {
   await user.selectOptions(select('Category'), category)
   await user.type(field('Brand'), brand)
-  await user.type(field('Model'), model)
+  await user.type(select('Model'), model)
+  // Leaves without picking a suggestion, which closes them
+  await user.tab()
 }
 
 describe('adding gear', () => {
@@ -314,8 +316,9 @@ describe('editing gear', () => {
     const price = within(screen.getByRole('group', { name: 'Purchase price' }))
     expect(price.getByRole('textbox', { name: 'Amount' })).toHaveValue('3899.00')
 
-    await user.clear(field('Model'))
-    await user.type(field('Model'), 'FE 24-70mm F2.8 GM')
+    await user.clear(select('Model'))
+    await user.type(select('Model'), 'FE 24-70mm F2.8 GM')
+    await user.tab()
     await save(user)
     expect(
       await screen.findByRole('heading', { level: 1, name: 'Sony FE 24-70mm F2.8 GM' }),

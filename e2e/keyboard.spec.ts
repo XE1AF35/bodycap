@@ -16,8 +16,10 @@ test('adds, edits, and deletes an item using only the keyboard', async ({ page }
   await expect(page.getByRole('combobox', { name: 'Category' })).toHaveValue('lens')
   await tabTo(page, page.getByRole('textbox', { name: 'Brand' }))
   await keyboard.type('Sony')
-  await tabTo(page, page.getByRole('textbox', { name: 'Model' }))
+  await tabTo(page, page.getByRole('combobox', { name: 'Model' }))
   await keyboard.type('FE 24-70mm F2.8 GM')
+  // Tab leaves the field without picking a suggestion, which closes them
+  await keyboard.press('Tab')
   await tabTo(page, page.getByRole('button', { name: 'Save' }))
   await keyboard.press('Enter')
   const added = page.getByRole('heading', { level: 1, name: 'Sony FE 24-70mm F2.8 GM' })
@@ -26,9 +28,10 @@ test('adds, edits, and deletes an item using only the keyboard', async ({ page }
   // Edit
   await tabTo(page, page.getByRole('link', { name: 'Edit' }))
   await keyboard.press('Enter')
-  await tabTo(page, page.getByRole('textbox', { name: 'Model' }))
+  await tabTo(page, page.getByRole('combobox', { name: 'Model' }))
   await keyboard.press('End')
   await keyboard.type(' II')
+  await keyboard.press('Tab')
   await tabTo(page, page.getByRole('button', { name: 'Save' }))
   await keyboard.press('Enter')
   const edited = page.getByRole('heading', { level: 1, name: 'Sony FE 24-70mm F2.8 GM II' })

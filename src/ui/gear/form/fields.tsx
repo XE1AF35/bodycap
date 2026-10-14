@@ -7,24 +7,9 @@ import { Label } from '@/ui/components/ui/label'
 import { NativeSelect, NativeSelectOption } from '@/ui/components/ui/native-select'
 import { Textarea } from '@/ui/components/ui/textarea'
 import { CURRENCY_OPTIONS } from '@/ui/gear/form/currency-options'
+import { aria, describedBy, type FieldProps } from '@/ui/gear/form/field-aria'
 
-interface FieldProps {
-  readonly id: string
-  readonly label: string
-  readonly hint?: string | undefined
-  readonly error?: string | undefined
-  readonly required?: boolean
-}
-
-/** The ids of whatever describes the control, or undefined when nothing does */
-function describedBy(id: string, hint?: string, error?: string, extra?: string) {
-  const ids = [hint && `${id}-hint`, error && `${id}-error`, extra].filter(
-    (part): part is string => typeof part === 'string' && part !== '',
-  )
-  return ids.length === 0 ? undefined : ids.join(' ')
-}
-
-function Messages({ id, hint, error }: Pick<FieldProps, 'id' | 'hint' | 'error'>) {
+export function Messages({ id, hint, error }: Pick<FieldProps, 'id' | 'hint' | 'error'>) {
   return (
     <>
       {hint !== undefined && (
@@ -42,7 +27,7 @@ function Messages({ id, hint, error }: Pick<FieldProps, 'id' | 'hint' | 'error'>
   )
 }
 
-function FieldLabel({ id, label, required }: Pick<FieldProps, 'id' | 'label' | 'required'>) {
+export function FieldLabel({ id, label, required }: Pick<FieldProps, 'id' | 'label' | 'required'>) {
   return (
     <Label htmlFor={id}>
       {label}
@@ -54,15 +39,6 @@ function FieldLabel({ id, label, required }: Pick<FieldProps, 'id' | 'label' | '
       )}
     </Label>
   )
-}
-
-/** The aria attributes every control gets */
-function aria({ id, hint, error, required }: FieldProps, extra?: string) {
-  return {
-    'aria-invalid': error === undefined ? undefined : true,
-    'aria-describedby': describedBy(id, hint, error, extra),
-    'aria-required': required === true ? true : undefined,
-  }
 }
 
 interface TextFieldProps extends FieldProps {

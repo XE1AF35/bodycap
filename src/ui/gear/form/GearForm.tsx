@@ -2,6 +2,8 @@
 // everything with validateGear on save, and asks before leaving with unsaved changes.
 import { Link, useBlocker, useNavigate } from '@tanstack/react-router'
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { fillFromCatalogue } from '@/core/catalogue/fill'
+import type { CatalogueEntry } from '@/core/catalogue/schema'
 import { isOneOf } from '@/core/choice'
 import { toIsoDate } from '@/core/dates'
 import {
@@ -33,6 +35,7 @@ import {
 } from '@/ui/components/ui/alert-dialog'
 import { Button } from '@/ui/components/ui/button'
 import { ErrorSummary, type Problem } from '@/ui/gear/form/ErrorSummary'
+import { ModelField } from '@/ui/gear/form/ModelField'
 import {
   CheckboxField,
   DateField,
@@ -41,7 +44,7 @@ import {
   SelectField,
   TextField,
 } from '@/ui/gear/form/fields'
-import { FIELD_LABELS, gearName } from '@/ui/gear/labels'
+import { catalogueFilled, FIELD_LABELS, gearName } from '@/ui/gear/labels'
 import { saveProblem } from '@/ui/gear/save-problem'
 import { useLive } from '@/ui/hooks/useLive'
 import { useServices } from '@/ui/services'
@@ -82,6 +85,20 @@ const ORDER: readonly Field[] = [
   'notes',
 ]
 
+// What picking a known model can fill in, so their messages go with it
+const FILLED_BY_CATALOGUE: readonly Field[] = [
+  'category',
+  'brand',
+  'model',
+  'mount',
+  'sensorFormat',
+  'lensCoverage',
+  'focalLengthMin',
+  'focalLengthMax',
+  'maxAperture',
+  'maxApertureTele',
+]
+
 const choices = <T extends string>(values: readonly T[], labels: Record<T, string>) =>
   values.map((value) => [value, labels[value]] as const)
 
@@ -117,6 +134,8 @@ export function GearForm({ initial, saved, onSave, cancel }: GearFormProps) {
   const [failedSaves, setFailedSaves] = useState(0)
   const [problem, setProblem] = useState<string>()
   const [saving, setSaving] = useState(false)
+  // The last model picked, and what was said about it, shown until the model is changed
+  const [picked, setPicked] = useState<{ readonly model: string; readonly message: string }>()
   const savedRef = useRef(false)
   const summaryRef = useRef<HTMLDivElement>(null)
 
@@ -159,6 +178,15 @@ export function GearForm({ initial, saved, onSave, cancel }: GearFormProps) {
     setErrors((previous) =>
       previous[field] === undefined ? previous : { ...previous, [field]: undefined },
     )
+  }
+
+  function pick(entry: CatalogueEntry) {
+    setInput((previous) => fillFromCatalogue(previous, entry))
+    setErrors((previous) => ({
+      ...previous,
+      ...Object.fromEntries(FILLED_BY_CATALOGUE.map((field) => [field, undefined])),
+    }))
+    setPicked({ model: entry.model, message: catalogueFilled(entry) })
   }
 
   const props = (field: Field) => ({
@@ -235,7 +263,13 @@ export function GearForm({ initial, saved, onSave, cancel }: GearFormProps) {
           }}
         />
         <TextField {...text('brand')} required />
-        <TextField {...text('model')} required />
+        <ModelField
+          {...text('model')}
+          required
+          category={input.category}
+          onPick={pick}
+          filled={picked?.model === input.model ? picked.message : undefined}
+        />
         {applies.has('nickname') && (
           <TextField {...text('nickname')} hint="A name you know it by, such as Main body." />
         )}
