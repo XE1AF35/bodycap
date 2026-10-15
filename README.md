@@ -1,4 +1,4 @@
-# Bodycap
+# <img src="public/app-icon.png" width="40" height="40" alt=""> Bodycap
 
 Store, organise, and keep track of your camera gear. Bodycap is a website that works like an app:
 it keeps everything in your own browser, works offline, and never needs an account.
