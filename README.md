@@ -5,7 +5,7 @@ it keeps everything in your own browser, works offline, and never needs an accou
 
 **Open it at <https://xe1af35.github.io/bodycap/>**
 
-![The Bodycap dashboard, with a gear count, its value, backup status, and a breakdown by lens mount](docs/screenshots/dashboard.png)
+![The Bodycap dashboard, with a warranty running out, gear counts, a camera on loan, what the gear is worth by category, and backup status](docs/screenshots/dashboard.png)
 
 ## What it does
 
