@@ -211,8 +211,8 @@ repository to be public on a free plan, with Settings, Pages, Source set to GitH
   repository named `<name>.github.io`.
 - If a broken service worker were ever published, deploying a build made with
   `PWA_SELF_DESTROY=true` replaces it with one that removes itself.
-- The app icons are made from `public/favicon.svg` and committed. After changing the SVG, run
-  `pnpm dlx @vite-pwa/assets-generator@1.0.4`.
+- The app icons are made from `public/app-icon.png`, a hand-drawn icon, and committed. After
+  changing the drawing, run `pnpm dlx @vite-pwa/assets-generator@1.0.4`.
 
 ### Dependencies
 
