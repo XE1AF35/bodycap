@@ -11,7 +11,7 @@ playwright-report/
 test-results/
 blob-report/
 
-# Environment variables (never commit secrets)
+# Environment variables
 .env
 .env.*
 !.env.example
