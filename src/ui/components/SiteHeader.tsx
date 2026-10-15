@@ -20,22 +20,17 @@ const PAGES = [
   { to: '/settings', label: 'Settings', exact: false },
 ] as const
 
-/** The body cap from the app icon, with its red index dot, beside the name */
+/** The hand-drawn app icon beside the name. It's decoration, since the name says the same. */
 function Wordmark() {
   return (
     <span className="mr-auto inline-flex items-center gap-2 text-lg font-semibold tracking-tight sm:mr-4">
-      <svg
-        viewBox="0 0 24 24"
-        aria-hidden="true"
-        className="size-7 text-muted-foreground"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-      >
-        <circle cx="12" cy="12" r="10.5" />
-        <circle cx="12" cy="12" r="5.5" />
-        <circle cx="12" cy="4.25" r="1.6" className="fill-signal" stroke="none" />
-      </svg>
+      <img
+        src={`${import.meta.env.BASE_URL}app-icon.png`}
+        alt=""
+        width={28}
+        height={28}
+        className="size-7"
+      />
       Bodycap
     </span>
   )

@@ -216,10 +216,11 @@ describe('cover photos elsewhere', () => {
     const { container } = renderApp('/gear', services)
     await screen.findAllByRole('link', { name: 'Canon EOS R6 Mark II' })
     // Once in the table and once in the cards, which CSS shows one of. Its name is beside it.
+    // Only the page's own images, not the app icon in the header
     await waitFor(() => {
-      expect(container.querySelectorAll('img')).toHaveLength(2)
+      expect(container.querySelectorAll('main img')).toHaveLength(2)
     })
-    const covers = container.querySelectorAll('img')
+    const covers = container.querySelectorAll('main img')
     for (const cover of covers) {
       expect(cover).toHaveAttribute('alt', '')
       expect(cover.getAttribute('src')).toMatch(/^blob:/)
