@@ -15,6 +15,10 @@ it keeps everything in your own browser, works offline, and never needs an accou
   batteries, drones, mount adapters, and anything else, with serial numbers, where and when you
   bought them, what you paid, condition, location, warranty, insured value, and notes. Lenses can
   also record their focal length and aperture.
+- **Model suggestions**: start typing a camera body or lens in the Model field, such as "a7 iv" or
+  "24-70 2.8", and pick from the [gear catalogue](#the-gear-catalogue) to fill in the brand,
+  mount, sensor format, focal lengths, and aperture. Everything it fills in stays editable, and a
+  model it doesn't know can be typed as it is.
 - **Statuses that follow real life**: owned, wishlist, lent out, in repair, sold, or lost. Buttons
   on each item's page lend it, take it back, sell it, or mark it lost, asking only for what that
   change needs, and the status list only offers changes that make sense.
@@ -101,6 +105,20 @@ just in case.
 Bodycap is made for current versions of Chrome, Edge, Firefox, and Safari. Some private windows block
 the storage it needs, and it says so if that happens.
 
+## The gear catalogue
+
+The model suggestions come from a catalogue that ships with Bodycap, so they work offline and what
+you type never leaves your browser. It holds 469 models: 144 mirrorless camera bodies from about
+2017 on, and 325 lenses, from Canon, Fujifilm, Hasselblad, Leica, Nikon, Olympus, OM System,
+Panasonic, Sigma, and Sony. DSLRs, third-party lenses, and cine lenses aren't in it yet.
+
+It was put together by hand from the names, mounts, sensor formats, and lens specifications the
+makers publish, and copies no other database, so it's under the same MIT licence as the rest of
+Bodycap. Brand and model names belong to their owners, and Bodycap isn't connected with any of
+them. The data is in `src/core/catalogue/data/`, one file per maker, and a test checks every entry
+against the gear form's own rules, so a suggestion can never fill in something Bodycap wouldn't
+save.
+
 ## Coming later
 
 - A shoots log and spending charts
@@ -147,8 +165,9 @@ Before the first `pnpm e2e`, install the test browsers with
 ```text
 src/core/   Domain logic with no React, storage, or browser APIs: validation, lifecycle rules,
             kits, loans, maintenance, photo rules, mount compatibility, the system map, value
-            totals, stats, alerts, search, shared kit links, the CSV file, the insurance list, and
-            the backup format, its .zip layout, its upgrades, and merging
+            totals, stats, alerts, search, the gear catalogue and its search, shared kit links, the
+            CSV file, the insurance list, and the backup format, its .zip layout, its upgrades, and
+            merging
 src/data/   The only code that uses Dexie: the database and its upgrades, repositories, backup,
             restore, and merge, and storage helpers. Photos are stored as bytes, since Safari
             won't store a Blob in a private window
@@ -169,7 +188,8 @@ ESLint keeps those boundaries: `src/core` can't import React, Dexie, or browser 
   upgrade a database seeded at an earlier version.
 - **UI tests** render the whole app in jsdom with Testing Library.
 - **End-to-end tests** run in Playwright against the built site, with its real base path, security
-  policy, and service worker: adding gear and packing a kit with only a keyboard, lending and
+  policy, and service worker: adding gear, picking a lens from the model suggestions, and packing
+  a kit with only a keyboard, lending and
   returning, logging maintenance, search, a backup restored into an empty browser and merged into
   another, a photo with a GPS location stored without it, a `.zip` backup with photos restored
   into an empty browser byte for byte, the CSV file, the insurance list in print, a kit shared into
@@ -220,9 +240,10 @@ pnpm only installs versions that have been public for at least a day, refuses pa
 publishing trust has dropped, and runs no install scripts. Dependabot suggests updates weekly, a
 week after each release. Workflow actions are pinned to full commit SHAs.
 
-As of October 2026, the site loads 185 kB of gzipped JavaScript at first, about 268 kB across all
-its pages, and 10 kB of CSS. The code for making and reading `.zip` backups loads only when it's
-needed.
+As of October 2026, the site loads 187 kB of gzipped JavaScript at first, about 307 kB across all
+its pages, and 10 kB of CSS. The code for making and reading `.zip` backups, and the gear
+catalogue, load only when they're needed. The build fails if the first load passes 200 kB, or any
+script loaded later passes 40 kB.
 
 ## Licence
 
