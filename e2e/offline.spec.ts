@@ -1,4 +1,5 @@
-// Offline use: once the service worker has the app, it opens and moves between pages with no network.
+// Offline use: once the service worker has the app, it opens, moves between pages, and suggests
+// models with no network.
 import type { Page } from '@playwright/test'
 import { expect, open, test } from './fixtures'
 
@@ -28,6 +29,22 @@ test('reloads and moves between pages with no network', async ({ page, context }
   await expect(page.getByRole('heading', { level: 1, name: 'Settings' })).toBeVisible()
   await page.getByRole('link', { name: 'Gear' }).click()
   await expect(page.getByRole('heading', { level: 1, name: 'Gear' })).toBeVisible()
+})
+
+// Chromium only, as above. The add page has never been opened, so the form and every gear catalogue
+// chunk can only come from what the worker cached when it installed.
+test('suggests models from the gear catalogue with no network', async ({ page, context }) => {
+  await installApp(page)
+  await context.setOffline(true)
+  // Changing the hash moves to the page without a reload, as following a link in the app would
+  await page.evaluate(() => {
+    location.hash = '#/gear/new'
+  })
+  await expect(page.getByRole('heading', { level: 1, name: 'Add gear' })).toBeVisible()
+  await page.getByRole('combobox', { name: 'Model' }).fill('24-70 2.8')
+  await expect(page.getByRole('listbox').getByRole('option').first()).toContainText(
+    'Sony FE 24-70mm F2.8 GM',
+  )
 })
 
 test('keeps working from its cache when the network goes @offline', async ({ page, context }) => {

@@ -7,6 +7,7 @@ import { gzipSync } from 'node:zlib'
 import type { Plugin } from 'vite'
 import { z } from 'zod'
 import { budgetProblems, firstLoadScripts, type ScriptSize } from './bundle-budget.ts'
+import { catalogueProblems } from './catalogue-chunks.ts'
 
 const iconSchema = z.object({
   src: z.string(),
@@ -66,6 +67,7 @@ export function outputProblems(outDir: string, base: string, schema: number): st
     if (!html.includes(text)) problems.push(`index.html is missing ${what}.`)
   }
   problems.push(...sizeProblems(outDir, base, html))
+  problems.push(...catalogueProblems(firstLoadScripts(html, base)))
 
   if (!existsSync(file('manifest.webmanifest'))) {
     problems.push('There is no manifest.webmanifest.')

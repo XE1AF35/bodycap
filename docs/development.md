@@ -57,7 +57,9 @@ ESLint keeps those boundaries: `src/core` can't import React, Dexie, or browser 
 
 The gear catalogue's data is in `src/core/catalogue/data/`, one file per maker. A test checks every
 entry against the gear form's own rules, so a suggestion can never fill in something Bodycap
-wouldn't save.
+wouldn't save. Each maker's file builds into its own chunk (`build/catalogue-chunks.ts`), all loaded
+together on the add and edit pages. A maker whose file nears the size budget for a chunk can be
+split into two files.
 
 ## Tests
 
@@ -117,7 +119,8 @@ pnpm only installs versions that have been public for at least a day, refuses pa
 publishing trust has dropped, and runs no install scripts. Dependabot suggests updates weekly, a
 week after each release. Workflow actions are pinned to full commit SHAs.
 
-As of October 2026, the site loads 187 kB of gzipped JavaScript at first, about 307 kB across all
+As of October 2026, the site loads 188 kB of gzipped JavaScript at first, about 312 kB across all
 its pages, and 10 kB of CSS. The code for making and reading `.zip` backups, and the gear
-catalogue, load only when they're needed. The build fails if the first load passes 200 kB, or any
-script loaded later passes 40 kB.
+catalogue, load only when they're needed; the catalogue is 12 kB in all, and its largest maker
+chunk 2.4 kB. The build fails if the first load passes 200 kB, any script loaded later passes
+40 kB, or a catalogue chunk is in the first load.

@@ -4,6 +4,7 @@ import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 import { defineConfig } from 'vitest/config'
+import { catalogueChunk } from './build/catalogue-chunks.ts'
 import { checkOutput } from './build/check-output.ts'
 import { securityMeta } from './build/security.ts'
 import { versionFile } from './build/version-file.ts'
@@ -23,7 +24,15 @@ const DARK = '#0d0e11'
 
 export default defineConfig({
   base,
-  build: { outDir },
+  build: {
+    outDir,
+    rolldownOptions: {
+      output: {
+        // See build/catalogue-chunks.ts
+        codeSplitting: { groups: [{ name: catalogueChunk }] },
+      },
+    },
+  },
   plugins: [
     react(),
     tailwindcss(),

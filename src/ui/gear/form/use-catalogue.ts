@@ -1,6 +1,7 @@
-// Loads the gear catalogue when the add or edit page opens. The data ships as its own chunk, so
-// nothing else waits for it, and it loads once however many forms open. If it can't load, the Model
-// field simply suggests nothing, and a later form tries again.
+// Loads the gear catalogue when the add or edit page opens. The data ships as a chunk for each
+// maker, all loaded together by the one import, so nothing else waits for it, and it loads once
+// however many forms open. If any chunk can't load, the Model field simply suggests nothing, and a
+// later form tries again.
 import { useEffect, useState } from 'react'
 import {
   createCatalogueSearch,
