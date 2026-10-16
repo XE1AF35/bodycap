@@ -4,7 +4,7 @@
 import { CATALOGUE_FORMAT, type Catalogue } from '../schema'
 import { SONY_BODIES, SONY_LENSES } from './sony'
 import { CANON_BODIES, CANON_DSLR_BODIES, CANON_DSLR_LENSES, CANON_LENSES } from './canon'
-import { NIKON_BODIES, NIKON_LENSES } from './nikon'
+import { NIKON_BODIES, NIKON_DSLR_BODIES, NIKON_DSLR_LENSES, NIKON_LENSES } from './nikon'
 import { FUJIFILM_BODIES, FUJIFILM_LENSES } from './fujifilm'
 import { PANASONIC_BODIES, PANASONIC_LENSES } from './panasonic'
 import { LEICA_BODIES } from './leica'
@@ -25,6 +25,8 @@ export const CATALOGUE: Catalogue = {
     ...CANON_DSLR_LENSES,
     ...NIKON_BODIES,
     ...NIKON_LENSES,
+    ...NIKON_DSLR_BODIES,
+    ...NIKON_DSLR_LENSES,
     ...FUJIFILM_BODIES,
     ...FUJIFILM_LENSES,
     ...PANASONIC_BODIES,

@@ -175,7 +175,7 @@ const SCREENS: readonly Screen[] = [
     show: async (page) => {
       await at(page, '#/gear/new', 'Add gear')
       await page.getByRole('combobox', { name: 'Model' }).fill('24-70 2.8')
-      await expect(page.getByRole('listbox').getByRole('option')).toHaveCount(8)
+      await expect(page.getByRole('listbox').getByRole('option')).toHaveCount(10)
     },
     // Base UI hides the rest of the page from screen readers while the list is open, keeping them
     // on the suggestions. Tab still leaves the field, which closes the list and shows the page

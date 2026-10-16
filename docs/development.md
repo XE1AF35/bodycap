@@ -119,8 +119,8 @@ pnpm only installs versions that have been public for at least a day, refuses pa
 publishing trust has dropped, and runs no install scripts. Dependabot suggests updates weekly, a
 week after each release. Workflow actions are pinned to full commit SHAs.
 
-As of October 2026, the site loads 188 kB of gzipped JavaScript at first, about 315 kB across all
+As of October 2026, the site loads 188 kB of gzipped JavaScript at first, about 320 kB across all
 its pages, and 10 kB of CSS. The code for making and reading `.zip` backups, and the gear
-catalogue, load only when they're needed; the catalogue is 15 kB in all, and its largest maker
+catalogue, load only when they're needed; the catalogue is 17 kB in all, and its largest maker
 chunk 4.5 kB. The build fails if the first load passes 200 kB, any script loaded later passes
 40 kB, or a catalogue chunk is in the first load.
