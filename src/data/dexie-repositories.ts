@@ -3,12 +3,14 @@
 import { toIsoDate } from '@/core/dates'
 import type { Gear } from '@/core/gear'
 import { removeFromKit } from '@/core/kits'
+import { removeFromShoot } from '@/core/shoots'
 import type { BodycapDatabase } from './db'
 import { createBackupStore } from './dexie-backup'
 import { createKitRepository } from './dexie-kits'
 import { createLoanRepository } from './dexie-loans'
 import { createMaintenanceRepository } from './dexie-maintenance'
 import { createPhotoRepository } from './dexie-photos'
+import { createShootRepository } from './dexie-shoots'
 import { live } from './live'
 import { countChange, SETTING, toGear, toRecord, toSettings } from './records'
 import {
@@ -89,7 +91,16 @@ export function createRepositories(
     remove: (id) =>
       db.transaction(
         'rw',
-        [db.gear, db.kits, db.loans, db.maintenance, db.photos, db.photoImages, db.settings],
+        [
+          db.gear,
+          db.kits,
+          db.loans,
+          db.maintenance,
+          db.photos,
+          db.photoImages,
+          db.shoots,
+          db.settings,
+        ],
         async () => {
           if ((await db.gear.get(id)) === undefined) return
           await db.gear.delete(id)
@@ -101,6 +112,10 @@ export function createRepositories(
           const at = now().toISOString()
           const kits = await db.kits.where('gearIds').equals(id).distinct().toArray()
           await db.kits.bulkPut(kits.map((kit) => ({ ...removeFromKit(kit, id), updatedAt: at })))
+          const shoots = await db.shoots.where('gearIds').equals(id).distinct().toArray()
+          await db.shoots.bulkPut(
+            shoots.map((shoot) => ({ ...removeFromShoot(shoot, id), updatedAt: at })),
+          )
           await countChange(db)
         },
       ),
@@ -129,7 +144,8 @@ export function createRepositories(
   const loans = createLoanRepository(db, { now, newId, today })
   const maintenance = createMaintenanceRepository(db, { now, newId })
   const photos = createPhotoRepository(db, { now, newId })
+  const shoots = createShootRepository(db, { now, newId })
   const backup = createBackupStore(db, { now, appVersion, timeZone })
 
-  return { gear, kits, loans, maintenance, photos, settings, backup }
+  return { gear, kits, loans, maintenance, photos, shoots, settings, backup }
 }

@@ -3,8 +3,8 @@
 import { newKit, type Kit, type KitFields } from '@/core/kits'
 import type { BodycapDatabase } from './db'
 import { live } from './live'
-import { countChange } from './records'
-import { GearNotFoundError, RecordNotFoundError, type KitRepository } from './repositories'
+import { checkGearExists, countChange } from './records'
+import { RecordNotFoundError, type KitRepository } from './repositories'
 
 export interface KitRepositoryOptions {
   readonly now: () => Date
@@ -47,9 +47,7 @@ export function createKitRepository(
         const saved = await db.kits.get(id)
         if (saved === undefined) throw new RecordNotFoundError('kit', id)
         const fields = change(saved)
-        const found = await db.gear.bulkGet([...fields.gearIds])
-        const missing = fields.gearIds.find((_, index) => found[index] === undefined)
-        if (missing !== undefined) throw new GearNotFoundError(missing)
+        await checkGearExists(db, fields.gearIds)
         const kit: Kit = {
           ...fields,
           id,

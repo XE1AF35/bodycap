@@ -5,7 +5,7 @@ import { isCurrencyCode } from '@/core/money'
 import type { Photo, PhotoInfo } from '@/core/photos'
 import { normaliseSerial } from '@/core/serials'
 import type { BodycapDatabase, GearRecord, PhotoRecord, SettingRecord } from './db'
-import type { Settings } from './repositories'
+import { GearNotFoundError, type Settings } from './repositories'
 
 export function toRecord(gear: Gear): GearRecord {
   const serialKey = normaliseSerial(gear.serialNumber ?? '')
@@ -43,6 +43,19 @@ export function toPhoto(record: PhotoRecord): Photo {
     ...toPhotoInfo(record),
     thumbnail: new Blob([record.thumbnail], { type: record.mimeType }),
   }
+}
+
+/**
+ * Rejects with GearNotFoundError if any of the items is gone, so a kit or shoot never points at gear
+ * that isn't there. Call it inside the write's transaction, which must include gear.
+ */
+export async function checkGearExists(
+  db: BodycapDatabase,
+  gearIds: readonly string[],
+): Promise<void> {
+  const found = await db.gear.bulkGet([...gearIds])
+  const missing = gearIds.find((_, index) => found[index] === undefined)
+  if (missing !== undefined) throw new GearNotFoundError(missing)
 }
 
 /** The keys settings are stored under */

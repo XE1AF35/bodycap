@@ -6,6 +6,7 @@ import type { Kit } from '@/core/kits'
 import type { Loan } from '@/core/loans'
 import type { MaintenanceRecord } from '@/core/maintenance'
 import type { PhotoInfo } from '@/core/photos'
+import type { Shoot } from '@/core/shoots'
 
 /** A gear item as stored: the item, plus its normalised serial for the index */
 export interface GearRecord extends Gear {
@@ -41,6 +42,7 @@ export class BodycapDatabase extends Dexie {
   declare maintenance: EntityTable<MaintenanceRecord, 'id'>
   declare photos: EntityTable<PhotoRecord, 'id'>
   declare photoImages: EntityTable<PhotoImageRecord, 'id'>
+  declare shoots: EntityTable<Shoot, 'id'>
 
   /** Options let tests pass in fake-indexeddb */
   constructor(options?: DexieOptions) {
@@ -68,5 +70,10 @@ export class BodycapDatabase extends Dexie {
     // nothing is upgraded. The new version still closes tabs running an older build, which would
     // otherwise save items without the new fields.
     this.version(4).stores({})
+    // M4 adds the shoots log. Nothing else changes, so there's nothing to upgrade.
+    this.version(5).stores({
+      // *gearIds indexes each item on a shoot, to find the shoots an item was on
+      shoots: 'id, date, *gearIds',
+    })
   }
 }

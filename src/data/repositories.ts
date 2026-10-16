@@ -8,6 +8,7 @@ import type { Loan, LoanDetails } from '@/core/loans'
 import type { MaintenanceDetails, MaintenanceRecord } from '@/core/maintenance'
 import type { CurrencyCode } from '@/core/money'
 import type { NewPhoto, Photo, PhotoInfo } from '@/core/photos'
+import type { Shoot, ShootFields } from '@/core/shoots'
 
 /** A query that gives fresh results whenever its data changes, until unsubscribed */
 export interface Live<T> {
@@ -25,8 +26,8 @@ export interface GearRepository {
   /** Replaces an item's details. Rejects with GearNotFoundError if it's gone. */
   update(id: string, fields: GearFields): Promise<Gear>
   /**
-   * Deletes an item, with its loans, maintenance, and photos, and takes it out of every kit, all at
-   * once. Deleting one that's already gone does nothing.
+   * Deletes an item, with its loans, maintenance, and photos, and takes it out of every kit and off
+   * every shoot, all at once. Deleting one that's already gone does nothing.
    */
   remove(id: string): Promise<void>
 }
@@ -46,6 +47,21 @@ export interface KitRepository {
    */
   update(id: string, change: (kit: Kit) => KitFields): Promise<Kit>
   /** Deletes a kit, but none of its gear. Deleting one that's already gone does nothing. */
+  remove(id: string): Promise<void>
+}
+
+export interface ShootRepository {
+  /** Every shoot, in no particular order, since the log sorts them itself */
+  list(): Live<readonly Shoot[]>
+  get(id: string): Live<Shoot | undefined>
+  /** Logs a shoot, giving it an ID and timestamps. Rejects with GearNotFoundError if an item is gone. */
+  add(fields: ShootFields): Promise<Shoot>
+  /**
+   * Replaces a shoot's details. Rejects with RecordNotFoundError if the shoot is gone, or
+   * GearNotFoundError if an item is.
+   */
+  update(id: string, fields: ShootFields): Promise<Shoot>
+  /** Deletes a shoot, but none of its items. Deleting one that's already gone does nothing. */
   remove(id: string): Promise<void>
 }
 
@@ -179,6 +195,7 @@ export interface Repositories {
   readonly loans: LoanRepository
   readonly maintenance: MaintenanceRepository
   readonly photos: PhotoRepository
+  readonly shoots: ShootRepository
   readonly settings: SettingsRepository
   readonly backup: BackupStore
 }
@@ -194,10 +211,10 @@ export class GearNotFoundError extends Error {
   }
 }
 
-/** A kit, loan, maintenance record, or photo was deleted, perhaps in another tab, before a change */
+/** A kit, loan, maintenance record, photo, or shoot was deleted, perhaps in another tab, before a change */
 export class RecordNotFoundError extends Error {
   override readonly name = 'RecordNotFoundError'
-  readonly kind: 'kit' | 'loan' | 'maintenance' | 'photo'
+  readonly kind: 'kit' | 'loan' | 'maintenance' | 'photo' | 'shoot'
   readonly id: string
 
   constructor(kind: RecordNotFoundError['kind'], id: string) {

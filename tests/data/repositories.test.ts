@@ -79,9 +79,9 @@ describe('database', () => {
     expect(db.verno).toBe(SCHEMA_VERSION)
   })
 
-  it('has the version 4 tables and indexes, unchanged since version 3', async () => {
+  it('has the version 5 tables and indexes, adding shoots to version 4', async () => {
     await db.open()
-    expect(db.verno).toBe(4)
+    expect(db.verno).toBe(5)
     expect(
       db.tables.map(({ name, schema }) => ({
         name,
@@ -100,6 +100,7 @@ describe('database', () => {
       { name: 'maintenance', key: 'id', indexes: ['gearId', 'date', '[gearId+date]'] },
       { name: 'photos', key: 'id', indexes: ['gearId'] },
       { name: 'photoImages', key: 'id', indexes: [] },
+      { name: 'shoots', key: 'id', indexes: ['date', 'gearIds'] },
     ])
   })
 })
@@ -192,6 +193,11 @@ describe('gear repository', () => {
     await repos.loans.giveBack(loan.id, '2026-10-03')
     await repos.maintenance.add(item.id, { type: 'repair', date: '2026-09-01' })
     const kept = await repos.maintenance.add(other.id, { type: 'repair', date: '2026-09-02' })
+    const shoot = await repos.shoots.add({
+      date: '2026-09-20',
+      name: 'Hooker Valley',
+      gearIds: [item.id, other.id],
+    })
     const before = await changesSinceBackup()
 
     await repos.gear.remove(item.id)
@@ -202,6 +208,7 @@ describe('gear repository', () => {
       packedGearIds: [other.id],
       updatedAt: START,
     })
+    expect(await db.shoots.get(shoot.id)).toMatchObject({ gearIds: [other.id], updatedAt: START })
     expect(await changesSinceBackup()).toBe((before ?? 0) + 1)
   })
 

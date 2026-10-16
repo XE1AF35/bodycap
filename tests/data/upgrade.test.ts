@@ -1,5 +1,5 @@
-// Upgrading databases made by older versions of Bodycap: opening a version 1, 2, or 3 database as
-// the current version keeps every record and index, and adds the newer tables empty.
+// Upgrading databases made by older versions of Bodycap: opening a version 1, 2, 3, or 4 database
+// as the current version keeps every record and index, and adds the newer tables empty.
 import Dexie from 'dexie'
 import { IDBFactory, IDBKeyRange } from 'fake-indexeddb'
 import { afterEach, describe, expect, it } from 'vitest'
@@ -24,6 +24,8 @@ const VERSION_2 = {
 }
 
 const VERSION_3 = { photos: 'id, gearId', photoImages: 'id' }
+
+const VERSION_4 = {}
 
 const gear = [
   {
@@ -72,7 +74,7 @@ describe('upgrading from version 1', () => {
     const db = new BodycapDatabase({ indexedDB, IDBKeyRange })
     opened.push(db)
     await db.open()
-    expect(db.verno).toBe(4)
+    expect(db.verno).toBe(5)
     expect(await db.gear.toArray()).toEqual(gear)
     expect(await db.settings.toArray()).toEqual(settings)
     expect(await db.gear.where('serialKey').equals('1AB2345').count()).toBe(1)
@@ -83,7 +85,8 @@ describe('upgrading from version 1', () => {
       await db.maintenance.count(),
       await db.photos.count(),
       await db.photoImages.count(),
-    ]).toEqual([0, 0, 0, 0, 0])
+      await db.shoots.count(),
+    ]).toEqual([0, 0, 0, 0, 0, 0])
   })
 })
 
@@ -130,7 +133,7 @@ describe('upgrading from version 2', () => {
     const db = new BodycapDatabase({ indexedDB, IDBKeyRange })
     opened.push(db)
     await db.open()
-    expect(db.verno).toBe(4)
+    expect(db.verno).toBe(5)
     expect(await db.gear.toArray()).toEqual(gear)
     expect(await db.settings.toArray()).toEqual(settings)
     expect(
@@ -146,7 +149,11 @@ describe('upgrading from version 2', () => {
         .equals(gear[0]?.id ?? '')
         .toArray(),
     ).toEqual([clean])
-    expect([await db.photos.count(), await db.photoImages.count()]).toEqual([0, 0])
+    expect([
+      await db.photos.count(),
+      await db.photoImages.count(),
+      await db.shoots.count(),
+    ]).toEqual([0, 0, 0])
   })
 })
 
@@ -179,7 +186,7 @@ describe('upgrading from version 3', () => {
     const db = new BodycapDatabase({ indexedDB, IDBKeyRange })
     opened.push(db)
     await db.open()
-    expect(db.verno).toBe(4)
+    expect(db.verno).toBe(5)
     expect(await db.gear.toArray()).toEqual(gear)
     expect(await db.settings.toArray()).toEqual(settings)
     expect(await db.gear.where('serialKey').equals('1AB2345').count()).toBe(1)
@@ -189,5 +196,35 @@ describe('upgrading from version 3', () => {
         .equals(gear[1]?.id ?? '')
         .toArray(),
     ).toEqual([photo])
+  })
+})
+
+describe('upgrading from version 4', () => {
+  // Version 5 adds the shoots table. Nothing else changes, so there's nothing to upgrade.
+  it('keeps every record and index as it was, and adds shoots empty', async () => {
+    const item = {
+      ...gear[1],
+      weightGrams: 695,
+      filterThreadMm: 82,
+      catalogueId: 'sony-fe-24-70mm-f2-8-gm-ii',
+    }
+    const indexedDB = new IDBFactory()
+    const old = new Dexie('bodycap', { indexedDB, IDBKeyRange })
+    old.version(1).stores(VERSION_1)
+    old.version(2).stores(VERSION_2)
+    old.version(3).stores(VERSION_3)
+    old.version(4).stores(VERSION_4)
+    await old.table('gear').add(item)
+    await old.table('settings').bulkAdd(settings)
+    old.close()
+
+    const db = new BodycapDatabase({ indexedDB, IDBKeyRange })
+    opened.push(db)
+    await db.open()
+    expect(db.verno).toBe(5)
+    expect(await db.gear.toArray()).toEqual([item])
+    expect(await db.settings.toArray()).toEqual(settings)
+    expect(await db.gear.where('status').equals('owned').primaryKeys()).toEqual([gear[1]?.id])
+    expect(await db.shoots.count()).toBe(0)
   })
 })

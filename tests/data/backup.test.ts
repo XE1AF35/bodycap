@@ -123,7 +123,7 @@ describe('backup.create', () => {
     expect(backup).toEqual({
       app: 'bodycap',
       formatVersion: 4,
-      schemaVersion: 4,
+      schemaVersion: 5,
       appVersion: '0.1.0',
       exportedAt: EXPORTED_AT,
       counts: { gear: 3, kits: 1, loans: 1, maintenance: 1, photos: 0 },
