@@ -3,7 +3,7 @@
 import { describe, expect, it } from 'vitest'
 import type { CatalogueEntry } from '@/core/catalogue/schema'
 import { createCatalogueSearch } from '@/core/catalogue/search'
-import { A7_IV, FE_28_70, FE_50_F18 } from './support'
+import { A7_IV, ART_35_L_MOUNT, ART_35_SONY_E, FE_28_70, FE_50_F18 } from './support'
 
 const EOS_5D_IV = {
   id: 'canon-eos-5d-mark-iv',
@@ -143,6 +143,50 @@ describe('createCatalogueSearch', () => {
   it('still finds a lens while millimetres or an f-number are half typed', () => {
     expect(ids(search('50m', { category: 'lens' }))).toEqual([FE_50_F18.id])
     expect(ids(search('50mm f', { category: 'lens' }))).toEqual([FE_50_F18.id])
+  })
+})
+
+describe('a lens made for several mounts', () => {
+  const search = createCatalogueSearch([ART_35_SONY_E, FE_50_F18, ART_35_L_MOUNT])
+
+  it('comes back once for each mount, in catalogue order', () => {
+    expect(search('sigma 35 1.4', { category: 'lens' })).toEqual({
+      entries: [ART_35_SONY_E, ART_35_L_MOUNT],
+      total: 2,
+    })
+  })
+
+  it('takes its place among the other suggestions by name, as any model does', () => {
+    // Shorter names first: "Sony FE 50mm F1.8" before "Sigma 35mm F1.4 DG DN Art"
+    expect(ids(search('f1', { category: 'lens' }))).toEqual([
+      FE_50_F18.id,
+      ART_35_SONY_E.id,
+      ART_35_L_MOUNT.id,
+    ])
+  })
+
+  it('counts each version among the 10 shown', () => {
+    const mounts = [
+      'sony-e',
+      'l-mount',
+      'nikon-z',
+      'canon-rf',
+      'fujifilm-x',
+      'micro-four-thirds',
+    ] as const
+    const versions = [ART_35_SONY_E, FE_50_F18].flatMap((lens) =>
+      mounts.map(
+        (mount) => ({ ...lens, id: `${lens.id}-${mount}`, mount }) satisfies CatalogueEntry,
+      ),
+    )
+    const result = createCatalogueSearch(versions)('f1', { category: 'lens' })
+    expect(result?.entries).toHaveLength(10)
+    expect(result?.total).toBe(12)
+    // The shorter name's versions first, each in catalogue order
+    expect(ids(result)).toEqual([
+      ...mounts.map((mount) => `${FE_50_F18.id}-${mount}`),
+      ...mounts.slice(0, 4).map((mount) => `${ART_35_SONY_E.id}-${mount}`),
+    ])
   })
 })
 

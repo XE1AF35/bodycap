@@ -1,7 +1,7 @@
 // Filling the gear form from a picked catalogue entry. The entry's facts replace what's in those
 // fields, and stay editable. Nothing about someone's own copy, such as its serial number, price,
-// dates, or notes, is ever touched. The item stays linked to the entry while its name still says
-// that model.
+// dates, or notes, is ever touched. The item stays linked to the entry while its name and mount
+// still say that model, since another mount is another version of it.
 import type { GearInput } from '../gear'
 import { toOpticsInput } from '../optics'
 import type { CatalogueEntry } from './schema'
@@ -28,21 +28,24 @@ export function fillFromCatalogue(input: GearInput, entry: CatalogueEntry): Gear
   }
 }
 
-/** The brand and model an item was linked under */
-export interface ModelName {
+/** The brand, model, and mount an item was linked under */
+export interface LinkedModel {
   readonly brand: string
   readonly model: string
+  readonly mount: string
 }
 
 // Case and spacing don't make a different model
-const nameKey = ({ brand, model }: ModelName) =>
+const nameKey = ({ brand, model }: Pick<LinkedModel, 'brand' | 'model'>) =>
   `${brand} ${model}`.toLowerCase().replaceAll(/\s+/g, '')
 
 /**
- * The form as it should be saved: still linked to its catalogue model while the brand and model name
- * the one it was `linked` under, and unlinked once they name something else.
+ * The form as it should be saved: still linked to its catalogue model while the brand, model, and
+ * mount are the ones it was `linked` under, and unlinked once they say something else.
  */
-export function keepCatalogueLink(input: GearInput, linked: ModelName | undefined): GearInput {
-  if (linked !== undefined && nameKey(input) === nameKey(linked)) return input
+export function keepCatalogueLink(input: GearInput, linked: LinkedModel | undefined): GearInput {
+  if (linked !== undefined && nameKey(input) === nameKey(linked) && input.mount === linked.mount) {
+    return input
+  }
   return { ...input, catalogueId: '' }
 }

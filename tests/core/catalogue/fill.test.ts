@@ -1,10 +1,19 @@
 // Filling the gear form from a picked catalogue entry: the entry's facts go in, and everything
-// personal is left as it was.
+// personal is left as it was. The item stays linked to the entry while its brand, model, and mount
+// still say it is that entry.
 import { describe, expect, it } from 'vitest'
 import { fillFromCatalogue, keepCatalogueLink } from '@/core/catalogue/fill'
 import type { CatalogueEntry } from '@/core/catalogue/schema'
 import { emptyGearInput, validateGear, type GearInput } from '@/core/gear'
-import { A7_IV, CATALOGUE, FE_28_70, FE_50_F18, FE_50_F18_UNMEASURED } from './support'
+import {
+  A7_IV,
+  ART_35_L_MOUNT,
+  ART_35_SONY_E,
+  CATALOGUE,
+  FE_28_70,
+  FE_50_F18,
+  FE_50_F18_UNMEASURED,
+} from './support'
 
 const TODAY = '2026-10-13'
 
@@ -80,6 +89,17 @@ describe('fillFromCatalogue', () => {
     expect(prime).toMatchObject({ brand: 'Sony', mount: 'sony-e', maxApertureTele: '' })
   })
 
+  it('fills in the mount of the version picked, for a lens made for several mounts', () => {
+    expect(fillFromCatalogue(typed, ART_35_L_MOUNT)).toMatchObject({
+      mount: 'l-mount',
+      catalogueId: ART_35_L_MOUNT.id,
+    })
+    expect(fillFromCatalogue(typed, ART_35_SONY_E)).toMatchObject({
+      mount: 'sony-e',
+      catalogueId: ART_35_SONY_E.id,
+    })
+  })
+
   it('leaves every personal field as it was', () => {
     for (const entry of CATALOGUE.entries) {
       expect(fillFromCatalogue(typed, entry)).toMatchObject(PERSONAL)
@@ -102,7 +122,7 @@ describe('fillFromCatalogue', () => {
 
 describe('keepCatalogueLink', () => {
   const picked = fillFromCatalogue(typed, A7_IV)
-  const linked = { brand: 'Sony', model: 'a7 IV' }
+  const linked = { brand: 'Sony', model: 'a7 IV', mount: 'sony-e' }
 
   it('keeps the link while the brand and model still name the picked model', () => {
     expect(keepCatalogueLink(picked, linked).catalogueId).toBe('sony-a7-iv')
@@ -118,9 +138,24 @@ describe('keepCatalogueLink', () => {
     expect(keepCatalogueLink({ ...picked, brand: 'Sigma' }, linked).catalogueId).toBe('')
   })
 
-  it('keeps it through changes to the optics, mount, or anything personal', () => {
-    const edited = { ...picked, mount: 'l-mount', weight: '700', notes: 'With grip' }
+  it('keeps it through changes to the optics, weight, or anything personal', () => {
+    const edited = { ...picked, weight: '700', notes: 'With grip' }
     expect(keepCatalogueLink(edited, linked)).toEqual(edited)
+    const lens = fillFromCatalogue(typed, FE_28_70)
+    const zoomed = { ...lens, focalLengthMax: '75', maxApertureTele: '6.3' }
+    expect(keepCatalogueLink(zoomed, FE_28_70)).toEqual(zoomed)
+  })
+
+  it('drops the link once the mount is not the one picked, as that is another version', () => {
+    expect(keepCatalogueLink({ ...picked, mount: 'l-mount' }, linked).catalogueId).toBe('')
+    expect(keepCatalogueLink({ ...picked, mount: '' }, linked).catalogueId).toBe('')
+    const lens = fillFromCatalogue(typed, ART_35_SONY_E)
+    expect(keepCatalogueLink({ ...lens, mount: 'l-mount' }, ART_35_SONY_E).catalogueId).toBe('')
+  })
+
+  it('keeps the link while the mount is still the one picked', () => {
+    const lens = fillFromCatalogue(typed, ART_35_L_MOUNT)
+    expect(keepCatalogueLink(lens, ART_35_L_MOUNT).catalogueId).toBe(ART_35_L_MOUNT.id)
   })
 
   it('drops an ID with nothing linked to compare it with', () => {

@@ -2,7 +2,7 @@
 // everything with validateGear on save, and asks before leaving with unsaved changes.
 import { Link, useBlocker, useNavigate } from '@tanstack/react-router'
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
-import { fillFromCatalogue, keepCatalogueLink, type ModelName } from '@/core/catalogue/fill'
+import { fillFromCatalogue, keepCatalogueLink, type LinkedModel } from '@/core/catalogue/fill'
 import type { CatalogueEntry } from '@/core/catalogue/schema'
 import { isOneOf } from '@/core/choice'
 import { toIsoDate } from '@/core/dates'
@@ -140,9 +140,11 @@ export function GearForm({ initial, saved, onSave, cancel }: GearFormProps) {
   const [saving, setSaving] = useState(false)
   // The last model picked, and what was said about it, shown until the model is changed
   const [picked, setPicked] = useState<{ readonly model: string; readonly message: string }>()
-  // The name the item is linked to a catalogue model under: as saved, or as last picked
-  const [linked, setLinked] = useState<ModelName | undefined>(() =>
-    initial.catalogueId === '' ? undefined : { brand: initial.brand, model: initial.model },
+  // The name and mount the item is linked to a catalogue model under: as saved, or as last picked
+  const [linked, setLinked] = useState<LinkedModel | undefined>(() =>
+    initial.catalogueId === ''
+      ? undefined
+      : { brand: initial.brand, model: initial.model, mount: initial.mount },
   )
   const savedRef = useRef(false)
   const summaryRef = useRef<HTMLDivElement>(null)
@@ -195,7 +197,7 @@ export function GearForm({ initial, saved, onSave, cancel }: GearFormProps) {
       ...Object.fromEntries(FILLED_BY_CATALOGUE.map((field) => [field, undefined])),
     }))
     setPicked({ model: entry.model, message: catalogueFilled(entry) })
-    setLinked({ brand: entry.brand, model: entry.model })
+    setLinked({ brand: entry.brand, model: entry.model, mount: entry.mount })
   }
 
   const props = (field: Field) => ({

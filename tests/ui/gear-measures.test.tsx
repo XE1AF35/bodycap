@@ -1,5 +1,6 @@
 // Weight and filter thread in the gear form: which items ask for them, saving and showing them, and
-// filling them from a picked model, which also links the item to that model until it's renamed.
+// filling them from a picked model, which also links the item to that model until it's renamed or
+// given another mount.
 import { screen } from '@testing-library/react'
 import userEvent, { type UserEvent } from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
@@ -114,6 +115,37 @@ describe('weight and filter thread', () => {
     await screen.findByRole('heading', { level: 1, name: 'Sony a7R IV' })
     const [item] = await current(services.repositories.gear.list())
     expect(item).toMatchObject({ weight: 658 })
+    expect(item).not.toHaveProperty('catalogueId')
+  })
+
+  it("offers each mount's version of a lens, and fills in the mount of the one picked", async () => {
+    const { user, services } = await renderAdd()
+    await user.selectOptions(select('Category'), 'Lens')
+    await user.type(model(), 'sigma 35 1.4')
+    const options = await screen.findAllByRole('option', { name: /35mm F1\.4 DG DN Art/ })
+    expect(options.map((option) => option.textContent)).toEqual([
+      expect.stringContaining('E mount'),
+      expect.stringContaining('L mount'),
+    ])
+    await user.click(options[1] ?? model())
+    expect(select('Mount')).toHaveValue('l-mount')
+    expect(field('Filter thread')).toHaveValue('67')
+    await save(user)
+    await screen.findByRole('heading', { level: 1, name: 'Sigma 35mm F1.4 DG DN Art' })
+    expect(await current(services.repositories.gear.list())).toMatchObject([
+      { mount: 'l-mount', catalogueId: 'sigma-35mm-f1-4-dg-dn-art-l-mount' },
+    ])
+  })
+
+  it('drops the link when the mount is changed from the one picked', async () => {
+    const { user, services } = await renderAdd()
+    await user.selectOptions(select('Category'), 'Lens')
+    await pick(user, 'sigma 35 1.4', /35mm F1\.4 DG DN Art.*E mount/)
+    await user.selectOptions(select('Mount'), 'l-mount')
+    await save(user)
+    await screen.findByRole('heading', { level: 1, name: 'Sigma 35mm F1.4 DG DN Art' })
+    const [item] = await current(services.repositories.gear.list())
+    expect(item).toMatchObject({ mount: 'l-mount', filterThread: 67 })
     expect(item).not.toHaveProperty('catalogueId')
   })
 
