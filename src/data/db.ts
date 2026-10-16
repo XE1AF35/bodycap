@@ -64,5 +64,9 @@ export class BodycapDatabase extends Dexie {
       photos: 'id, gearId',
       photoImages: 'id',
     })
+    // M3.5 adds weight, filter thread, and catalogue ID to gear, all optional and unindexed, so
+    // nothing is upgraded. The new version still closes tabs running an older build, which would
+    // otherwise save items without the new fields.
+    this.version(4).stores({})
   }
 }

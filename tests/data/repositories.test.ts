@@ -79,9 +79,9 @@ describe('database', () => {
     expect(db.verno).toBe(SCHEMA_VERSION)
   })
 
-  it('has the version 3 tables and indexes, with older tables as they were released', async () => {
+  it('has the version 4 tables and indexes, unchanged since version 3', async () => {
     await db.open()
-    expect(db.verno).toBe(3)
+    expect(db.verno).toBe(4)
     expect(
       db.tables.map(({ name, schema }) => ({
         name,

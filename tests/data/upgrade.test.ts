@@ -1,5 +1,5 @@
-// Upgrading databases made by older versions of Bodycap: opening a version 1 or 2 database as the
-// current version keeps every record and index, and adds the newer tables empty.
+// Upgrading databases made by older versions of Bodycap: opening a version 1, 2, or 3 database as
+// the current version keeps every record and index, and adds the newer tables empty.
 import Dexie from 'dexie'
 import { IDBFactory, IDBKeyRange } from 'fake-indexeddb'
 import { afterEach, describe, expect, it } from 'vitest'
@@ -22,6 +22,8 @@ const VERSION_2 = {
   loans: 'id, gearId, dueDate, [gearId+dateOut]',
   maintenance: 'id, gearId, date, [gearId+date]',
 }
+
+const VERSION_3 = { photos: 'id, gearId', photoImages: 'id' }
 
 const gear = [
   {
@@ -70,7 +72,7 @@ describe('upgrading from version 1', () => {
     const db = new BodycapDatabase({ indexedDB, IDBKeyRange })
     opened.push(db)
     await db.open()
-    expect(db.verno).toBe(3)
+    expect(db.verno).toBe(4)
     expect(await db.gear.toArray()).toEqual(gear)
     expect(await db.settings.toArray()).toEqual(settings)
     expect(await db.gear.where('serialKey').equals('1AB2345').count()).toBe(1)
@@ -128,7 +130,7 @@ describe('upgrading from version 2', () => {
     const db = new BodycapDatabase({ indexedDB, IDBKeyRange })
     opened.push(db)
     await db.open()
-    expect(db.verno).toBe(3)
+    expect(db.verno).toBe(4)
     expect(await db.gear.toArray()).toEqual(gear)
     expect(await db.settings.toArray()).toEqual(settings)
     expect(
@@ -145,5 +147,47 @@ describe('upgrading from version 2', () => {
         .toArray(),
     ).toEqual([clean])
     expect([await db.photos.count(), await db.photoImages.count()]).toEqual([0, 0])
+  })
+})
+
+describe('upgrading from version 3', () => {
+  // Version 4 adds optional gear fields only, so nothing is rewritten. The version changes so tabs
+  // still running an older build close rather than save items without the new fields.
+  it('keeps every record and index as it was', async () => {
+    const photo = {
+      id: '5e6f7a8b-9c0d-4e1f-8a2b-3c4d5e6f7a8b',
+      createdAt: '2026-10-09T03:00:00.000Z',
+      updatedAt: '2026-10-09T03:00:00.000Z',
+      gearId: gear[1]?.id,
+      isCover: true,
+      mimeType: 'image/webp',
+      width: 1600,
+      height: 1200,
+      bytes: 3,
+      thumbnailBytes: 2,
+    }
+    const indexedDB = new IDBFactory()
+    const old = new Dexie('bodycap', { indexedDB, IDBKeyRange })
+    old.version(1).stores(VERSION_1)
+    old.version(2).stores(VERSION_2)
+    old.version(3).stores(VERSION_3)
+    await old.table('gear').bulkAdd(gear)
+    await old.table('settings').bulkAdd(settings)
+    await old.table('photos').add(photo)
+    old.close()
+
+    const db = new BodycapDatabase({ indexedDB, IDBKeyRange })
+    opened.push(db)
+    await db.open()
+    expect(db.verno).toBe(4)
+    expect(await db.gear.toArray()).toEqual(gear)
+    expect(await db.settings.toArray()).toEqual(settings)
+    expect(await db.gear.where('serialKey').equals('1AB2345').count()).toBe(1)
+    expect(
+      await db.photos
+        .where('gearId')
+        .equals(gear[1]?.id ?? '')
+        .toArray(),
+    ).toEqual([photo])
   })
 })
