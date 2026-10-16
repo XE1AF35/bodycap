@@ -3,7 +3,7 @@
 // removed model goes in `retired`, and a renamed one in `renamed`.
 import { CATALOGUE_FORMAT, type Catalogue } from '../schema'
 import { SONY_BODIES, SONY_LENSES } from './sony'
-import { CANON_BODIES, CANON_LENSES } from './canon'
+import { CANON_BODIES, CANON_DSLR_BODIES, CANON_DSLR_LENSES, CANON_LENSES } from './canon'
 import { NIKON_BODIES, NIKON_LENSES } from './nikon'
 import { FUJIFILM_BODIES, FUJIFILM_LENSES } from './fujifilm'
 import { PANASONIC_BODIES, PANASONIC_LENSES } from './panasonic'
@@ -21,6 +21,8 @@ export const CATALOGUE: Catalogue = {
     ...SONY_LENSES,
     ...CANON_BODIES,
     ...CANON_LENSES,
+    ...CANON_DSLR_BODIES,
+    ...CANON_DSLR_LENSES,
     ...NIKON_BODIES,
     ...NIKON_LENSES,
     ...FUJIFILM_BODIES,

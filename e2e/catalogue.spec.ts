@@ -19,7 +19,7 @@ test('adds a lens by keyboard from the model suggestions', async ({ page }) => {
   await tabTo(page, model)
   await keyboard.type('24-70 2.8')
   const suggestions = page.getByRole('listbox')
-  await expect(suggestions.getByRole('option')).toHaveCount(6)
+  await expect(suggestions.getByRole('option')).toHaveCount(8)
   await expect(suggestions.getByRole('option').first()).toContainText('Sony FE 24-70mm F2.8 GM')
   await keyboard.press('ArrowDown')
   await keyboard.press('Enter')
@@ -59,7 +59,7 @@ test('shows the rest of the page again when Tab leaves the suggestions', async (
   await open(page, '#/gear/new')
   const model = page.getByRole('combobox', { name: 'Model' })
   await model.fill('24-70 2.8')
-  await expect(page.getByRole('listbox').getByRole('option')).toHaveCount(6)
+  await expect(page.getByRole('listbox').getByRole('option')).toHaveCount(8)
   // Hidden from screen readers while the suggestions are open
   await expect(page.getByRole('banner')).toHaveCount(0)
 
@@ -68,4 +68,15 @@ test('shows the rest of the page again when Tab leaves the suggestions', async (
   await expect(model).not.toBeFocused()
   await expect(model).toHaveValue('24-70 2.8')
   await expect(page.getByRole('banner')).toBeVisible()
+})
+
+test('scrolls each suggestion into view as the arrow keys reach it', async ({ page }) => {
+  await open(page, '#/gear/new')
+  await page.getByRole('combobox', { name: 'Model' }).fill('24-70 2.8')
+  const options = page.getByRole('listbox').getByRole('option')
+  await expect(options).toHaveCount(8)
+  await expect(options.last()).not.toBeInViewport()
+
+  for (let i = 0; i < 8; i++) await page.keyboard.press('ArrowDown')
+  await expect(options.last()).toBeInViewport()
 })

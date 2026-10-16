@@ -175,12 +175,14 @@ const SCREENS: readonly Screen[] = [
     show: async (page) => {
       await at(page, '#/gear/new', 'Add gear')
       await page.getByRole('combobox', { name: 'Model' }).fill('24-70 2.8')
-      await expect(page.getByRole('listbox').getByRole('option')).toHaveCount(6)
+      await expect(page.getByRole('listbox').getByRole('option')).toHaveCount(8)
     },
     // Base UI hides the rest of the page from screen readers while the list is open, keeping them
     // on the suggestions. Tab still leaves the field, which closes the list and shows the page
-    // again (catalogue.spec.ts checks that), so the hidden controls are never focused hidden.
-    allowed: ['aria-hidden-focus'],
+    // again (catalogue.spec.ts checks that), so the hidden controls are never focused hidden. A
+    // long list scrolls, and focus stays in the field while the arrow keys move through it, which
+    // scrolls each one into view (catalogue.spec.ts checks that too).
+    allowed: ['aria-hidden-focus', 'scrollable-region-focusable'],
   },
   {
     name: 'add form after picking a model',

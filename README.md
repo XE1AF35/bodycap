@@ -85,10 +85,13 @@ says so if that happens.
 ## The gear catalogue
 
 The model suggestions come from a catalogue built into the app, so they work offline and what you
-type never leaves your browser. It holds 144 mirrorless bodies and 325 lenses from ten makers;
-DSLRs, third-party lenses, and cine lenses aren't in it yet. Names, mounts, and specifications are
-the makers' own. Lens weights and filter threads are the makers' figures as Wikipedia's lens lists give
-them, left out where Wikipedia and the maker disagree. Bodies don't have weights yet.
+type never leaves your browser. It holds 182 camera bodies and 452 lenses from ten makers: mirrorless
+bodies and the makers' own mirrorless lenses, and Canon's DSLRs from 2008 on with its EF and EF-S
+lenses. Other DSLRs, third-party lenses, and cine lenses aren't in it yet, and neither are Canon's
+APS-H bodies, its manual-focus TS-E and MP-E lenses, older film-era kit zooms, or a few rare lenses.
+Names, mounts, and specifications are the makers' own. Lens weights and filter threads are the
+makers' figures as Wikipedia's lens lists and articles give them, left out where Wikipedia and the
+maker disagree. Bodies don't have weights yet.
 
 Specifications are facts, so the catalogue is under the same MIT licence as the rest of Bodycap.
 Brand and model names belong to their owners, and Bodycap isn't connected with any of them.
