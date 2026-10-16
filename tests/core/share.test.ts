@@ -28,6 +28,9 @@ const lens: Gear = {
   focalLengthMin: 24,
   focalLengthMax: 70,
   maxAperture: 2.8,
+  filterThread: 82,
+  weight: 695,
+  catalogueId: 'sony-fe-24-70mm-f2-8-gm-ii',
   purchaseDate: '2026-03-01',
   purchasePrice: { amountMinor: 389900, currency: 'NZD' },
   whereBought: 'Photo Warehouse',
@@ -48,6 +51,8 @@ const body: Gear = {
   serialNumber: 'SN-7654321',
   mount: 'sony-e',
   sensorFormat: 'full-frame',
+  weight: 658,
+  catalogueId: 'sony-a7-iv',
   status: 'sold',
   saleDate: '2026-09-01',
   salePrice: { amountMinor: 250000, currency: 'NZD' },
@@ -145,6 +150,9 @@ describe('shareKitLink and openSharedKit', () => {
             focalLengthMin: 24,
             focalLengthMax: 70,
             maxAperture: 2.8,
+            filterThread: 82,
+            weight: 695,
+            catalogueId: 'sony-fe-24-70mm-f2-8-gm-ii',
             status: 'wishlist',
           },
           {
@@ -153,6 +161,8 @@ describe('shareKitLink and openSharedKit', () => {
             model: 'A7 IV',
             mount: 'sony-e',
             sensorFormat: 'full-frame',
+            weight: 658,
+            catalogueId: 'sony-a7-iv',
             status: 'wishlist',
           },
         ],
@@ -183,6 +193,9 @@ describe('shareKitLink and openSharedKit', () => {
       focalLengthMin: 24,
       focalLengthMax: 70,
       maxAperture: 2.8,
+      filterThread: 82,
+      weight: 695,
+      catalogueId: 'sony-fe-24-70mm-f2-8-gm-ii',
       status: 'wishlist',
       ...lensExtras,
     })
@@ -248,6 +261,29 @@ describe('openSharedKit', () => {
     })
   })
 
+  // Links made before format 4 have none of these, and still open as they are
+  it('opens weight, filter thread, and catalogue ID from a link that has them', () => {
+    const measured = {
+      ...validFile,
+      items: [
+        { ...validFile.items[0], weight: 521, catalogueId: 'fujifilm-x100vi' },
+        { category: 'filter', brand: 'B+W', model: 'UV 77mm', filterThread: 77 },
+      ],
+    }
+    const opened = openSharedKit(linkOf(measured), TODAY)
+    expect(opened.ok && opened.value.items).toEqual([
+      {
+        category: 'camera-body',
+        brand: 'Fujifilm',
+        model: 'X100VI',
+        weight: 521,
+        catalogueId: 'fujifilm-x100vi',
+        status: 'wishlist',
+      },
+      { category: 'filter', brand: 'B+W', model: 'UV 77mm', filterThread: 77, status: 'wishlist' },
+    ])
+  })
+
   it('drops anything a link holds that a shared kit never does', () => {
     const opened = openSharedKit(
       linkOf({
@@ -299,6 +335,16 @@ describe('openSharedKit', () => {
           },
         ],
       }),
+      DAMAGED,
+    ],
+    [
+      'a weight the form would refuse',
+      linkOf({ ...validFile, items: [{ ...validFile.items[0], weight: 0 }] }),
+      DAMAGED,
+    ],
+    [
+      'a filter thread that is text',
+      linkOf({ ...validFile, items: [{ ...validFile.items[0], filterThread: '77mm' }] }),
       DAMAGED,
     ],
     [

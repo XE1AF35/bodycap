@@ -74,12 +74,12 @@ which leaves behind everything else in the original file, such as where it was t
 camera's serial number. The CSV file and the insurance list are for reading and printing, not
 backups: they leave out kits, loans, maintenance, and photos, and can't be restored.
 
-**Shared kit links** say what each item is (its brand, model, mount, and focal lengths) and
-nothing about whose it is: no serial numbers, and nothing about where or when it was bought, where
-it's kept, or its warranty or insurance. Prices and notes go in only if you tick them. The kit
-travels in the part of the link after the `#`, which browsers never send to a server, but links
-can end up in chat apps and their previews, so share them as you would the kit itself. Opening a
-link is checked as carefully as a backup file, and adds nothing until you choose to.
+**Shared kit links** say what each item is (its brand, model, mount, focal lengths, filter thread,
+and weight) and nothing about whose it is: no serial numbers, and nothing about where or when it was
+bought, where it's kept, or its warranty or insurance. Prices and notes go in only if you tick them.
+The kit travels in the part of the link after the `#`, which browsers never send to a server, but
+links can end up in chat apps and their previews, so share them as you would the kit itself. Opening
+a link is checked as carefully as a backup file, and adds nothing until you choose to.
 
 Browsers can delete a site's data:
 
