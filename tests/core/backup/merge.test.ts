@@ -117,6 +117,16 @@ describe('planMerge', () => {
     })
   })
 
+  // Whole records win, so a newer copy from an older Bodycap drops the fields it didn't know about
+  it("takes a newer copy without a weight over an older one with, as records aren't mixed", () => {
+    const withWeight: Gear = { ...gear('g1'), weight: 658, catalogueId: 'sony-a7-iv' }
+    const newer = gear('g1', LATE)
+    expect(planMerge(data({ gear: [withWeight] }), data({ gear: [newer] }))).toMatchObject({
+      ok: true,
+      value: { writes: { gear: [newer] } },
+    })
+  })
+
   it.each<[BackupList, Partial<BackupData>, Partial<BackupData>]>([
     [
       'kits',

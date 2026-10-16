@@ -23,6 +23,9 @@ const lens: Gear = {
   focalLengthMin: 24,
   focalLengthMax: 70,
   maxAperture: 2.8,
+  filterThread: 82,
+  weight: 695,
+  catalogueId: 'sony-fe-24-70mm-f2-8-gm-ii',
   purchaseDate: '2026-03-01',
   purchasePrice: { amountMinor: 389900, currency: 'NZD' },
   status: 'owned',
@@ -232,6 +235,14 @@ describe('readBackup', () => {
         counts: { ...backup.counts, photos: 0 },
         data: { ...backup.data, photos: [] },
       },
+    })
+  })
+
+  it('upgrades a format 3 backup exactly, as format 4 only adds optional fields', () => {
+    const formatThree = { ...backup, formatVersion: 3 }
+    expect(readBackup(JSON.stringify(formatThree))).toEqual({
+      ok: true,
+      value: { ...backup, formatVersion: 4 },
     })
   })
 

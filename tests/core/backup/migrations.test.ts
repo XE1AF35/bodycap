@@ -93,3 +93,20 @@ describe('format 2 to 3', () => {
     expect(BACKUP_MIGRATIONS[2]?.(file)).toEqual(file)
   })
 })
+
+describe('format 3 to 4', () => {
+  // Format 4 adds weight, filter thread, and catalogue ID, all optional, so a format 3 item is
+  // already a valid format 4 item. The step exists so older apps refuse format 4 files.
+  it('changes nothing but the version', () => {
+    const formatThree = {
+      app: 'bodycap',
+      formatVersion: 3,
+      schemaVersion: 3,
+      appVersion: '0.3.0',
+      exportedAt: '2026-10-12T03:00:00.000Z',
+      counts: { gear: 1, kits: 0, loans: 0, maintenance: 0, photos: 0 },
+      data: { gear: [{ id: 'kept as it is' }], kits: [], loans: [], maintenance: [], photos: [] },
+    }
+    expect(migrateBackup(formatThree, 3, 4)).toEqual({ ...formatThree, formatVersion: 4 })
+  })
+})

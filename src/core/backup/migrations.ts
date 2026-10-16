@@ -32,10 +32,19 @@ function addPhotos(file: Readonly<Record<string, unknown>>) {
   return { ...file, counts: { ...counts, photos: 0 }, data: { ...data, photos: [] } }
 }
 
+/**
+ * Format 4 adds optional gear fields, so a format 3 file is already valid as it is. The step still
+ * exists so an older Bodycap refuses a format 4 file, rather than dropping the fields it can't read.
+ */
+function addGearMeasurements(file: Readonly<Record<string, unknown>>) {
+  return { ...file }
+}
+
 /** Step n upgrades format n to n + 1 */
 export const BACKUP_MIGRATIONS: Migrations = {
   1: addKitsLoansAndMaintenance,
   2: addPhotos,
+  3: addGearMeasurements,
 }
 
 /** Upgrades a file in format `from` to format `to`, setting its formatVersion as it goes. */

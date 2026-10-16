@@ -122,7 +122,7 @@ describe('backup.create', () => {
     expect(file.name).toBe('bodycap-backup-2026-10-05.json')
     expect(backup).toEqual({
       app: 'bodycap',
-      formatVersion: 3,
+      formatVersion: 4,
       schemaVersion: 3,
       appVersion: '0.1.0',
       exportedAt: EXPORTED_AT,
