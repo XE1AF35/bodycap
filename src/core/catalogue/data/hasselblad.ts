@@ -1,5 +1,6 @@
-// Hasselblad XCD camera bodies, and the Lunar, an E-mount body made with Sony. Names, mounts, and sensor formats as Hasselblad publishes them,
-// cross-checked against reference lists and launch coverage.
+// Hasselblad XCD camera bodies, and two made with Sony: the Lunar (E-mount) and the HV (A-mount).
+// Names, mounts, and sensor formats as Hasselblad publishes them, cross-checked against reference
+// lists and launch coverage.
 import type { CatalogueEntry } from '../schema'
 
 export const HASSELBLAD_BODIES: readonly CatalogueEntry[] = [
@@ -51,5 +52,13 @@ export const HASSELBLAD_BODIES: readonly CatalogueEntry[] = [
     category: 'camera-body',
     mount: 'sony-e',
     sensorFormat: 'aps-c',
+  },
+  {
+    id: 'hasselblad-hv',
+    brand: 'Hasselblad',
+    model: 'HV',
+    category: 'camera-body',
+    mount: 'sony-a',
+    sensorFormat: 'full-frame',
   },
 ]

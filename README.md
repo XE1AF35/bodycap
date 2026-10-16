@@ -85,17 +85,19 @@ says so if that happens.
 ## The gear catalogue
 
 The model suggestions come from a catalogue built into the app, so they work offline and what you
-type never leaves your browser. It holds 324 camera bodies and 577 lenses from 13 makers:
-mirrorless bodies from 2008 on and the makers' own mirrorless lenses, Canon's DSLRs from 2008 on
-with its EF and EF-S lenses, and Nikon's DSLRs from 2008 on with its autofocus F-mount lenses. Other
-DSLRs, third-party lenses, and cine lenses aren't in it yet. Neither are fixed-lens cameras,
-camcorders, cine cameras, infrared versions of cameras, cameras on mounts Bodycap doesn't know (such
-as Nikon 1, Pentax Q, and Samsung NX), Canon's APS-H bodies, its manual-focus TS-E and MP-E
-lenses, older film-era kit zooms, Nikon's IX-Nikkor and AF-I lenses, its first AF-S
-super-telephotos, its F3AF lenses from the early 1980s, or a few rare lenses. Names, mounts, and
-specifications are the makers' own. Lens weights and filter threads are the makers' figures as
-Wikipedia's lens lists and articles give them, left out where Wikipedia and the maker disagree.
-Bodies don't have weights yet.
+type never leaves your browser. It holds 376 camera bodies and 727 lenses from 14 makers:
+mirrorless bodies from 2008 on and the makers' own mirrorless lenses, and DSLRs from 2008 on for the
+Canon EF, Nikon F, Pentax K, and Sony A mounts, with Canon's, Nikon's, Pentax's, and Sony's own
+autofocus lenses for them. Third-party lenses, Minolta's A-mount lenses, and cine lenses
+aren't in it yet. Neither are fixed-lens cameras, camcorders, cine cameras, infrared versions of
+cameras, cameras on mounts Bodycap doesn't know (such as Nikon 1, Pentax Q, and Samsung NX), Canon's
+APS-H bodies, its manual-focus TS-E and MP-E lenses, older film-era kit zooms, Nikon's IX-Nikkor
+and AF-I lenses, its first AF-S super-telephotos, its F3AF lenses from the early 1980s, Pentax's DA
+L kit zooms and most of its F lenses, or a few rare lenses. Names, mounts, and specifications are
+the makers' own. Lens weights and filter threads are the makers' figures as Wikipedia's lens lists
+and articles give them, left out where Wikipedia and the maker disagree. Wikipedia has no such list
+for Sony's A-mount or Pentax's autofocus lenses, so theirs come from the makers' own pages and
+manuals, left out where those disagree. Bodies don't have weights yet.
 
 Specifications are facts, so the catalogue is under the same MIT licence as the rest of Bodycap.
 Brand and model names belong to their owners, and Bodycap isn't connected with any of them.

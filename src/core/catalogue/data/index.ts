@@ -2,7 +2,7 @@
 // has its own file. Change `version` with every change to the data, and never reuse an ID: a
 // removed model goes in `retired`, and a renamed one in `renamed`.
 import { CATALOGUE_FORMAT, type Catalogue } from '../schema'
-import { SONY_BODIES, SONY_LENSES } from './sony'
+import { SONY_A_BODIES, SONY_A_LENSES, SONY_BODIES, SONY_LENSES } from './sony'
 import { CANON_BODIES, CANON_DSLR_BODIES, CANON_DSLR_LENSES, CANON_LENSES } from './canon'
 import { NIKON_BODIES, NIKON_DSLR_BODIES, NIKON_DSLR_LENSES, NIKON_LENSES } from './nikon'
 import { FUJIFILM_BODIES, FUJIFILM_LENSES } from './fujifilm'
@@ -12,9 +12,10 @@ import { SIGMA_BODIES } from './sigma'
 import { OLYMPUS_BODIES, OLYMPUS_LENSES } from './olympus'
 import { OM_SYSTEM_BODIES, OM_SYSTEM_LENSES } from './om-system'
 import { HASSELBLAD_BODIES } from './hasselblad'
-import { PENTAX_BODIES } from './pentax'
+import { PENTAX_BODIES, PENTAX_LENSES } from './pentax'
 import { KODAK_BODIES } from './kodak'
 import { YI_BODIES } from './yi'
+import { SAMSUNG_BODIES } from './samsung'
 
 export const CATALOGUE: Catalogue = {
   format: CATALOGUE_FORMAT,
@@ -22,6 +23,8 @@ export const CATALOGUE: Catalogue = {
   entries: [
     ...SONY_BODIES,
     ...SONY_LENSES,
+    ...SONY_A_BODIES,
+    ...SONY_A_LENSES,
     ...CANON_BODIES,
     ...CANON_LENSES,
     ...CANON_DSLR_BODIES,
@@ -42,8 +45,10 @@ export const CATALOGUE: Catalogue = {
     ...OM_SYSTEM_LENSES,
     ...HASSELBLAD_BODIES,
     ...PENTAX_BODIES,
+    ...PENTAX_LENSES,
     ...KODAK_BODIES,
     ...YI_BODIES,
+    ...SAMSUNG_BODIES,
   ],
   retired: [],
   renamed: {},

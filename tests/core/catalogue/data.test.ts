@@ -96,11 +96,11 @@ describe('the catalogue data', () => {
   })
 
   it('has camera bodies in it', () => {
-    expect(entries.filter(({ category }) => category === 'camera-body').length).toBeGreaterThan(320)
+    expect(entries.filter(({ category }) => category === 'camera-body').length).toBeGreaterThan(370)
   })
 
   it('has lenses in it', () => {
-    expect(entries.filter(({ category }) => category === 'lens').length).toBeGreaterThan(570)
+    expect(entries.filter(({ category }) => category === 'lens').length).toBeGreaterThan(720)
   })
 
   it('never uses an ID twice', () => {
