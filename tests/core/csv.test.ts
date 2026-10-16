@@ -68,6 +68,9 @@ const lens: Gear = {
   focalLengthMin: 24,
   focalLengthMax: 70,
   maxAperture: 2.8,
+  filterThread: 82,
+  weight: 695,
+  catalogueId: 'sony-fe-24-70mm-f2-8-gm-ii',
   purchaseDate: '2026-03-01',
   purchasePrice: { amountMinor: 389900, currency: 'NZD' },
   whereBought: 'Photo Warehouse',
@@ -112,6 +115,8 @@ const HEADER = [
   'Longest focal length (mm)',
   'Widest aperture',
   'Widest aperture at the long end',
+  'Filter thread (mm)',
+  'Weight (g)',
   'Purchase date',
   'Purchase price',
   'Purchase currency',
@@ -128,6 +133,7 @@ const HEADER = [
   'Added',
   'Last changed',
   'ID',
+  'Catalogue ID',
 ]
 
 /** One row as written, from its cells */
@@ -162,6 +168,8 @@ describe('gearCsv', () => {
         '70',
         '2.8',
         '',
+        '82',
+        '695',
         '2026-03-01',
         '3899.00',
         'NZD',
@@ -178,6 +186,7 @@ describe('gearCsv', () => {
         '2026-03-02T01:00:00.000Z',
         '2026-06-11T22:45:10.250Z',
         lens.id,
+        'sony-fe-24-70mm-f2-8-gm-ii',
       ]),
     )
   })
@@ -198,6 +207,15 @@ describe('gearCsv', () => {
       'Sale currency': 'AUD',
       Status: 'Sold',
     })
+  })
+
+  it('writes weights as plain whole grams, and leaves blank what an item has none of', () => {
+    const cells = linesOf(gearCsv([{ ...adapter, weight: 1370 }]))[1]
+      ?.slice(1, -1)
+      .split('","')
+    expect(cells?.[HEADER.indexOf('Weight (g)')]).toBe('1370')
+    expect(cells?.[HEADER.indexOf('Filter thread (mm)')]).toBe('')
+    expect(cells?.[HEADER.indexOf('Catalogue ID')]).toBe('')
   })
 
   it('writes autofocus as No when an adapter has none', () => {

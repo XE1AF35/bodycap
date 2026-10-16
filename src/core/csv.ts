@@ -48,6 +48,8 @@ const GEAR_COLUMNS: readonly (readonly [string, (item: Gear) => string])[] = [
   ['Longest focal length (mm)', (item) => text(item.focalLengthMax)],
   ['Widest aperture', (item) => text(item.maxAperture)],
   ['Widest aperture at the long end', (item) => text(item.maxApertureTele)],
+  ['Filter thread (mm)', (item) => text(item.filterThread)],
+  ['Weight (g)', (item) => text(item.weight)],
   ['Purchase date', (item) => text(item.purchaseDate)],
   ['Purchase price', (item) => amount(item.purchasePrice)],
   ['Purchase currency', (item) => text(item.purchasePrice?.currency)],
@@ -64,6 +66,7 @@ const GEAR_COLUMNS: readonly (readonly [string, (item: Gear) => string])[] = [
   ['Added', (item) => item.createdAt],
   ['Last changed', (item) => item.updatedAt],
   ['ID', (item) => item.id],
+  ['Catalogue ID', (item) => text(item.catalogueId)],
 ]
 
 /** Every field of every item, one row each in the order given, under a header row */
