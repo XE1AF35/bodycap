@@ -27,7 +27,8 @@ const isoDate = z.string().refine(isIsoDate)
 const timestamp = z.iso.datetime()
 const currency = z.string().refine(isCurrencyCode)
 const money = z.object({ amountMinor: z.int().min(0), currency })
-// The optics rules check the ranges afterwards, with the rest of each item's rules
+// The optics, weight, and filter thread rules check the ranges afterwards, with the rest of each
+// item's rules
 const number = z.number()
 
 // Every record has these. The ID is what other records point at.
@@ -46,6 +47,9 @@ export const gearShape = {
   mount: z.enum(MOUNTS).exactOptional(),
   sensorFormat: z.enum(SENSOR_FORMATS).exactOptional(),
   lensCoverage: z.enum(SENSOR_FORMATS).exactOptional(),
+  filterThread: number.exactOptional(),
+  weight: number.exactOptional(),
+  catalogueId: shortText.exactOptional(),
   adapterFrom: z.enum(MOUNTS).exactOptional(),
   adapterTo: z.enum(MOUNTS).exactOptional(),
   adapterAutofocus: z.boolean().exactOptional(),

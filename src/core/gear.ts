@@ -1,5 +1,6 @@
 // Gear records, and the rules for turning what someone typed into the gear form into a clean record.
 // The rules live here so the form, backups, and tests all agree on what a valid item is.
+import { isCatalogueId } from './catalogue/id'
 import { isOneOf } from './choice'
 import { isIsoDate, type IsoDate } from './dates'
 import { LOCALE } from './locale'
@@ -111,6 +112,12 @@ export interface GearFields extends LensOptics {
   readonly sensorFormat?: SensorFormat
   /** Lenses: the sensor size the lens is made for */
   readonly lensCoverage?: SensorFormat
+  /** Lenses and filters: the filter thread's diameter in millimetres, such as 77 or 40.5 */
+  readonly filterThread?: number
+  /** In whole grams */
+  readonly weight?: number
+  /** Camera bodies and lenses: the catalogue model it was filled from, such as "sony-a7-iv" */
+  readonly catalogueId?: string
   /** Mount adapters: the lens side */
   readonly adapterFrom?: MountId
   /** Mount adapters: the camera side */
@@ -155,6 +162,10 @@ export interface GearInput extends OpticsInput {
   readonly mount: string
   readonly sensorFormat: string
   readonly lensCoverage: string
+  readonly filterThread: string
+  readonly weight: string
+  /** Set when a catalogue model is picked, and never typed */
+  readonly catalogueId: string
   readonly adapterFrom: string
   readonly adapterTo: string
   readonly adapterAutofocus: boolean
@@ -182,6 +193,7 @@ const ALWAYS: readonly OptionalField[] = [
   'condition',
   'currentLocation',
   'notes',
+  'weight',
 ]
 
 // Something on the wishlist hasn't been bought yet, so it has no serial, purchase date, or cover
@@ -193,8 +205,9 @@ const ONCE_BOUGHT: readonly OptionalField[] = [
 ]
 
 const BY_CATEGORY: Partial<Record<Category, readonly OptionalField[]>> = {
-  'camera-body': ['mount', 'sensorFormat'],
-  lens: ['mount', 'lensCoverage', ...OPTICS_FIELDS],
+  'camera-body': ['mount', 'sensorFormat', 'catalogueId'],
+  lens: ['mount', 'lensCoverage', ...OPTICS_FIELDS, 'filterThread', 'catalogueId'],
+  filter: ['filterThread'],
   'mount-adapter': ['adapterFrom', 'adapterTo', 'adapterAutofocus'],
 }
 
@@ -246,6 +259,41 @@ type ChoiceField =
 type Writable<T> = { -readonly [K in keyof T]: T[K] }
 
 const countFormat = new Intl.NumberFormat(LOCALE)
+
+/** In grams: from a lens cap to a loaded cine rig */
+export const WEIGHT_RANGE = { min: 1, max: 50_000 } as const
+
+/** In millimetres: from the smallest step-up rings to the largest screw-in filters */
+export const FILTER_THREAD_RANGE = { min: 10, max: 200 } as const
+
+type MeasureField = 'weight' | 'filterThread'
+
+interface Measure {
+  readonly pattern: RegExp
+  readonly range: { readonly min: number; readonly max: number }
+  readonly unit: string
+  readonly name: string
+  readonly unclear: string
+}
+
+const MEASURES: Record<MeasureField, Measure> = {
+  weight: {
+    // Whole grams, with or without "g", and with or without commas between thousands
+    pattern: /^(\d{1,3}(?:,\d{3})+|\d+)\s*g?$/i,
+    range: WEIGHT_RANGE,
+    unit: 'g',
+    name: 'a weight',
+    unclear: 'Enter the weight in whole grams, such as 658.',
+  },
+  filterThread: {
+    // Most are whole millimetres, but some small lenses take 40.5 or 37.5
+    pattern: /^(\d{1,3}(?:\.\d)?)\s*(?:mm)?$/i,
+    range: FILTER_THREAD_RANGE,
+    unit: 'mm',
+    name: 'a filter thread',
+    unclear: 'Enter the filter thread in millimetres, such as 77.',
+  },
+}
 
 /** Checks the form's input against every rule. All problems are reported together, not one at a time. */
 export function validateGear(input: GearInput, today: IsoDate): Result<GearFields, GearErrors> {
@@ -315,6 +363,31 @@ export function validateGear(input: GearInput, today: IsoDate): Result<GearField
   const whereBought = optionalText('whereBought')
   const currentLocation = optionalText('currentLocation')
   const notes = optionalText('notes', cleanMultiline)
+
+  const measure = (field: MeasureField): number | undefined => {
+    const { pattern, range, unit, name, unclear } = MEASURES[field]
+    const value = input[field].trim()
+    if (!applies.has(field) || value === '') return undefined
+    const digits = pattern.exec(value)?.[1]
+    if (digits === undefined) {
+      errors[field] = unclear
+      return undefined
+    }
+    const number = Number(digits.replaceAll(',', ''))
+    if (number < range.min || number > range.max) {
+      const min = countFormat.format(range.min)
+      const max = countFormat.format(range.max)
+      errors[field] = `Enter ${name} from ${min} to ${max} ${unit}.`
+      return undefined
+    }
+    return number
+  }
+
+  const weight = measure('weight')
+  const filterThread = measure('filterThread')
+  // Never shown, so a broken one is dropped rather than reported
+  const typedId = input.catalogueId.trim()
+  const catalogueId = applies.has('catalogueId') && isCatalogueId(typedId) ? typedId : undefined
 
   const pickMount = 'Choose a mount from the list.'
   const pickFormat = 'Choose a sensor format from the list.'
@@ -386,6 +459,9 @@ export function validateGear(input: GearInput, today: IsoDate): Result<GearField
   if (sensorFormat !== undefined) fields.sensorFormat = sensorFormat
   if (lensCoverage !== undefined) fields.lensCoverage = lensCoverage
   Object.assign(fields, opticsFields)
+  if (filterThread !== undefined) fields.filterThread = filterThread
+  if (weight !== undefined) fields.weight = weight
+  if (catalogueId !== undefined) fields.catalogueId = catalogueId
   if (adapterFrom !== undefined) fields.adapterFrom = adapterFrom
   if (adapterTo !== undefined) fields.adapterTo = adapterTo
   if (applies.has('adapterAutofocus')) fields.adapterAutofocus = input.adapterAutofocus
@@ -415,6 +491,9 @@ export function emptyGearInput(currency: CurrencyCode = DEFAULT_CURRENCY): GearI
     mount: '',
     sensorFormat: '',
     lensCoverage: '',
+    filterThread: '',
+    weight: '',
+    catalogueId: '',
     adapterFrom: '',
     adapterTo: '',
     adapterAutofocus: false,
@@ -453,6 +532,9 @@ export function toGearInput(
     mount: fields.mount ?? '',
     sensorFormat: fields.sensorFormat ?? '',
     lensCoverage: fields.lensCoverage ?? '',
+    filterThread: fields.filterThread === undefined ? '' : String(fields.filterThread),
+    weight: fields.weight === undefined ? '' : String(fields.weight),
+    catalogueId: fields.catalogueId ?? '',
     adapterFrom: fields.adapterFrom ?? '',
     adapterTo: fields.adapterTo ?? '',
     adapterAutofocus: fields.adapterAutofocus ?? false,

@@ -72,6 +72,15 @@ describe('applicableFields', () => {
     ['maxApertureTele', 'lens', 'wishlist', true],
     ['focalLengthMax', 'camera-body', 'owned', false],
     ['maxAperture', 'mount-adapter', 'owned', false],
+    ['weight', 'bag', 'owned', true],
+    ['weight', 'lens', 'wishlist', true],
+    ['weight', 'other', 'sold', true],
+    ['filterThread', 'lens', 'owned', true],
+    ['filterThread', 'filter', 'wishlist', true],
+    ['filterThread', 'camera-body', 'owned', false],
+    ['catalogueId', 'camera-body', 'owned', true],
+    ['catalogueId', 'lens', 'wishlist', true],
+    ['catalogueId', 'tripod', 'owned', false],
   ] as const)('%s applies to a %s that is %s: %s', (field, category, status, applies) => {
     expect(applicableFields(category, status).has(field)).toBe(applies)
   })
@@ -218,12 +227,71 @@ describe('validateGear', () => {
     ],
     [{ purchasePrice: { amount: '100', currency: 'XYZ' } }, 'purchasePrice', 'Choose a currency.'],
     [{ insuredValue: nzd('-1') }, 'insuredValue', "Amounts can't be negative."],
+    [{ weight: '1.2 kg' }, 'weight', 'Enter the weight in whole grams, such as 658.'],
+    [{ weight: '1,20' }, 'weight', 'Enter the weight in whole grams, such as 658.'],
+    [{ weight: '0' }, 'weight', 'Enter a weight from 1 to 50,000 g.'],
+    [{ weight: '50,001 g' }, 'weight', 'Enter a weight from 1 to 50,000 g.'],
+    [
+      { filterThread: 'M77' },
+      'filterThread',
+      'Enter the filter thread in millimetres, such as 77.',
+    ],
+    [
+      { filterThread: '40.25' },
+      'filterThread',
+      'Enter the filter thread in millimetres, such as 77.',
+    ],
+    [{ filterThread: '9.5' }, 'filterThread', 'Enter a filter thread from 10 to 200 mm.'],
+    [{ filterThread: '201' }, 'filterThread', 'Enter a filter thread from 10 to 200 mm.'],
   ])('reports %j on %s: %s', (overrides, field, message) => {
     expect(validateGear(input(overrides), TODAY)).toEqual({
       ok: false,
       error: { [field]: message },
     })
   })
+
+  it.each([
+    ['658', 658],
+    ['658 g', 658],
+    ['658g', 658],
+    ['1200G', 1200],
+    ['1,200', 1200],
+    [' 50,000 ', 50000],
+    ['1', 1],
+  ])('reads a weight typed as %j as %i g', (weight, grams) => {
+    expect(validateGear(input({ category: 'bag', weight }), TODAY)).toMatchObject({
+      ok: true,
+      value: { weight: grams },
+    })
+  })
+
+  it.each([
+    ['77', 'lens', 77],
+    ['77mm', 'lens', 77],
+    [' 40.5 MM ', 'lens', 40.5],
+    ['82 mm', 'filter', 82],
+  ])('reads a filter thread typed as %j on a %s as %d mm', (filterThread, category, mm) => {
+    expect(validateGear(input({ category, filterThread }), TODAY)).toMatchObject({
+      ok: true,
+      value: { filterThread: mm },
+    })
+  })
+
+  it('keeps the catalogue model a body or lens was filled from', () => {
+    expect(
+      validateGear(input({ catalogueId: ' sony-fe-24-70mm-f2-8-gm-ii ' }), TODAY),
+    ).toMatchObject({ ok: true, value: { catalogueId: 'sony-fe-24-70mm-f2-8-gm-ii' } })
+  })
+
+  // The ID is never shown, so there's nothing to tell anyone: a broken one just isn't kept
+  it.each(['Sony a7 IV', 'sony--a7', '-a7', 'a7-', `a${'-b'.repeat(40)}`])(
+    'drops a catalogue ID that is not well formed, without a message: %j',
+    (catalogueId) => {
+      const result = validateGear(input({ catalogueId }), TODAY)
+      expect(result).toMatchObject({ ok: true })
+      expect(result.ok && result.value).not.toHaveProperty('catalogueId')
+    },
+  )
 
   it('reports every problem at once', () => {
     const result = validateGear(input({ brand: '', model: '', purchaseDate: '2027-01-01' }), TODAY)
@@ -387,6 +455,8 @@ describe('toGearInput', () => {
     serialNumber: '3001234',
     mount: 'nikon-z',
     sensorFormat: 'full-frame',
+    weight: 760,
+    catalogueId: 'nikon-z6-iii',
     purchaseDate: '2025-07-01',
     purchasePrice: { amountMinor: 389900, currency: 'NZD' },
     whereBought: 'Photo Warehouse',
@@ -419,6 +489,7 @@ describe('toGearInput', () => {
         focalLengthMin: 35,
         focalLengthMax: 35,
         maxAperture: 1.4,
+        filterThread: 67,
         purchaseDate: '2023-03-10',
         purchasePrice: { amountMinor: 159900, currency: 'USD' },
         status: 'sold',
@@ -450,6 +521,7 @@ describe('toGearInput', () => {
         focalLengthMax: 300,
         maxAperture: 4,
         maxApertureTele: 5.6,
+        weight: 1150,
         purchasePrice: { amountMinor: 129900, currency: 'NZD' },
         status: 'wishlist',
       },
@@ -459,7 +531,8 @@ describe('toGearInput', () => {
       {
         category: 'filter',
         brand: 'Kenko',
-        model: 'PRO1D Protector 67mm',
+        model: 'PRO1D Protector 40.5mm',
+        filterThread: 40.5,
         purchasePrice: { amountMinor: 4500, currency: 'JPY' },
         status: 'owned',
       },

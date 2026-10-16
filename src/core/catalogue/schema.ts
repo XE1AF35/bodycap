@@ -3,16 +3,12 @@
 // hold it to, and its types are what the data files are written against.
 import { z } from 'zod'
 import { MOUNTS, SENSOR_FORMATS } from '../mounts'
+import { CATALOGUE_ID_MAX_LENGTH, CATALOGUE_ID_PATTERN } from './id'
 
 /** The shape of the data. The data's own version is `version`. */
 export const CATALOGUE_FORMAT = 1
 
-// Lower-case words joined by single hyphens, such as sony-a7-iv. Items keep the ID they were filled
-// from, so an ID is never reused for a different model.
-const catalogueId = z
-  .string()
-  .max(80)
-  .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
+const catalogueId = z.string().max(CATALOGUE_ID_MAX_LENGTH).regex(CATALOGUE_ID_PATTERN)
 
 const common = {
   id: catalogueId,
