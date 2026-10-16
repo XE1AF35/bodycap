@@ -2,6 +2,7 @@
 // with the app and is checked by tests, never parsed at runtime, so this schema is what those tests
 // hold it to, and its types are what the data files are written against.
 import { z } from 'zod'
+import { FILTER_THREAD_RANGE, WEIGHT_RANGE } from '../gear'
 import { MOUNTS, SENSOR_FORMATS } from '../mounts'
 import { CATALOGUE_ID_MAX_LENGTH, CATALOGUE_ID_PATTERN } from './id'
 
@@ -17,6 +18,8 @@ const common = {
   model: z.string().min(1).max(120),
   /** Other names people search by, such as "ILCE-7M4" or "Alpha 7 IV" */
   aliases: z.array(z.string().max(120)).max(8).exactOptional(),
+  /** As the maker publishes it: a body with its battery and card, a lens on its own */
+  weight: z.int().min(WEIGHT_RANGE.min).max(WEIGHT_RANGE.max).exactOptional(),
 }
 
 const bodySchema = z.strictObject({
@@ -36,6 +39,12 @@ const lensSchema = z.strictObject({
   focalLengthMax: z.number(),
   maxAperture: z.number(),
   maxApertureTele: z.number().exactOptional(),
+  /** Left out for lenses that take no screw-in filters, such as most fisheyes */
+  filterThread: z
+    .number()
+    .min(FILTER_THREAD_RANGE.min)
+    .max(FILTER_THREAD_RANGE.max)
+    .exactOptional(),
 })
 
 export const catalogueEntrySchema = z.discriminatedUnion('category', [bodySchema, lensSchema])

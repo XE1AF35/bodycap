@@ -13,12 +13,12 @@ it keeps everything in your own browser, works offline, and never needs an accou
 
 - **Your gear in one place**: bodies, lenses, flashes, tripods, bags, filters, memory cards,
   batteries, drones, mount adapters, and anything else, with serial numbers, where and when you
-  bought them, what you paid, condition, location, warranty, insured value, and notes. Lenses can
-  also record their focal length and aperture.
+  bought them, what you paid, condition, location, warranty, insured value, weight, and notes.
+  Lenses can also record their focal length, aperture, and filter thread, and filters their size.
 - **Model suggestions**: start typing a camera body or lens in the Model field, such as "a7 iv" or
   "24-70 2.8", and pick from the [gear catalogue](#the-gear-catalogue) to fill in the brand,
-  mount, sensor format, focal lengths, and aperture. Everything it fills in stays editable, and a
-  model it doesn't know can be typed as it is.
+  mount, sensor format, focal lengths, aperture, filter thread, and weight. Everything it fills in
+  stays editable, and a model it doesn't know can be typed as it is.
 - **Statuses that follow real life**: owned, wishlist, lent out, in repair, sold, or lost. Buttons
   on each item's page lend it, take it back, sell it, or mark it lost, asking only for what that
   change needs, and the status list only offers changes that make sense.

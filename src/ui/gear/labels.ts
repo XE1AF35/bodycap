@@ -78,9 +78,13 @@ export function catalogueDetails(entry: CatalogueEntry): string {
 
 /** Said after a model is picked: what it filled in, and that it can all be changed */
 export function catalogueFilled(entry: CatalogueEntry): string {
-  const filled =
-    entry.category === 'camera-body'
-      ? 'the category, brand, mount, and sensor format'
-      : 'the category, brand, mount, lens coverage, focal length, and aperture'
-  return `Filled in ${filled}. Change anything that's different on yours.`
+  const filled = ['category', 'brand', 'mount']
+  if (entry.category === 'camera-body') filled.push('sensor format')
+  else {
+    filled.push('lens coverage', 'focal length', 'aperture')
+    if (entry.filterThread !== undefined) filled.push('filter thread')
+  }
+  if (entry.weight !== undefined) filled.push('weight')
+  const last = filled.pop() ?? ''
+  return `Filled in the ${filled.join(', ')}, and ${last}. Change anything that's different on yours.`
 }

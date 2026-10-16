@@ -1,10 +1,10 @@
 // Filling the gear form from a picked catalogue entry: the entry's facts go in, and everything
 // personal is left as it was.
 import { describe, expect, it } from 'vitest'
-import { fillFromCatalogue } from '@/core/catalogue/fill'
+import { fillFromCatalogue, keepCatalogueLink } from '@/core/catalogue/fill'
 import type { CatalogueEntry } from '@/core/catalogue/schema'
 import { emptyGearInput, validateGear, type GearInput } from '@/core/gear'
-import { A7_IV, CATALOGUE, FE_28_70, FE_50_F18 } from './support'
+import { A7_IV, CATALOGUE, FE_28_70, FE_50_F18, FE_50_F18_UNMEASURED } from './support'
 
 const TODAY = '2026-10-13'
 
@@ -34,6 +34,8 @@ describe('fillFromCatalogue', () => {
       model: 'a7 IV',
       mount: 'sony-e',
       sensorFormat: 'full-frame',
+      weight: '658',
+      catalogueId: 'sony-a7-iv',
     })
   })
 
@@ -49,6 +51,17 @@ describe('fillFromCatalogue', () => {
       focalLengthMax: '50',
       maxAperture: '1.8',
       maxApertureTele: '',
+      filterThread: '49',
+      weight: '186',
+      catalogueId: 'sony-fe-50mm-f1-8',
+    })
+  })
+
+  it('leaves the weight and filter thread as they are when the catalogue has none', () => {
+    const before = { ...typed, weight: '200', filterThread: '52' }
+    expect(fillFromCatalogue(before, FE_50_F18_UNMEASURED)).toMatchObject({
+      weight: '200',
+      filterThread: '52',
     })
   })
 
@@ -83,6 +96,34 @@ describe('fillFromCatalogue', () => {
       Object.entries(entry).filter(([key]) => key !== 'id' && key !== 'aliases'),
     )
     const result = validateGear(fillFromCatalogue(typed, entry), TODAY)
-    expect(result).toMatchObject({ ok: true, value: facts })
+    expect(result).toMatchObject({ ok: true, value: { ...facts, catalogueId: entry.id } })
+  })
+})
+
+describe('keepCatalogueLink', () => {
+  const picked = fillFromCatalogue(typed, A7_IV)
+  const linked = { brand: 'Sony', model: 'a7 IV' }
+
+  it('keeps the link while the brand and model still name the picked model', () => {
+    expect(keepCatalogueLink(picked, linked).catalogueId).toBe('sony-a7-iv')
+  })
+
+  it('ignores case and spacing, so tidying the name keeps the link', () => {
+    const tidied = { ...picked, brand: ' SONY', model: 'A7  iv ' }
+    expect(keepCatalogueLink(tidied, linked).catalogueId).toBe('sony-a7-iv')
+  })
+
+  it('drops the link once the name says another model', () => {
+    expect(keepCatalogueLink({ ...picked, model: 'a7R IV' }, linked).catalogueId).toBe('')
+    expect(keepCatalogueLink({ ...picked, brand: 'Sigma' }, linked).catalogueId).toBe('')
+  })
+
+  it('keeps it through changes to the optics, mount, or anything personal', () => {
+    const edited = { ...picked, mount: 'l-mount', weight: '700', notes: 'With grip' }
+    expect(keepCatalogueLink(edited, linked)).toEqual(edited)
+  })
+
+  it('drops an ID with nothing linked to compare it with', () => {
+    expect(keepCatalogueLink(picked, undefined).catalogueId).toBe('')
   })
 })

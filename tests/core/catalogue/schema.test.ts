@@ -1,13 +1,17 @@
 // The catalogue's shape: what an entry may say, and the IDs that keep old links working.
 import { describe, expect, it } from 'vitest'
 import { catalogueSchema } from '@/core/catalogue/schema'
-import { A7_IV, CATALOGUE, FE_50_F18 } from './support'
+import { A7_IV, CATALOGUE, FE_50_F18, FE_50_F18_UNMEASURED } from './support'
 
 const withEntry = (entry: object) => ({ ...CATALOGUE, entries: [entry] })
 
 describe('catalogueSchema', () => {
   it('accepts bodies, primes, and zooms', () => {
     expect(catalogueSchema.safeParse(CATALOGUE).success).toBe(true)
+  })
+
+  it('accepts entries without a weight or filter thread', () => {
+    expect(catalogueSchema.safeParse(withEntry(FE_50_F18_UNMEASURED)).success).toBe(true)
   })
 
   it('accepts an empty catalogue', () => {
@@ -34,7 +38,10 @@ describe('catalogueSchema', () => {
     ['an unknown sensor format', { ...A7_IV, sensorFormat: 'one-inch' }],
     ['a lens field on a body', { ...A7_IV, lensCoverage: 'full-frame' }],
     ['a body field on a lens', { ...FE_50_F18, sensorFormat: 'full-frame' }],
-    ['a field nobody knows', { ...A7_IV, weight: 658 }],
+    ['a field nobody knows', { ...A7_IV, releaseYear: 2021 }],
+    ['a filter thread on a body', { ...A7_IV, filterThread: 52 }],
+    ['a weight in part grams', { ...A7_IV, weight: 658.5 }],
+    ['a weight of nothing', { ...A7_IV, weight: 0 }],
     ['a lens with no focal length', { ...FE_50_F18, focalLengthMin: undefined }],
     ['a lens with no aperture', { ...FE_50_F18, maxAperture: undefined }],
     ['a blank brand', { ...A7_IV, brand: '' }],

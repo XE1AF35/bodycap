@@ -2,7 +2,7 @@
 // everything with validateGear on save, and asks before leaving with unsaved changes.
 import { Link, useBlocker, useNavigate } from '@tanstack/react-router'
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
-import { fillFromCatalogue } from '@/core/catalogue/fill'
+import { fillFromCatalogue, keepCatalogueLink, type ModelName } from '@/core/catalogue/fill'
 import type { CatalogueEntry } from '@/core/catalogue/schema'
 import { isOneOf } from '@/core/choice'
 import { toIsoDate } from '@/core/dates'
@@ -68,9 +68,11 @@ const ORDER: readonly Field[] = [
   'focalLengthMax',
   'maxAperture',
   'maxApertureTele',
+  'filterThread',
   'adapterFrom',
   'adapterTo',
   'adapterAutofocus',
+  'weight',
   'purchaseDate',
   'purchasePrice',
   'whereBought',
@@ -97,6 +99,8 @@ const FILLED_BY_CATALOGUE: readonly Field[] = [
   'focalLengthMax',
   'maxAperture',
   'maxApertureTele',
+  'filterThread',
+  'weight',
 ]
 
 const choices = <T extends string>(values: readonly T[], labels: Record<T, string>) =>
@@ -136,6 +140,10 @@ export function GearForm({ initial, saved, onSave, cancel }: GearFormProps) {
   const [saving, setSaving] = useState(false)
   // The last model picked, and what was said about it, shown until the model is changed
   const [picked, setPicked] = useState<{ readonly model: string; readonly message: string }>()
+  // The name the item is linked to a catalogue model under: as saved, or as last picked
+  const [linked, setLinked] = useState<ModelName | undefined>(() =>
+    initial.catalogueId === '' ? undefined : { brand: initial.brand, model: initial.model },
+  )
   const savedRef = useRef(false)
   const summaryRef = useRef<HTMLDivElement>(null)
 
@@ -187,6 +195,7 @@ export function GearForm({ initial, saved, onSave, cancel }: GearFormProps) {
       ...Object.fromEntries(FILLED_BY_CATALOGUE.map((field) => [field, undefined])),
     }))
     setPicked({ model: entry.model, message: catalogueFilled(entry) })
+    setLinked({ brand: entry.brand, model: entry.model })
   }
 
   const props = (field: Field) => ({
@@ -211,13 +220,25 @@ export function GearForm({ initial, saved, onSave, cancel }: GearFormProps) {
     },
   })
 
+  const filterThread = applies.has('filterThread') && (
+    <TextField
+      {...text('filterThread')}
+      kind="number"
+      hint={
+        category === 'lens'
+          ? 'In millimetres, such as 77. Leave it blank if it takes no screw-in filters.'
+          : 'In millimetres, such as 77.'
+      }
+    />
+  )
+
   const problems: Problem[] = ORDER.flatMap((field) => {
     const message = errors[field]
     return message === undefined ? [] : [{ id: fieldId(field), message }]
   })
 
   async function submit() {
-    const result = validateGear(input, toIsoDate(new Date()))
+    const result = validateGear(keepCatalogueLink(input, linked), toIsoDate(new Date()))
     if (!result.ok) {
       setErrors(result.error)
       setFailedSaves((count) => count + 1)
@@ -270,6 +291,8 @@ export function GearForm({ initial, saved, onSave, cancel }: GearFormProps) {
           onPick={pick}
           filled={picked?.model === input.model ? picked.message : undefined}
         />
+        {/* A filter is mostly its size, so it's asked for straight after the name */}
+        {category === 'filter' && filterThread}
         {applies.has('nickname') && (
           <TextField {...text('nickname')} hint="A name you know it by, such as Main body." />
         )}
@@ -341,6 +364,7 @@ export function GearForm({ initial, saved, onSave, cancel }: GearFormProps) {
             </div>
           </fieldset>
         )}
+        {category === 'lens' && filterThread}
         {applies.has('adapterFrom') && (
           <SelectField
             {...text('adapterFrom')}
@@ -367,6 +391,15 @@ export function GearForm({ initial, saved, onSave, cancel }: GearFormProps) {
             }}
           />
         )}
+        <TextField
+          {...text('weight')}
+          kind="number"
+          hint={
+            category === 'camera-body'
+              ? 'In grams, with its battery and card, such as 658.'
+              : 'In grams, such as 658.'
+          }
+        />
       </fieldset>
 
       <fieldset className="grid gap-4">

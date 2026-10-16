@@ -1,4 +1,5 @@
-// A small catalogue for tests: one body, one prime, and one zoom that opens less wide at the long end.
+// A small catalogue for tests: one body, one prime, and one zoom that opens less wide at the long end,
+// with weights and filter threads as the makers publish them.
 import { CATALOGUE_FORMAT, type Catalogue, type CatalogueEntry } from '@/core/catalogue/schema'
 
 export const A7_IV = {
@@ -9,9 +10,11 @@ export const A7_IV = {
   category: 'camera-body',
   mount: 'sony-e',
   sensorFormat: 'full-frame',
+  weight: 658,
 } as const satisfies CatalogueEntry
 
-export const FE_50_F18 = {
+/** The prime as it would be with no weight or filter thread found for it */
+export const FE_50_F18_UNMEASURED = {
   id: 'sony-fe-50mm-f1-8',
   brand: 'Sony',
   model: 'FE 50mm F1.8',
@@ -21,6 +24,12 @@ export const FE_50_F18 = {
   focalLengthMin: 50,
   focalLengthMax: 50,
   maxAperture: 1.8,
+} as const satisfies CatalogueEntry
+
+export const FE_50_F18 = {
+  ...FE_50_F18_UNMEASURED,
+  filterThread: 49,
+  weight: 186,
 } as const satisfies CatalogueEntry
 
 export const FE_28_70 = {
@@ -35,6 +44,8 @@ export const FE_28_70 = {
   focalLengthMax: 70,
   maxAperture: 3.5,
   maxApertureTele: 5.6,
+  filterThread: 55,
+  weight: 295,
 } as const satisfies CatalogueEntry
 
 export const CATALOGUE = {

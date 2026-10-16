@@ -3,6 +3,7 @@
 // flow down two columns, so the reading order stays the same as the page's.
 import { formatDate, toIsoDate, type IsoDate } from '@/core/dates'
 import { CATEGORY_LABELS, CONDITION_LABELS, type Gear, type GearFields } from '@/core/gear'
+import { LOCALE } from '@/core/locale'
 import { formatMoney, type Money } from '@/core/money'
 import { MOUNT_LABELS, SENSOR_FORMAT_LABELS } from '@/core/mounts'
 import { formatAperture, formatFocalLength } from '@/core/optics'
@@ -12,6 +13,9 @@ import { FIELD_LABELS } from '@/ui/gear/labels'
 
 const date = (value?: IsoDate) => (value === undefined ? undefined : formatDate(value))
 const money = (value?: Money) => (value === undefined ? undefined : formatMoney(value))
+const count = new Intl.NumberFormat(LOCALE)
+const measure = (value: number | undefined, unit: string) =>
+  value === undefined ? undefined : `${count.format(value)} ${unit}`
 // Timestamps are UTC, but people think of when they added something in their own time zone
 const day = (timestamp: string) => formatDate(toIsoDate(new Date(timestamp)))
 
@@ -58,9 +62,11 @@ export function GearDetails({ item }: { readonly item: Gear }) {
           row('lensCoverage', format(item.lensCoverage)),
           { label: 'Focal length', value: formatFocalLength(item), data: true },
           { label: 'Aperture', value: formatAperture(item), data: true },
+          dataRow('filterThread', measure(item.filterThread, 'mm')),
           row('adapterFrom', mount(item.adapterFrom)),
           row('adapterTo', mount(item.adapterTo)),
           row('adapterAutofocus', autofocus),
+          dataRow('weight', measure(item.weight, 'g')),
         ]}
       />
       <DetailSection
