@@ -2,7 +2,7 @@
 // facts about it while leaving everything about your own copy alone.
 import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, expect, it } from 'vitest'
+import { beforeAll, describe, expect, it } from 'vitest'
 import { renderApp } from './support'
 
 const textbox = (name: string) => screen.getByRole('textbox', { name })
@@ -16,6 +16,10 @@ async function renderAdd() {
 }
 
 describe('model suggestions', () => {
+  // The real catalogue is a module for each maker, slow to build the first time under coverage, so
+  // it loads before any test waits on a suggestion
+  beforeAll(() => import('@/core/catalogue/data'))
+
   it('suggests known models as you type, saying what each is', async () => {
     const user = await renderAdd()
     await user.selectOptions(select('Category'), 'Camera body')

@@ -12,6 +12,9 @@ import { SIGMA_BODIES } from './sigma'
 import { OLYMPUS_BODIES, OLYMPUS_LENSES } from './olympus'
 import { OM_SYSTEM_BODIES, OM_SYSTEM_LENSES } from './om-system'
 import { HASSELBLAD_BODIES } from './hasselblad'
+import { PENTAX_BODIES } from './pentax'
+import { KODAK_BODIES } from './kodak'
+import { YI_BODIES } from './yi'
 
 export const CATALOGUE: Catalogue = {
   format: CATALOGUE_FORMAT,
@@ -38,6 +41,9 @@ export const CATALOGUE: Catalogue = {
     ...OM_SYSTEM_BODIES,
     ...OM_SYSTEM_LENSES,
     ...HASSELBLAD_BODIES,
+    ...PENTAX_BODIES,
+    ...KODAK_BODIES,
+    ...YI_BODIES,
   ],
   retired: [],
   renamed: {},

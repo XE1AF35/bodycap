@@ -182,6 +182,47 @@ export const CANON_BODIES: readonly CatalogueEntry[] = [
     mount: 'canon-ef-m',
     sensorFormat: 'aps-c',
   },
+  // Bodies from before 2017
+  {
+    id: 'canon-eos-m',
+    brand: 'Canon',
+    model: 'EOS M',
+    category: 'camera-body',
+    mount: 'canon-ef-m',
+    sensorFormat: 'aps-c',
+  },
+  {
+    id: 'canon-eos-m2',
+    brand: 'Canon',
+    model: 'EOS M2',
+    category: 'camera-body',
+    mount: 'canon-ef-m',
+    sensorFormat: 'aps-c',
+  },
+  {
+    id: 'canon-eos-m3',
+    brand: 'Canon',
+    model: 'EOS M3',
+    category: 'camera-body',
+    mount: 'canon-ef-m',
+    sensorFormat: 'aps-c',
+  },
+  {
+    id: 'canon-eos-m10',
+    brand: 'Canon',
+    model: 'EOS M10',
+    category: 'camera-body',
+    mount: 'canon-ef-m',
+    sensorFormat: 'aps-c',
+  },
+  {
+    id: 'canon-eos-m5',
+    brand: 'Canon',
+    model: 'EOS M5',
+    category: 'camera-body',
+    mount: 'canon-ef-m',
+    sensorFormat: 'aps-c',
+  },
 ]
 
 export const CANON_LENSES: readonly CatalogueEntry[] = [

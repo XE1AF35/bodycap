@@ -96,7 +96,7 @@ describe('the catalogue data', () => {
   })
 
   it('has camera bodies in it', () => {
-    expect(entries.filter(({ category }) => category === 'camera-body').length).toBeGreaterThan(215)
+    expect(entries.filter(({ category }) => category === 'camera-body').length).toBeGreaterThan(320)
   })
 
   it('has lenses in it', () => {
