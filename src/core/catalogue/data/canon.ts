@@ -1,5 +1,8 @@
 // Canon RF and EF-M camera bodies and lenses. Names, mounts, and sensor formats as Canon publishes them,
 // cross-checked against reference lists and launch coverage.
+// Lens weights and filter threads are Canon's figures as Wikipedia's lens lists give them
+// (October 2026). A lens without one had no figure that could be confirmed, or takes no
+// screw-in filters.
 import type { CatalogueEntry } from '../schema'
 
 export const CANON_BODIES: readonly CatalogueEntry[] = [
@@ -192,6 +195,7 @@ export const CANON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 10,
     focalLengthMax: 20,
     maxAperture: 4,
+    weight: 570,
   },
   {
     id: 'canon-rf-14-35mm-f4-l-is-usm',
@@ -203,6 +207,8 @@ export const CANON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 14,
     focalLengthMax: 35,
     maxAperture: 4,
+    filterThread: 77,
+    weight: 540,
   },
   {
     id: 'canon-rf-15-30mm-f4-5-6-3-is-stm',
@@ -215,6 +221,8 @@ export const CANON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 30,
     maxAperture: 4.5,
     maxApertureTele: 6.3,
+    filterThread: 67,
+    weight: 390,
   },
   {
     id: 'canon-rf-15-35mm-f2-8-l-is-usm',
@@ -226,6 +234,8 @@ export const CANON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 15,
     focalLengthMax: 35,
     maxAperture: 2.8,
+    filterThread: 82,
+    weight: 840,
   },
   {
     id: 'canon-rf-16mm-f2-8-stm',
@@ -237,6 +247,8 @@ export const CANON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 16,
     focalLengthMax: 16,
     maxAperture: 2.8,
+    filterThread: 43,
+    weight: 165,
   },
   {
     id: 'canon-rf-16-28mm-f2-8-is-stm',
@@ -248,6 +260,8 @@ export const CANON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 16,
     focalLengthMax: 28,
     maxAperture: 2.8,
+    filterThread: 67,
+    weight: 445,
   },
   {
     id: 'canon-rf-20mm-f1-4-l-vcm',
@@ -259,6 +273,8 @@ export const CANON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 20,
     focalLengthMax: 20,
     maxAperture: 1.4,
+    filterThread: 67,
+    weight: 519,
   },
   {
     id: 'canon-rf-24mm-f1-4-l-vcm',
@@ -270,6 +286,8 @@ export const CANON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 24,
     focalLengthMax: 24,
     maxAperture: 1.4,
+    filterThread: 67,
+    weight: 525,
   },
   {
     id: 'canon-rf-24mm-f1-8-macro-is-stm',
@@ -281,6 +299,8 @@ export const CANON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 24,
     focalLengthMax: 24,
     maxAperture: 1.8,
+    filterThread: 52,
+    weight: 270,
   },
   {
     id: 'canon-rf-24-50mm-f4-5-6-3-is-stm',
@@ -293,6 +313,8 @@ export const CANON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 50,
     maxAperture: 4.5,
     maxApertureTele: 6.3,
+    filterThread: 58,
+    weight: 210,
   },
   {
     id: 'canon-rf-24-70mm-f2-8-l-is-usm',
@@ -304,6 +326,8 @@ export const CANON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 24,
     focalLengthMax: 70,
     maxAperture: 2.8,
+    filterThread: 82,
+    weight: 900,
   },
   {
     id: 'canon-rf-24-105mm-f2-8-l-is-usm-z',
@@ -315,6 +339,8 @@ export const CANON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 24,
     focalLengthMax: 105,
     maxAperture: 2.8,
+    filterThread: 82,
+    weight: 1330,
   },
   {
     id: 'canon-rf-24-105mm-f4-l-is-usm',
@@ -326,6 +352,8 @@ export const CANON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 24,
     focalLengthMax: 105,
     maxAperture: 4,
+    filterThread: 77,
+    weight: 700,
   },
   {
     id: 'canon-rf-24-105mm-f4-7-1-is-stm',
@@ -338,6 +366,8 @@ export const CANON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 105,
     maxAperture: 4,
     maxApertureTele: 7.1,
+    filterThread: 67,
+    weight: 395,
   },
   {
     id: 'canon-rf-24-240mm-f4-6-3-is-usm',
@@ -350,6 +380,8 @@ export const CANON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 240,
     maxAperture: 4,
     maxApertureTele: 6.3,
+    filterThread: 72,
+    weight: 750,
   },
   {
     id: 'canon-rf-28mm-f2-8-stm',
@@ -361,6 +393,8 @@ export const CANON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 28,
     focalLengthMax: 28,
     maxAperture: 2.8,
+    filterThread: 55,
+    weight: 120,
   },
   {
     id: 'canon-rf-28-70mm-f2-l-usm',
@@ -372,6 +406,8 @@ export const CANON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 28,
     focalLengthMax: 70,
     maxAperture: 2,
+    filterThread: 95,
+    weight: 1430,
   },
   {
     id: 'canon-rf-28-70mm-f2-8-is-stm',
@@ -383,6 +419,8 @@ export const CANON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 28,
     focalLengthMax: 70,
     maxAperture: 2.8,
+    filterThread: 67,
+    weight: 495,
   },
   {
     id: 'canon-rf-35mm-f1-4-l-vcm',
@@ -394,6 +432,8 @@ export const CANON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 35,
     focalLengthMax: 35,
     maxAperture: 1.4,
+    filterThread: 67,
+    weight: 555,
   },
   {
     id: 'canon-rf-35mm-f1-8-macro-is-stm',
@@ -405,6 +445,8 @@ export const CANON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 35,
     focalLengthMax: 35,
     maxAperture: 1.8,
+    filterThread: 52,
+    weight: 305,
   },
   {
     id: 'canon-rf-45mm-f1-2-stm',
@@ -416,6 +458,8 @@ export const CANON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 45,
     focalLengthMax: 45,
     maxAperture: 1.2,
+    filterThread: 67,
+    weight: 346,
   },
   {
     id: 'canon-rf-50mm-f1-2-l-usm',
@@ -427,6 +471,8 @@ export const CANON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 50,
     focalLengthMax: 50,
     maxAperture: 1.2,
+    filterThread: 77,
+    weight: 950,
   },
   {
     id: 'canon-rf-50mm-f1-4-l-vcm',
@@ -438,6 +484,8 @@ export const CANON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 50,
     focalLengthMax: 50,
     maxAperture: 1.4,
+    filterThread: 67,
+    weight: 590,
   },
   {
     id: 'canon-rf-50mm-f1-8-stm',
@@ -449,6 +497,8 @@ export const CANON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 50,
     focalLengthMax: 50,
     maxAperture: 1.8,
+    filterThread: 43,
+    weight: 160,
   },
   {
     id: 'canon-rf-70-200mm-f2-8-l-is-usm',
@@ -460,6 +510,8 @@ export const CANON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 70,
     focalLengthMax: 200,
     maxAperture: 2.8,
+    filterThread: 77,
+    weight: 1070,
   },
   {
     id: 'canon-rf-70-200mm-f2-8-l-is-usm-z',
@@ -471,6 +523,8 @@ export const CANON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 70,
     focalLengthMax: 200,
     maxAperture: 2.8,
+    filterThread: 82,
+    weight: 1115,
   },
   {
     id: 'canon-rf-70-200mm-f4-l-is-usm',
@@ -482,6 +536,8 @@ export const CANON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 70,
     focalLengthMax: 200,
     maxAperture: 4,
+    filterThread: 77,
+    weight: 695,
   },
   {
     id: 'canon-rf-75-300mm-f4-5-6',
@@ -494,6 +550,8 @@ export const CANON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 300,
     maxAperture: 4,
     maxApertureTele: 5.6,
+    filterThread: 58,
+    weight: 507,
   },
   {
     id: 'canon-rf-85mm-f1-2-l-usm',
@@ -505,6 +563,8 @@ export const CANON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 85,
     focalLengthMax: 85,
     maxAperture: 1.2,
+    filterThread: 82,
+    weight: 1195,
   },
   {
     id: 'canon-rf-85mm-f1-2-l-usm-ds',
@@ -516,6 +576,8 @@ export const CANON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 85,
     focalLengthMax: 85,
     maxAperture: 1.2,
+    filterThread: 82,
+    weight: 1195,
   },
   {
     id: 'canon-rf-85mm-f2-macro-is-stm',
@@ -527,6 +589,8 @@ export const CANON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 85,
     focalLengthMax: 85,
     maxAperture: 2,
+    filterThread: 67,
+    weight: 500,
   },
   {
     id: 'canon-rf-100mm-f2-8-l-macro-is-usm',
@@ -538,6 +602,8 @@ export const CANON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 100,
     focalLengthMax: 100,
     maxAperture: 2.8,
+    filterThread: 67,
+    weight: 730,
   },
   {
     id: 'canon-rf-100-300mm-f2-8-l-is-usm',
@@ -549,6 +615,7 @@ export const CANON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 100,
     focalLengthMax: 300,
     maxAperture: 2.8,
+    weight: 2650,
   },
   {
     id: 'canon-rf-100-400mm-f5-6-8-is-usm',
@@ -561,6 +628,8 @@ export const CANON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 400,
     maxAperture: 5.6,
     maxApertureTele: 8,
+    filterThread: 67,
+    weight: 635,
   },
   {
     id: 'canon-rf-100-500mm-f4-5-7-1-l-is-usm',
@@ -573,6 +642,7 @@ export const CANON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 500,
     maxAperture: 4.5,
     maxApertureTele: 7.1,
+    filterThread: 77,
   },
   {
     id: 'canon-rf-135mm-f1-8-l-is-usm',
@@ -584,6 +654,8 @@ export const CANON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 135,
     focalLengthMax: 135,
     maxAperture: 1.8,
+    filterThread: 82,
+    weight: 935,
   },
   {
     id: 'canon-rf-200-800mm-f6-3-9-is-usm',
@@ -596,6 +668,8 @@ export const CANON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 800,
     maxAperture: 6.3,
     maxApertureTele: 9,
+    filterThread: 95,
+    weight: 2050,
   },
   {
     id: 'canon-rf-400mm-f2-8-l-is-usm',
@@ -607,6 +681,7 @@ export const CANON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 400,
     focalLengthMax: 400,
     maxAperture: 2.8,
+    weight: 2890,
   },
   {
     id: 'canon-rf-600mm-f4-l-is-usm',
@@ -618,6 +693,7 @@ export const CANON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 600,
     focalLengthMax: 600,
     maxAperture: 4,
+    weight: 3090,
   },
   {
     id: 'canon-rf-600mm-f11-is-stm',
@@ -629,6 +705,8 @@ export const CANON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 600,
     focalLengthMax: 600,
     maxAperture: 11,
+    filterThread: 82,
+    weight: 930,
   },
   {
     id: 'canon-rf-800mm-f5-6-l-is-usm',
@@ -640,6 +718,7 @@ export const CANON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 800,
     focalLengthMax: 800,
     maxAperture: 5.6,
+    weight: 3140,
   },
   {
     id: 'canon-rf-800mm-f11-is-stm',
@@ -651,6 +730,8 @@ export const CANON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 800,
     focalLengthMax: 800,
     maxAperture: 11,
+    filterThread: 95,
+    weight: 1260,
   },
   {
     id: 'canon-rf-1200mm-f8-l-is-usm',
@@ -662,6 +743,7 @@ export const CANON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 1200,
     focalLengthMax: 1200,
     maxAperture: 8,
+    weight: 3340,
   },
   {
     id: 'canon-rf-s-10-18mm-f4-5-6-3-is-stm',
@@ -674,6 +756,8 @@ export const CANON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 18,
     maxAperture: 4.5,
     maxApertureTele: 6.3,
+    filterThread: 49,
+    weight: 150,
   },
   {
     id: 'canon-rf-s-14-30mm-f4-6-3-is-stm-pz',
@@ -686,6 +770,8 @@ export const CANON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 30,
     maxAperture: 4,
     maxApertureTele: 6.3,
+    filterThread: 58,
+    weight: 181,
   },
   {
     id: 'canon-rf-s-18-45mm-f4-5-6-3-is-stm',
@@ -698,6 +784,8 @@ export const CANON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 45,
     maxAperture: 4.5,
     maxApertureTele: 6.3,
+    filterThread: 49,
+    weight: 130,
   },
   {
     id: 'canon-rf-s-18-150mm-f3-5-6-3-is-stm',
@@ -710,6 +798,8 @@ export const CANON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 150,
     maxAperture: 3.5,
     maxApertureTele: 6.3,
+    filterThread: 55,
+    weight: 310,
   },
   {
     id: 'canon-rf-s-55-210mm-f5-7-1-is-stm',
@@ -722,6 +812,8 @@ export const CANON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 210,
     maxAperture: 5,
     maxApertureTele: 7.1,
+    filterThread: 55,
+    weight: 270,
   },
   {
     id: 'canon-ef-m-11-22mm-f4-5-6-is-stm',
@@ -734,6 +826,8 @@ export const CANON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 22,
     maxAperture: 4,
     maxApertureTele: 5.6,
+    filterThread: 55,
+    weight: 220,
   },
   {
     id: 'canon-ef-m-15-45mm-f3-5-6-3-is-stm',
@@ -746,6 +840,8 @@ export const CANON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 45,
     maxAperture: 3.5,
     maxApertureTele: 6.3,
+    filterThread: 49,
+    weight: 130,
   },
   {
     id: 'canon-ef-m-18-55mm-f3-5-5-6-is-stm',
@@ -758,6 +854,8 @@ export const CANON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 55,
     maxAperture: 3.5,
     maxApertureTele: 5.6,
+    filterThread: 52,
+    weight: 210,
   },
   {
     id: 'canon-ef-m-18-150mm-f3-5-6-3-is-stm',
@@ -770,6 +868,8 @@ export const CANON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 150,
     maxAperture: 3.5,
     maxApertureTele: 6.3,
+    filterThread: 55,
+    weight: 300,
   },
   {
     id: 'canon-ef-m-22mm-f2-stm',
@@ -781,6 +881,8 @@ export const CANON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 22,
     focalLengthMax: 22,
     maxAperture: 2,
+    filterThread: 43,
+    weight: 105,
   },
   {
     id: 'canon-ef-m-28mm-f3-5-macro-is-stm',
@@ -792,6 +894,8 @@ export const CANON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 28,
     focalLengthMax: 28,
     maxAperture: 3.5,
+    filterThread: 43,
+    weight: 130,
   },
   {
     id: 'canon-ef-m-32mm-f1-4-stm',
@@ -803,6 +907,8 @@ export const CANON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 32,
     focalLengthMax: 32,
     maxAperture: 1.4,
+    filterThread: 43,
+    weight: 235,
   },
   {
     id: 'canon-ef-m-55-200mm-f4-5-6-3-is-stm',
@@ -815,5 +921,7 @@ export const CANON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 200,
     maxAperture: 4.5,
     maxApertureTele: 6.3,
+    filterThread: 52,
+    weight: 260,
   },
 ]

@@ -1,5 +1,8 @@
 // Sony E-mount camera bodies and lenses. Names, mounts, and sensor formats as Sony publishes them,
 // cross-checked against reference lists and launch coverage.
+// Lens weights and filter threads are Sony's figures as Wikipedia's lens lists give them
+// (October 2026). A lens without one had no figure that could be confirmed, or takes no
+// screw-in filters.
 import type { CatalogueEntry } from '../schema'
 
 export const SONY_BODIES: readonly CatalogueEntry[] = [
@@ -248,6 +251,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 10,
     focalLengthMax: 18,
     maxAperture: 4,
+    filterThread: 62,
+    weight: 225,
   },
   {
     id: 'sony-e-pz-10-20mm-f4-g',
@@ -259,6 +264,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 10,
     focalLengthMax: 20,
     maxAperture: 4,
+    filterThread: 62,
+    weight: 178,
   },
   {
     id: 'sony-e-pz-16-50mm-f3-5-5-6-oss',
@@ -271,6 +278,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 50,
     maxAperture: 3.5,
     maxApertureTele: 5.6,
+    filterThread: 40.5,
+    weight: 116,
   },
   {
     id: 'sony-e-pz-16-50mm-f3-5-5-6-oss-ii',
@@ -283,6 +292,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 50,
     maxAperture: 3.5,
     maxApertureTele: 5.6,
+    filterThread: 40.5,
+    weight: 107,
   },
   {
     id: 'sony-e-16-55mm-f2-8-g',
@@ -294,6 +305,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 16,
     focalLengthMax: 55,
     maxAperture: 2.8,
+    filterThread: 67,
+    weight: 494,
   },
   {
     id: 'sony-vario-tessar-t-e-16-70mm-f4-za-oss',
@@ -305,6 +318,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 16,
     focalLengthMax: 70,
     maxAperture: 4,
+    filterThread: 55,
+    weight: 308,
   },
   {
     id: 'sony-e-18-55mm-f3-5-5-6-oss',
@@ -317,6 +332,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 55,
     maxAperture: 3.5,
     maxApertureTele: 5.6,
+    filterThread: 49,
+    weight: 194,
   },
   {
     id: 'sony-e-pz-18-105mm-f4-g-oss',
@@ -328,6 +345,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 18,
     focalLengthMax: 105,
     maxAperture: 4,
+    filterThread: 72,
+    weight: 427,
   },
   {
     id: 'sony-e-pz-18-110mm-f4-g-oss',
@@ -339,6 +358,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 18,
     focalLengthMax: 110,
     maxAperture: 4,
+    filterThread: 95,
+    weight: 1105,
   },
   {
     id: 'sony-e-18-135mm-f3-5-5-6-oss',
@@ -351,6 +372,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 135,
     maxAperture: 3.5,
     maxApertureTele: 5.6,
+    filterThread: 55,
+    weight: 325,
   },
   {
     id: 'sony-e-18-200mm-f3-5-6-3-oss',
@@ -363,6 +386,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 200,
     maxAperture: 3.5,
     maxApertureTele: 6.3,
+    filterThread: 67,
+    weight: 524,
   },
   {
     id: 'sony-e-18-200mm-f3-5-6-3-oss-le',
@@ -375,6 +400,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 200,
     maxAperture: 3.5,
     maxApertureTele: 6.3,
+    filterThread: 62,
+    weight: 460,
   },
   {
     id: 'sony-e-pz-18-200mm-f3-5-6-3-oss',
@@ -387,6 +414,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 200,
     maxAperture: 3.5,
     maxApertureTele: 6.3,
+    filterThread: 67,
+    weight: 649,
   },
   {
     id: 'sony-e-55-210mm-f4-5-6-3-oss',
@@ -399,6 +428,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 210,
     maxAperture: 4.5,
     maxApertureTele: 6.3,
+    filterThread: 49,
+    weight: 345,
   },
   {
     id: 'sony-e-70-350mm-f4-5-6-3-g-oss',
@@ -411,6 +442,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 350,
     maxAperture: 4.5,
     maxApertureTele: 6.3,
+    filterThread: 67,
+    weight: 625,
   },
   {
     id: 'sony-e-11mm-f1-8',
@@ -422,6 +455,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 11,
     focalLengthMax: 11,
     maxAperture: 1.8,
+    filterThread: 55,
+    weight: 181,
   },
   {
     id: 'sony-e-15mm-f1-4-g',
@@ -433,6 +468,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 15,
     focalLengthMax: 15,
     maxAperture: 1.4,
+    filterThread: 55,
+    weight: 219,
   },
   {
     id: 'sony-e-16mm-f2-8',
@@ -444,6 +481,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 16,
     focalLengthMax: 16,
     maxAperture: 2.8,
+    filterThread: 49,
+    weight: 67,
   },
   {
     id: 'sony-e-20mm-f2-8',
@@ -455,6 +494,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 20,
     focalLengthMax: 20,
     maxAperture: 2.8,
+    filterThread: 49,
+    weight: 69,
   },
   {
     id: 'sony-sonnar-t-e-24mm-f1-8-za',
@@ -466,6 +507,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 24,
     focalLengthMax: 24,
     maxAperture: 1.8,
+    filterThread: 49,
+    weight: 225,
   },
   {
     id: 'sony-e-30mm-f3-5-macro',
@@ -477,6 +520,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 30,
     focalLengthMax: 30,
     maxAperture: 3.5,
+    filterThread: 49,
+    weight: 138,
   },
   {
     id: 'sony-e-35mm-f1-8-oss',
@@ -488,6 +533,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 35,
     focalLengthMax: 35,
     maxAperture: 1.8,
+    filterThread: 49,
+    weight: 154,
   },
   {
     id: 'sony-e-50mm-f1-8-oss',
@@ -499,6 +546,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 50,
     focalLengthMax: 50,
     maxAperture: 1.8,
+    filterThread: 49,
+    weight: 202,
   },
   {
     id: 'sony-fe-12-24mm-f2-8-gm',
@@ -510,6 +559,7 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 12,
     focalLengthMax: 24,
     maxAperture: 2.8,
+    weight: 847,
   },
   {
     id: 'sony-fe-12-24mm-f4-g',
@@ -521,6 +571,7 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 12,
     focalLengthMax: 24,
     maxAperture: 4,
+    weight: 565,
   },
   {
     id: 'sony-fe-16-25mm-f2-8-g',
@@ -532,6 +583,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 16,
     focalLengthMax: 25,
     maxAperture: 2.8,
+    filterThread: 67,
+    weight: 409,
   },
   {
     id: 'sony-fe-16-35mm-f2-8-gm',
@@ -543,6 +596,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 16,
     focalLengthMax: 35,
     maxAperture: 2.8,
+    filterThread: 82,
+    weight: 680,
   },
   {
     id: 'sony-fe-16-35mm-f2-8-gm-ii',
@@ -554,6 +609,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 16,
     focalLengthMax: 35,
     maxAperture: 2.8,
+    filterThread: 82,
+    weight: 547,
   },
   {
     id: 'sony-fe-pz-16-35mm-f4-g',
@@ -565,6 +622,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 16,
     focalLengthMax: 35,
     maxAperture: 4,
+    filterThread: 72,
+    weight: 353,
   },
   {
     id: 'sony-vario-tessar-t-fe-16-35mm-f4-za-oss',
@@ -576,6 +635,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 16,
     focalLengthMax: 35,
     maxAperture: 4,
+    filterThread: 72,
+    weight: 518,
   },
   {
     id: 'sony-fe-20-70mm-f4-g',
@@ -587,6 +648,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 20,
     focalLengthMax: 70,
     maxAperture: 4,
+    filterThread: 72,
+    weight: 488,
   },
   {
     id: 'sony-fe-24-50mm-f2-8-g',
@@ -598,6 +661,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 24,
     focalLengthMax: 50,
     maxAperture: 2.8,
+    filterThread: 67,
+    weight: 440,
   },
   {
     id: 'sony-vario-tessar-t-fe-24-70mm-f4-za-oss',
@@ -609,6 +674,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 24,
     focalLengthMax: 70,
     maxAperture: 4,
+    filterThread: 67,
+    weight: 426,
   },
   {
     id: 'sony-fe-24-70mm-f2-8-gm',
@@ -620,6 +687,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 24,
     focalLengthMax: 70,
     maxAperture: 2.8,
+    filterThread: 82,
+    weight: 886,
   },
   {
     id: 'sony-fe-24-70mm-f2-8-gm-ii',
@@ -631,6 +700,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 24,
     focalLengthMax: 70,
     maxAperture: 2.8,
+    filterThread: 82,
+    weight: 695,
   },
   {
     id: 'sony-fe-24-105mm-f4-g-oss',
@@ -642,6 +713,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 24,
     focalLengthMax: 105,
     maxAperture: 4,
+    filterThread: 77,
+    weight: 663,
   },
   {
     id: 'sony-fe-24-240mm-f3-5-6-3-oss',
@@ -654,6 +727,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 240,
     maxAperture: 3.5,
     maxApertureTele: 6.3,
+    filterThread: 72,
+    weight: 780,
   },
   {
     id: 'sony-fe-28-60mm-f4-5-6',
@@ -666,6 +741,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 60,
     maxAperture: 4,
     maxApertureTele: 5.6,
+    filterThread: 40.5,
+    weight: 167,
   },
   {
     id: 'sony-fe-28-70mm-f2-gm',
@@ -677,6 +754,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 28,
     focalLengthMax: 70,
     maxAperture: 2,
+    filterThread: 86,
+    weight: 918,
   },
   {
     id: 'sony-fe-28-70mm-f3-5-5-6-oss',
@@ -689,6 +768,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 70,
     maxAperture: 3.5,
     maxApertureTele: 5.6,
+    filterThread: 55,
+    weight: 295,
   },
   {
     id: 'sony-fe-28-70mm-f3-5-5-6-oss-ii',
@@ -701,6 +782,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 70,
     maxAperture: 3.5,
     maxApertureTele: 5.6,
+    filterThread: 55,
+    weight: 293,
   },
   {
     id: 'sony-fe-pz-28-135mm-f4-g-oss',
@@ -712,6 +795,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 28,
     focalLengthMax: 135,
     maxAperture: 4,
+    filterThread: 95,
+    weight: 1215,
   },
   {
     id: 'sony-fe-50-150mm-f2-gm',
@@ -723,6 +808,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 50,
     focalLengthMax: 150,
     maxAperture: 2,
+    filterThread: 95,
+    weight: 1340,
   },
   {
     id: 'sony-fe-70-200mm-f4-g-oss',
@@ -734,6 +821,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 70,
     focalLengthMax: 200,
     maxAperture: 4,
+    filterThread: 72,
+    weight: 840,
   },
   {
     id: 'sony-fe-70-200mm-f4-macro-g-oss-ii',
@@ -745,6 +834,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 70,
     focalLengthMax: 200,
     maxAperture: 4,
+    filterThread: 72,
+    weight: 794,
   },
   {
     id: 'sony-fe-70-200mm-f2-8-gm-oss',
@@ -756,6 +847,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 70,
     focalLengthMax: 200,
     maxAperture: 2.8,
+    filterThread: 77,
+    weight: 1480,
   },
   {
     id: 'sony-fe-70-200mm-f2-8-gm-oss-ii',
@@ -767,6 +860,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 70,
     focalLengthMax: 200,
     maxAperture: 2.8,
+    filterThread: 77,
+    weight: 1045,
   },
   {
     id: 'sony-fe-70-300mm-f4-5-5-6-g-oss',
@@ -779,6 +874,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 300,
     maxAperture: 4.5,
     maxApertureTele: 5.6,
+    filterThread: 72,
+    weight: 854,
   },
   {
     id: 'sony-fe-100-400mm-f4-5-5-6-gm-oss',
@@ -791,6 +888,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 400,
     maxAperture: 4.5,
     maxApertureTele: 5.6,
+    filterThread: 77,
+    weight: 1398,
   },
   {
     id: 'sony-fe-200-600mm-f5-6-6-3-g-oss',
@@ -803,6 +902,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 600,
     maxAperture: 5.6,
     maxApertureTele: 6.3,
+    filterThread: 95,
+    weight: 2115,
   },
   {
     id: 'sony-fe-400-800mm-f6-3-8-g-oss',
@@ -815,6 +916,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 800,
     maxAperture: 6.3,
     maxApertureTele: 8,
+    filterThread: 105,
+    weight: 2475,
   },
   {
     id: 'sony-fe-14mm-f1-8-gm',
@@ -826,6 +929,7 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 14,
     focalLengthMax: 14,
     maxAperture: 1.8,
+    weight: 460,
   },
   {
     id: 'sony-fe-16mm-f1-8-g',
@@ -837,6 +941,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 16,
     focalLengthMax: 16,
     maxAperture: 1.8,
+    filterThread: 67,
+    weight: 304,
   },
   {
     id: 'sony-fe-20mm-f1-8-g',
@@ -848,6 +954,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 20,
     focalLengthMax: 20,
     maxAperture: 1.8,
+    filterThread: 67,
+    weight: 373,
   },
   {
     id: 'sony-fe-24mm-f1-4-gm',
@@ -859,6 +967,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 24,
     focalLengthMax: 24,
     maxAperture: 1.4,
+    filterThread: 67,
+    weight: 445,
   },
   {
     id: 'sony-fe-24mm-f2-8-g',
@@ -870,6 +980,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 24,
     focalLengthMax: 24,
     maxAperture: 2.8,
+    filterThread: 49,
+    weight: 162,
   },
   {
     id: 'sony-fe-28mm-f2',
@@ -881,6 +993,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 28,
     focalLengthMax: 28,
     maxAperture: 2,
+    filterThread: 49,
+    weight: 200,
   },
   {
     id: 'sony-fe-35mm-f1-4-gm',
@@ -892,6 +1006,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 35,
     focalLengthMax: 35,
     maxAperture: 1.4,
+    filterThread: 67,
+    weight: 524,
   },
   {
     id: 'sony-distagon-t-fe-35mm-f1-4-za',
@@ -903,6 +1019,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 35,
     focalLengthMax: 35,
     maxAperture: 1.4,
+    filterThread: 72,
+    weight: 630,
   },
   {
     id: 'sony-sonnar-t-fe-35mm-f2-8-za',
@@ -914,6 +1032,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 35,
     focalLengthMax: 35,
     maxAperture: 2.8,
+    filterThread: 49,
+    weight: 120,
   },
   {
     id: 'sony-fe-35mm-f1-8',
@@ -925,6 +1045,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 35,
     focalLengthMax: 35,
     maxAperture: 1.8,
+    filterThread: 55,
+    weight: 280,
   },
   {
     id: 'sony-fe-40mm-f2-5-g',
@@ -936,6 +1058,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 40,
     focalLengthMax: 40,
     maxAperture: 2.5,
+    filterThread: 49,
+    weight: 173,
   },
   {
     id: 'sony-fe-50mm-f1-2-gm',
@@ -947,6 +1071,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 50,
     focalLengthMax: 50,
     maxAperture: 1.2,
+    filterThread: 72,
+    weight: 778,
   },
   {
     id: 'sony-fe-50mm-f1-4-gm',
@@ -958,6 +1084,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 50,
     focalLengthMax: 50,
     maxAperture: 1.4,
+    filterThread: 67,
+    weight: 516,
   },
   {
     id: 'sony-planar-t-fe-50mm-f1-4-za',
@@ -969,6 +1097,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 50,
     focalLengthMax: 50,
     maxAperture: 1.4,
+    filterThread: 72,
+    weight: 778,
   },
   {
     id: 'sony-fe-50mm-f1-8',
@@ -980,6 +1110,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 50,
     focalLengthMax: 50,
     maxAperture: 1.8,
+    filterThread: 49,
+    weight: 186,
   },
   {
     id: 'sony-fe-50mm-f2-5-g',
@@ -991,6 +1123,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 50,
     focalLengthMax: 50,
     maxAperture: 2.5,
+    filterThread: 49,
+    weight: 174,
   },
   {
     id: 'sony-fe-50mm-f2-8-macro',
@@ -1002,6 +1136,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 50,
     focalLengthMax: 50,
     maxAperture: 2.8,
+    filterThread: 55,
+    weight: 236,
   },
   {
     id: 'sony-sonnar-t-fe-55mm-f1-8-za',
@@ -1013,6 +1149,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 55,
     focalLengthMax: 55,
     maxAperture: 1.8,
+    filterThread: 49,
+    weight: 281,
   },
   {
     id: 'sony-fe-85mm-f1-4-gm',
@@ -1024,6 +1162,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 85,
     focalLengthMax: 85,
     maxAperture: 1.4,
+    filterThread: 77,
+    weight: 848,
   },
   {
     id: 'sony-fe-85mm-f1-4-gm-ii',
@@ -1035,6 +1175,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 85,
     focalLengthMax: 85,
     maxAperture: 1.4,
+    filterThread: 77,
+    weight: 642,
   },
   {
     id: 'sony-fe-85mm-f1-8',
@@ -1046,6 +1188,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 85,
     focalLengthMax: 85,
     maxAperture: 1.8,
+    filterThread: 67,
+    weight: 371,
   },
   {
     id: 'sony-fe-90mm-f2-8-macro-g-oss',
@@ -1057,6 +1201,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 90,
     focalLengthMax: 90,
     maxAperture: 2.8,
+    filterThread: 62,
+    weight: 602,
   },
   {
     id: 'sony-fe-100mm-f2-8-stf-gm-oss',
@@ -1068,6 +1214,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 100,
     focalLengthMax: 100,
     maxAperture: 2.8,
+    filterThread: 72,
+    weight: 700,
   },
   {
     id: 'sony-fe-135mm-f1-8-gm',
@@ -1079,6 +1227,8 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 135,
     focalLengthMax: 135,
     maxAperture: 1.8,
+    filterThread: 82,
+    weight: 953,
   },
   {
     id: 'sony-fe-300mm-f2-8-gm-oss',
@@ -1090,6 +1240,7 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 300,
     focalLengthMax: 300,
     maxAperture: 2.8,
+    weight: 1470,
   },
   {
     id: 'sony-fe-400mm-f2-8-gm-oss',
@@ -1101,6 +1252,7 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 400,
     focalLengthMax: 400,
     maxAperture: 2.8,
+    weight: 2895,
   },
   {
     id: 'sony-fe-600mm-f4-gm-oss',
@@ -1112,5 +1264,6 @@ export const SONY_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 600,
     focalLengthMax: 600,
     maxAperture: 4,
+    weight: 3040,
   },
 ]

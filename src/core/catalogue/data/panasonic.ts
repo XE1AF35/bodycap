@@ -1,5 +1,8 @@
 // Panasonic L-Mount and Micro Four Thirds camera bodies and lenses. Names, mounts, and sensor formats as Panasonic publishes them,
 // cross-checked against reference lists and launch coverage.
+// Lens weights and filter threads are Panasonic's figures as Wikipedia's lens lists give them
+// (October 2026). A lens without one had no figure that could be confirmed, or takes no
+// screw-in filters.
 import type { CatalogueEntry } from '../schema'
 
 export const PANASONIC_BODIES: readonly CatalogueEntry[] = [
@@ -382,6 +385,7 @@ export const PANASONIC_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 7,
     focalLengthMax: 14,
     maxAperture: 4,
+    weight: 300,
   },
   {
     id: 'panasonic-leica-dg-vario-elmar-8-18mm-f2-8-4-0-asph',
@@ -394,6 +398,8 @@ export const PANASONIC_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 18,
     maxAperture: 2.8,
     maxApertureTele: 4,
+    filterThread: 67,
+    weight: 315,
   },
   {
     id: 'panasonic-leica-dg-vario-summilux-10-25mm-f1-7-asph',
@@ -405,6 +411,8 @@ export const PANASONIC_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 10,
     focalLengthMax: 25,
     maxAperture: 1.7,
+    filterThread: 77,
+    weight: 690,
   },
   {
     id: 'panasonic-lumix-g-vario-12-32mm-f3-5-5-6-asph-mega-o-i-s',
@@ -417,6 +425,8 @@ export const PANASONIC_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 32,
     maxAperture: 3.5,
     maxApertureTele: 5.6,
+    filterThread: 37,
+    weight: 70,
   },
   {
     id: 'panasonic-lumix-g-x-vario-12-35mm-f2-8-ii-asph-power-o-i-s',
@@ -428,6 +438,8 @@ export const PANASONIC_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 12,
     focalLengthMax: 35,
     maxAperture: 2.8,
+    filterThread: 58,
+    weight: 305,
   },
   {
     id: 'panasonic-leica-dg-vario-elmarit-12-35mm-f2-8-asph-power-o-i-s',
@@ -439,6 +451,8 @@ export const PANASONIC_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 12,
     focalLengthMax: 35,
     maxAperture: 2.8,
+    filterThread: 58,
+    weight: 306,
   },
   {
     id: 'panasonic-leica-dg-vario-elmarit-12-60mm-f2-8-4-0-asph-power-o-i-s',
@@ -451,6 +465,8 @@ export const PANASONIC_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 60,
     maxAperture: 2.8,
     maxApertureTele: 4,
+    filterThread: 62,
+    weight: 320,
   },
   {
     id: 'panasonic-lumix-g-vario-12-60mm-f3-5-5-6-asph-power-o-i-s',
@@ -463,6 +479,8 @@ export const PANASONIC_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 60,
     maxAperture: 3.5,
     maxApertureTele: 5.6,
+    filterThread: 58,
+    weight: 210,
   },
   {
     id: 'panasonic-lumix-g-vario-14-42mm-f3-5-5-6-ii-asph-mega-o-i-s',
@@ -475,6 +493,8 @@ export const PANASONIC_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 42,
     maxAperture: 3.5,
     maxApertureTele: 5.6,
+    filterThread: 46,
+    weight: 110,
   },
   {
     id: 'panasonic-lumix-g-vario-14-140mm-f3-5-5-6-asph-power-o-i-s',
@@ -487,6 +507,7 @@ export const PANASONIC_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 140,
     maxAperture: 3.5,
     maxApertureTele: 5.6,
+    weight: 265,
   },
   {
     id: 'panasonic-leica-dg-vario-summilux-25-50mm-f1-7-asph',
@@ -498,6 +519,8 @@ export const PANASONIC_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 25,
     focalLengthMax: 50,
     maxAperture: 1.7,
+    filterThread: 77,
+    weight: 654,
   },
   {
     id: 'panasonic-lumix-g-x-vario-35-100mm-f2-8-ii-power-o-i-s',
@@ -509,6 +532,8 @@ export const PANASONIC_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 35,
     focalLengthMax: 100,
     maxAperture: 2.8,
+    filterThread: 58,
+    weight: 357,
   },
   {
     id: 'panasonic-leica-dg-vario-elmarit-35-100mm-f2-8-power-o-i-s',
@@ -520,6 +545,8 @@ export const PANASONIC_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 35,
     focalLengthMax: 100,
     maxAperture: 2.8,
+    filterThread: 58,
+    weight: 360,
   },
   {
     id: 'panasonic-lumix-g-vario-45-150mm-f4-5-6-asph-mega-o-i-s',
@@ -532,6 +559,8 @@ export const PANASONIC_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 150,
     maxAperture: 4,
     maxApertureTele: 5.6,
+    filterThread: 52,
+    weight: 200,
   },
   {
     id: 'panasonic-lumix-g-vario-45-200mm-f4-5-6-ii-power-o-i-s',
@@ -544,6 +573,8 @@ export const PANASONIC_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 200,
     maxAperture: 4,
     maxApertureTele: 5.6,
+    filterThread: 52,
+    weight: 370,
   },
   {
     id: 'panasonic-leica-dg-vario-elmarit-50-200mm-f2-8-4-0-asph-power-o-i-s',
@@ -556,6 +587,8 @@ export const PANASONIC_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 200,
     maxAperture: 2.8,
     maxApertureTele: 4,
+    filterThread: 67,
+    weight: 655,
   },
   {
     id: 'panasonic-lumix-g-vario-100-300mm-f4-5-6-ii-power-o-i-s',
@@ -568,6 +601,8 @@ export const PANASONIC_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 300,
     maxAperture: 4,
     maxApertureTele: 5.6,
+    filterThread: 67,
+    weight: 520,
   },
   {
     id: 'panasonic-leica-dg-vario-elmar-100-400mm-f4-0-6-3-ii-asph-power-o-i-s',
@@ -580,6 +615,8 @@ export const PANASONIC_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 400,
     maxAperture: 4,
     maxApertureTele: 6.3,
+    filterThread: 72,
+    weight: 985,
   },
   {
     id: 'panasonic-lumix-g-fisheye-8mm-f3-5',
@@ -591,6 +628,7 @@ export const PANASONIC_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 8,
     focalLengthMax: 8,
     maxAperture: 3.5,
+    weight: 165,
   },
   {
     id: 'panasonic-leica-dg-summilux-9mm-f1-7-asph',
@@ -602,6 +640,8 @@ export const PANASONIC_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 9,
     focalLengthMax: 9,
     maxAperture: 1.7,
+    filterThread: 55,
+    weight: 130,
   },
   {
     id: 'panasonic-leica-dg-summilux-12mm-f1-4-asph',
@@ -613,6 +653,8 @@ export const PANASONIC_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 12,
     focalLengthMax: 12,
     maxAperture: 1.4,
+    filterThread: 62,
+    weight: 335,
   },
   {
     id: 'panasonic-lumix-g-14mm-f2-5-ii-asph',
@@ -624,6 +666,8 @@ export const PANASONIC_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 14,
     focalLengthMax: 14,
     maxAperture: 2.5,
+    filterThread: 46,
+    weight: 55,
   },
   {
     id: 'panasonic-leica-dg-summilux-15mm-f1-7-asph',
@@ -635,6 +679,8 @@ export const PANASONIC_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 15,
     focalLengthMax: 15,
     maxAperture: 1.7,
+    filterThread: 46,
+    weight: 115,
   },
   {
     id: 'panasonic-lumix-g-20mm-f1-7-ii-asph',
@@ -646,6 +692,8 @@ export const PANASONIC_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 20,
     focalLengthMax: 20,
     maxAperture: 1.7,
+    filterThread: 46,
+    weight: 87,
   },
   {
     id: 'panasonic-leica-dg-summilux-25mm-f1-4-ii-asph',
@@ -657,6 +705,8 @@ export const PANASONIC_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 25,
     focalLengthMax: 25,
     maxAperture: 1.4,
+    filterThread: 46,
+    weight: 205,
   },
   {
     id: 'panasonic-lumix-g-25mm-f1-7-asph',
@@ -668,6 +718,8 @@ export const PANASONIC_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 25,
     focalLengthMax: 25,
     maxAperture: 1.7,
+    filterThread: 46,
+    weight: 125,
   },
   {
     id: 'panasonic-lumix-g-macro-30mm-f2-8-asph-mega-o-i-s',
@@ -679,6 +731,8 @@ export const PANASONIC_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 30,
     focalLengthMax: 30,
     maxAperture: 2.8,
+    filterThread: 46,
+    weight: 180,
   },
   {
     id: 'panasonic-leica-dg-nocticron-42-5mm-f1-2-asph-power-o-i-s',
@@ -690,6 +744,8 @@ export const PANASONIC_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 42.5,
     focalLengthMax: 42.5,
     maxAperture: 1.2,
+    filterThread: 67,
+    weight: 425,
   },
   {
     id: 'panasonic-lumix-g-42-5mm-f1-7-asph-power-o-i-s',
@@ -701,6 +757,8 @@ export const PANASONIC_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 42.5,
     focalLengthMax: 42.5,
     maxAperture: 1.7,
+    filterThread: 37,
+    weight: 130,
   },
   {
     id: 'panasonic-leica-dg-macro-elmarit-45mm-f2-8-asph-mega-o-i-s',
@@ -712,6 +770,8 @@ export const PANASONIC_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 45,
     focalLengthMax: 45,
     maxAperture: 2.8,
+    filterThread: 46,
+    weight: 225,
   },
   {
     id: 'panasonic-leica-dg-elmarit-200mm-f2-8-power-o-i-s',
@@ -723,5 +783,7 @@ export const PANASONIC_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 200,
     focalLengthMax: 200,
     maxAperture: 2.8,
+    filterThread: 77,
+    weight: 1245,
   },
 ]

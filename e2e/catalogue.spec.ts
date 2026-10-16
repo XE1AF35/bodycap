@@ -35,8 +35,10 @@ test('adds a lens by keyboard from the model suggestions', async ({ page }) => {
   await expect(page.getByRole('textbox', { name: 'Widest aperture', exact: true })).toHaveValue(
     '2.8',
   )
+  await expect(page.getByRole('textbox', { name: 'Filter thread' })).toHaveValue('82')
+  await expect(page.getByRole('textbox', { name: 'Weight' })).toHaveValue('886')
   await expect(page.getByRole('status').filter({ hasText: /^Filled in the category/ })).toHaveText(
-    "Filled in the category, brand, mount, lens coverage, focal length, and aperture. Change anything that's different on yours.",
+    "Filled in the category, brand, mount, lens coverage, focal length, aperture, filter thread, and weight. Change anything that's different on yours.",
   )
 
   await tabTo(page, page.getByRole('button', { name: 'Save' }))
@@ -49,6 +51,8 @@ test('adds a lens by keyboard from the model suggestions', async ({ page }) => {
   await expect(detail(page, 'Lens coverage')).toHaveText('Full frame')
   await expect(detail(page, 'Focal length')).toHaveText('24-70mm')
   await expect(detail(page, 'Aperture')).toHaveText('f/2.8')
+  await expect(detail(page, 'Filter thread')).toHaveText('82 mm')
+  await expect(detail(page, 'Weight')).toHaveText('886 g')
 })
 
 test('shows the rest of the page again when Tab leaves the suggestions', async ({ page }) => {

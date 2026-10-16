@@ -1,5 +1,8 @@
 // Olympus Micro Four Thirds camera bodies and lenses. Names, mounts, and sensor formats as Olympus publishes them,
 // cross-checked against reference lists and launch coverage.
+// Lens weights and filter threads are Olympus's figures as Wikipedia's lens lists give them
+// (October 2026). A lens without one had no figure that could be confirmed, or takes no
+// screw-in filters.
 import type { CatalogueEntry } from '../schema'
 
 export const OLYMPUS_BODIES: readonly CatalogueEntry[] = [
@@ -80,6 +83,7 @@ export const OLYMPUS_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 7,
     focalLengthMax: 14,
     maxAperture: 2.8,
+    weight: 535,
   },
   {
     id: 'olympus-m-zuiko-digital-ed-8-25mm-f4-pro',
@@ -91,6 +95,8 @@ export const OLYMPUS_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 8,
     focalLengthMax: 25,
     maxAperture: 4,
+    filterThread: 72,
+    weight: 411,
   },
   {
     id: 'olympus-m-zuiko-digital-ed-9-18mm-f4-5-6',
@@ -103,6 +109,8 @@ export const OLYMPUS_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 18,
     maxAperture: 4,
     maxApertureTele: 5.6,
+    filterThread: 52,
+    weight: 155,
   },
   {
     id: 'olympus-m-zuiko-digital-ed-12-40mm-f2-8-pro',
@@ -114,6 +122,8 @@ export const OLYMPUS_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 12,
     focalLengthMax: 40,
     maxAperture: 2.8,
+    filterThread: 62,
+    weight: 382,
   },
   {
     id: 'olympus-m-zuiko-digital-ed-12-45mm-f4-pro',
@@ -125,6 +135,8 @@ export const OLYMPUS_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 12,
     focalLengthMax: 45,
     maxAperture: 4,
+    filterThread: 58,
+    weight: 254,
   },
   {
     id: 'olympus-m-zuiko-digital-ed-12-100mm-f4-is-pro',
@@ -136,6 +148,8 @@ export const OLYMPUS_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 12,
     focalLengthMax: 100,
     maxAperture: 4,
+    filterThread: 72,
+    weight: 561,
   },
   {
     id: 'olympus-m-zuiko-digital-ed-12-200mm-f3-5-6-3',
@@ -148,6 +162,8 @@ export const OLYMPUS_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 200,
     maxAperture: 3.5,
     maxApertureTele: 6.3,
+    filterThread: 72,
+    weight: 455,
   },
   {
     id: 'olympus-m-zuiko-digital-ed-14-42mm-f3-5-5-6-ez',
@@ -160,6 +176,8 @@ export const OLYMPUS_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 42,
     maxAperture: 3.5,
     maxApertureTele: 5.6,
+    filterThread: 37,
+    weight: 95,
   },
   {
     id: 'olympus-m-zuiko-digital-14-42mm-f3-5-5-6-ii-r',
@@ -172,6 +190,8 @@ export const OLYMPUS_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 42,
     maxAperture: 3.5,
     maxApertureTele: 5.6,
+    filterThread: 37,
+    weight: 113,
   },
   {
     id: 'olympus-m-zuiko-digital-ed-14-150mm-f4-5-6-ii',
@@ -184,6 +204,8 @@ export const OLYMPUS_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 150,
     maxAperture: 4,
     maxApertureTele: 5.6,
+    filterThread: 58,
+    weight: 285,
   },
   {
     id: 'olympus-m-zuiko-digital-ed-40-150mm-f2-8-pro',
@@ -195,6 +217,8 @@ export const OLYMPUS_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 40,
     focalLengthMax: 150,
     maxAperture: 2.8,
+    filterThread: 72,
+    weight: 880,
   },
   {
     id: 'olympus-m-zuiko-digital-ed-40-150mm-f4-5-6-r',
@@ -207,6 +231,8 @@ export const OLYMPUS_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 150,
     maxAperture: 4,
     maxApertureTele: 5.6,
+    filterThread: 58,
+    weight: 190,
   },
   {
     id: 'olympus-m-zuiko-digital-ed-75-300mm-f4-8-6-7-ii',
@@ -219,6 +245,8 @@ export const OLYMPUS_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 300,
     maxAperture: 4.8,
     maxApertureTele: 6.7,
+    filterThread: 58,
+    weight: 423,
   },
   {
     id: 'olympus-m-zuiko-digital-ed-100-400mm-f5-0-6-3-is',
@@ -231,6 +259,8 @@ export const OLYMPUS_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 400,
     maxAperture: 5,
     maxApertureTele: 6.3,
+    filterThread: 72,
+    weight: 1120,
   },
   {
     id: 'olympus-m-zuiko-digital-ed-150-400mm-f4-5-tc1-25x-is-pro',
@@ -242,6 +272,8 @@ export const OLYMPUS_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 150,
     focalLengthMax: 400,
     maxAperture: 4.5,
+    filterThread: 95,
+    weight: 1875,
   },
   {
     id: 'olympus-m-zuiko-digital-ed-8mm-f1-8-fisheye-pro',
@@ -253,6 +285,7 @@ export const OLYMPUS_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 8,
     focalLengthMax: 8,
     maxAperture: 1.8,
+    weight: 315,
   },
   {
     id: 'olympus-m-zuiko-digital-ed-12mm-f2',
@@ -264,6 +297,8 @@ export const OLYMPUS_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 12,
     focalLengthMax: 12,
     maxAperture: 2,
+    filterThread: 46,
+    weight: 130,
   },
   {
     id: 'olympus-m-zuiko-digital-ed-17mm-f1-2-pro',
@@ -275,6 +310,8 @@ export const OLYMPUS_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 17,
     focalLengthMax: 17,
     maxAperture: 1.2,
+    filterThread: 62,
+    weight: 390,
   },
   {
     id: 'olympus-m-zuiko-digital-17mm-f1-8',
@@ -286,6 +323,8 @@ export const OLYMPUS_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 17,
     focalLengthMax: 17,
     maxAperture: 1.8,
+    filterThread: 46,
+    weight: 120,
   },
   {
     id: 'olympus-m-zuiko-digital-ed-25mm-f1-2-pro',
@@ -297,6 +336,8 @@ export const OLYMPUS_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 25,
     focalLengthMax: 25,
     maxAperture: 1.2,
+    filterThread: 62,
+    weight: 410,
   },
   {
     id: 'olympus-m-zuiko-digital-25mm-f1-8',
@@ -308,6 +349,8 @@ export const OLYMPUS_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 25,
     focalLengthMax: 25,
     maxAperture: 1.8,
+    filterThread: 46,
+    weight: 137,
   },
   {
     id: 'olympus-m-zuiko-digital-ed-30mm-f3-5-macro',
@@ -319,6 +362,8 @@ export const OLYMPUS_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 30,
     focalLengthMax: 30,
     maxAperture: 3.5,
+    filterThread: 46,
+    weight: 128,
   },
   {
     id: 'olympus-m-zuiko-digital-ed-45mm-f1-2-pro',
@@ -330,6 +375,8 @@ export const OLYMPUS_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 45,
     focalLengthMax: 45,
     maxAperture: 1.2,
+    filterThread: 62,
+    weight: 410,
   },
   {
     id: 'olympus-m-zuiko-digital-45mm-f1-8',
@@ -341,6 +388,8 @@ export const OLYMPUS_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 45,
     focalLengthMax: 45,
     maxAperture: 1.8,
+    filterThread: 37,
+    weight: 116,
   },
   {
     id: 'olympus-m-zuiko-digital-ed-60mm-f2-8-macro',
@@ -352,6 +401,8 @@ export const OLYMPUS_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 60,
     focalLengthMax: 60,
     maxAperture: 2.8,
+    filterThread: 46,
+    weight: 185,
   },
   {
     id: 'olympus-m-zuiko-digital-ed-75mm-f1-8',
@@ -363,6 +414,8 @@ export const OLYMPUS_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 75,
     focalLengthMax: 75,
     maxAperture: 1.8,
+    filterThread: 58,
+    weight: 305,
   },
   {
     id: 'olympus-m-zuiko-digital-ed-300mm-f4-is-pro',
@@ -374,5 +427,7 @@ export const OLYMPUS_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 300,
     focalLengthMax: 300,
     maxAperture: 4,
+    filterThread: 77,
+    weight: 1270,
   },
 ]

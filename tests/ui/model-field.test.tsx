@@ -68,7 +68,11 @@ describe('model suggestions', () => {
     expect(textbox('Longest focal length')).toHaveValue('70')
     expect(textbox('Widest aperture')).toHaveValue('2.8')
     expect(textbox('Widest aperture at the long end')).toHaveValue('')
-    expect(screen.getByText(/focal length, and aperture/)).toBeInTheDocument()
+    expect(textbox('Filter thread')).toHaveValue('82')
+    expect(textbox('Weight')).toHaveValue('695')
+    expect(
+      screen.getByText(/focal length, aperture, filter thread, and weight/),
+    ).toBeInTheDocument()
   })
 
   it('shows only the chosen category', async () => {

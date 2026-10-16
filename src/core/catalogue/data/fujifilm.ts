@@ -1,5 +1,8 @@
 // Fujifilm X and G camera bodies and lenses. Names, mounts, and sensor formats as Fujifilm publishes them,
 // cross-checked against reference lists and launch coverage.
+// Lens weights and filter threads are Fujifilm's figures as Wikipedia's lens lists give them
+// (October 2026). A lens without one had no figure that could be confirmed, or takes no
+// screw-in filters.
 import type { CatalogueEntry } from '../schema'
 
 export const FUJIFILM_BODIES: readonly CatalogueEntry[] = [
@@ -241,6 +244,8 @@ export const FUJIFILM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 45,
     maxAperture: 3.5,
     maxApertureTele: 5.6,
+    filterThread: 52,
+    weight: 136,
   },
   {
     id: 'fujifilm-xc16-50mmf3-5-5-6-ois-ii',
@@ -253,6 +258,8 @@ export const FUJIFILM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 50,
     maxAperture: 3.5,
     maxApertureTele: 5.6,
+    filterThread: 58,
+    weight: 195,
   },
   {
     id: 'fujifilm-xc35mmf2',
@@ -264,6 +271,8 @@ export const FUJIFILM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 35,
     focalLengthMax: 35,
     maxAperture: 2,
+    filterThread: 43,
+    weight: 130,
   },
   {
     id: 'fujifilm-xc50-230mmf4-5-6-7-ois-ii',
@@ -276,6 +285,8 @@ export const FUJIFILM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 230,
     maxAperture: 4.5,
     maxApertureTele: 6.7,
+    filterThread: 58,
+    weight: 375,
   },
   {
     id: 'fujifilm-xf8mmf3-5-r-wr',
@@ -287,6 +298,8 @@ export const FUJIFILM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 8,
     focalLengthMax: 8,
     maxAperture: 3.5,
+    filterThread: 62,
+    weight: 215,
   },
   {
     id: 'fujifilm-xf8-16mmf2-8-r-lm-wr',
@@ -298,6 +311,7 @@ export const FUJIFILM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 8,
     focalLengthMax: 16,
     maxAperture: 2.8,
+    weight: 805,
   },
   {
     id: 'fujifilm-xf10-24mmf4-r-ois',
@@ -309,6 +323,8 @@ export const FUJIFILM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 10,
     focalLengthMax: 24,
     maxAperture: 4,
+    filterThread: 72,
+    weight: 410,
   },
   {
     id: 'fujifilm-xf10-24mmf4-r-ois-wr',
@@ -320,6 +336,8 @@ export const FUJIFILM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 10,
     focalLengthMax: 24,
     maxAperture: 4,
+    filterThread: 72,
+    weight: 385,
   },
   {
     id: 'fujifilm-xf14mmf2-8-r',
@@ -331,6 +349,8 @@ export const FUJIFILM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 14,
     focalLengthMax: 14,
     maxAperture: 2.8,
+    filterThread: 58,
+    weight: 235,
   },
   {
     id: 'fujifilm-xf16mmf1-4-r-wr',
@@ -342,6 +362,8 @@ export const FUJIFILM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 16,
     focalLengthMax: 16,
     maxAperture: 1.4,
+    filterThread: 67,
+    weight: 375,
   },
   {
     id: 'fujifilm-xf16mmf2-8-r-wr',
@@ -353,6 +375,8 @@ export const FUJIFILM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 16,
     focalLengthMax: 16,
     maxAperture: 2.8,
+    filterThread: 49,
+    weight: 155,
   },
   {
     id: 'fujifilm-xf16-50mmf2-8-4-8-r-lm-wr',
@@ -365,6 +389,8 @@ export const FUJIFILM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 50,
     maxAperture: 2.8,
     maxApertureTele: 4.8,
+    filterThread: 58,
+    weight: 240,
   },
   {
     id: 'fujifilm-xf16-55mmf2-8-r-lm-wr',
@@ -376,6 +402,8 @@ export const FUJIFILM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 16,
     focalLengthMax: 55,
     maxAperture: 2.8,
+    filterThread: 77,
+    weight: 655,
   },
   {
     id: 'fujifilm-xf16-55mmf2-8-r-lm-wr-ii',
@@ -387,6 +415,8 @@ export const FUJIFILM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 16,
     focalLengthMax: 55,
     maxAperture: 2.8,
+    filterThread: 72,
+    weight: 410,
   },
   {
     id: 'fujifilm-xf16-80mmf4-r-ois-wr',
@@ -398,6 +428,8 @@ export const FUJIFILM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 16,
     focalLengthMax: 80,
     maxAperture: 4,
+    filterThread: 72,
+    weight: 440,
   },
   {
     id: 'fujifilm-xf18mmf1-4-r-lm-wr',
@@ -409,6 +441,8 @@ export const FUJIFILM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 18,
     focalLengthMax: 18,
     maxAperture: 1.4,
+    filterThread: 62,
+    weight: 370,
   },
   {
     id: 'fujifilm-xf18mmf2-r',
@@ -420,6 +454,8 @@ export const FUJIFILM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 18,
     focalLengthMax: 18,
     maxAperture: 2,
+    filterThread: 52,
+    weight: 116,
   },
   {
     id: 'fujifilm-xf18-55mmf2-8-4-r-lm-ois',
@@ -432,6 +468,8 @@ export const FUJIFILM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 55,
     maxAperture: 2.8,
     maxApertureTele: 4,
+    filterThread: 58,
+    weight: 310,
   },
   {
     id: 'fujifilm-xf18-120mmf4-lm-pz-wr',
@@ -443,6 +481,8 @@ export const FUJIFILM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 18,
     focalLengthMax: 120,
     maxAperture: 4,
+    filterThread: 72,
+    weight: 460,
   },
   {
     id: 'fujifilm-xf18-135mmf3-5-5-6-r-lm-ois-wr',
@@ -455,6 +495,8 @@ export const FUJIFILM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 135,
     maxAperture: 3.5,
     maxApertureTele: 5.6,
+    filterThread: 67,
+    weight: 490,
   },
   {
     id: 'fujifilm-xf23mmf1-4-r',
@@ -466,6 +508,8 @@ export const FUJIFILM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 23,
     focalLengthMax: 23,
     maxAperture: 1.4,
+    filterThread: 62,
+    weight: 300,
   },
   {
     id: 'fujifilm-xf23mmf1-4-r-lm-wr',
@@ -477,6 +521,8 @@ export const FUJIFILM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 23,
     focalLengthMax: 23,
     maxAperture: 1.4,
+    filterThread: 58,
+    weight: 375,
   },
   {
     id: 'fujifilm-xf23mmf2-r-wr',
@@ -488,6 +534,8 @@ export const FUJIFILM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 23,
     focalLengthMax: 23,
     maxAperture: 2,
+    filterThread: 43,
+    weight: 180,
   },
   {
     id: 'fujifilm-xf27mmf2-8',
@@ -499,6 +547,8 @@ export const FUJIFILM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 27,
     focalLengthMax: 27,
     maxAperture: 2.8,
+    filterThread: 39,
+    weight: 78,
   },
   {
     id: 'fujifilm-xf27mmf2-8-r-wr',
@@ -510,6 +560,8 @@ export const FUJIFILM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 27,
     focalLengthMax: 27,
     maxAperture: 2.8,
+    filterThread: 39,
+    weight: 78,
   },
   {
     id: 'fujifilm-xf30mmf2-8-r-lm-wr-macro',
@@ -521,6 +573,8 @@ export const FUJIFILM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 30,
     focalLengthMax: 30,
     maxAperture: 2.8,
+    filterThread: 43,
+    weight: 195,
   },
   {
     id: 'fujifilm-xf33mmf1-4-r-lm-wr',
@@ -532,6 +586,8 @@ export const FUJIFILM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 33,
     focalLengthMax: 33,
     maxAperture: 1.4,
+    filterThread: 58,
+    weight: 360,
   },
   {
     id: 'fujifilm-xf35mmf1-4-r',
@@ -543,6 +599,8 @@ export const FUJIFILM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 35,
     focalLengthMax: 35,
     maxAperture: 1.4,
+    filterThread: 52,
+    weight: 187,
   },
   {
     id: 'fujifilm-xf35mmf2-r-wr',
@@ -554,6 +612,8 @@ export const FUJIFILM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 35,
     focalLengthMax: 35,
     maxAperture: 2,
+    filterThread: 43,
+    weight: 170,
   },
   {
     id: 'fujifilm-xf50mmf1-0-r-wr',
@@ -565,6 +625,8 @@ export const FUJIFILM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 50,
     focalLengthMax: 50,
     maxAperture: 1,
+    filterThread: 77,
+    weight: 845,
   },
   {
     id: 'fujifilm-xf50mmf2-r-wr',
@@ -576,6 +638,8 @@ export const FUJIFILM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 50,
     focalLengthMax: 50,
     maxAperture: 2,
+    filterThread: 46,
+    weight: 200,
   },
   {
     id: 'fujifilm-xf50-140mmf2-8-r-lm-ois-wr',
@@ -587,6 +651,8 @@ export const FUJIFILM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 50,
     focalLengthMax: 140,
     maxAperture: 2.8,
+    filterThread: 72,
+    weight: 995,
   },
   {
     id: 'fujifilm-xf55-200mmf3-5-4-8-r-lm-ois',
@@ -599,6 +665,8 @@ export const FUJIFILM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 200,
     maxAperture: 3.5,
     maxApertureTele: 4.8,
+    filterThread: 62,
+    weight: 580,
   },
   {
     id: 'fujifilm-xf56mmf1-2-r',
@@ -610,6 +678,8 @@ export const FUJIFILM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 56,
     focalLengthMax: 56,
     maxAperture: 1.2,
+    filterThread: 62,
+    weight: 405,
   },
   {
     id: 'fujifilm-xf56mmf1-2-r-apd',
@@ -621,6 +691,8 @@ export const FUJIFILM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 56,
     focalLengthMax: 56,
     maxAperture: 1.2,
+    filterThread: 62,
+    weight: 405,
   },
   {
     id: 'fujifilm-xf56mmf1-2-r-wr',
@@ -632,6 +704,8 @@ export const FUJIFILM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 56,
     focalLengthMax: 56,
     maxAperture: 1.2,
+    filterThread: 67,
+    weight: 445,
   },
   {
     id: 'fujifilm-xf60mmf2-4-r-macro',
@@ -643,6 +717,8 @@ export const FUJIFILM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 60,
     focalLengthMax: 60,
     maxAperture: 2.4,
+    filterThread: 39,
+    weight: 215,
   },
   {
     id: 'fujifilm-xf70-300mmf4-5-6-r-lm-ois-wr',
@@ -655,6 +731,8 @@ export const FUJIFILM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 300,
     maxAperture: 4,
     maxApertureTele: 5.6,
+    filterThread: 67,
+    weight: 580,
   },
   {
     id: 'fujifilm-xf80mmf2-8-r-lm-ois-wr-macro',
@@ -666,6 +744,8 @@ export const FUJIFILM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 80,
     focalLengthMax: 80,
     maxAperture: 2.8,
+    filterThread: 62,
+    weight: 750,
   },
   {
     id: 'fujifilm-xf90mmf2-r-lm-wr',
@@ -677,6 +757,8 @@ export const FUJIFILM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 90,
     focalLengthMax: 90,
     maxAperture: 2,
+    filterThread: 62,
+    weight: 540,
   },
   {
     id: 'fujifilm-xf100-400mmf4-5-5-6-r-lm-ois-wr',
@@ -689,6 +771,8 @@ export const FUJIFILM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 400,
     maxAperture: 4.5,
     maxApertureTele: 5.6,
+    filterThread: 77,
+    weight: 1375,
   },
   {
     id: 'fujifilm-xf150-600mmf5-6-8-r-lm-ois-wr',
@@ -701,6 +785,8 @@ export const FUJIFILM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 600,
     maxAperture: 5.6,
     maxApertureTele: 8,
+    filterThread: 82,
+    weight: 1605,
   },
   {
     id: 'fujifilm-xf200mmf2-r-lm-ois-wr',
@@ -712,6 +798,8 @@ export const FUJIFILM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 200,
     focalLengthMax: 200,
     maxAperture: 2,
+    filterThread: 105,
+    weight: 2265,
   },
   {
     id: 'fujifilm-xf500mmf5-6-r-lm-ois-wr',
@@ -723,6 +811,8 @@ export const FUJIFILM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 500,
     focalLengthMax: 500,
     maxAperture: 5.6,
+    filterThread: 95,
+    weight: 1335,
   },
   {
     id: 'fujifilm-gf20-35mmf4-r-wr',
@@ -734,6 +824,8 @@ export const FUJIFILM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 20,
     focalLengthMax: 35,
     maxAperture: 4,
+    filterThread: 82,
+    weight: 725,
   },
   {
     id: 'fujifilm-gf23mmf4-r-lm-wr',
@@ -745,6 +837,8 @@ export const FUJIFILM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 23,
     focalLengthMax: 23,
     maxAperture: 4,
+    filterThread: 82,
+    weight: 845,
   },
   {
     id: 'fujifilm-gf30mmf3-5-r-wr',
@@ -756,6 +850,8 @@ export const FUJIFILM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 30,
     focalLengthMax: 30,
     maxAperture: 3.5,
+    filterThread: 58,
+    weight: 510,
   },
   {
     id: 'fujifilm-gf30mmf5-6-t-s',
@@ -767,6 +863,8 @@ export const FUJIFILM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 30,
     focalLengthMax: 30,
     maxAperture: 5.6,
+    filterThread: 105,
+    weight: 1340,
   },
   {
     id: 'fujifilm-gf32-64mmf4-r-lm-wr',
@@ -778,6 +876,8 @@ export const FUJIFILM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 32,
     focalLengthMax: 64,
     maxAperture: 4,
+    filterThread: 77,
+    weight: 875,
   },
   {
     id: 'fujifilm-gf35-70mmf4-5-5-6-wr',
@@ -790,6 +890,8 @@ export const FUJIFILM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 70,
     maxAperture: 4.5,
     maxApertureTele: 5.6,
+    filterThread: 62,
+    weight: 390,
   },
   {
     id: 'fujifilm-gf45mmf2-8-r-wr',
@@ -801,6 +903,8 @@ export const FUJIFILM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 45,
     focalLengthMax: 45,
     maxAperture: 2.8,
+    filterThread: 62,
+    weight: 490,
   },
   {
     id: 'fujifilm-gf45-100mmf4-r-lm-ois-wr',
@@ -812,6 +916,8 @@ export const FUJIFILM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 45,
     focalLengthMax: 100,
     maxAperture: 4,
+    filterThread: 82,
+    weight: 1005,
   },
   {
     id: 'fujifilm-gf50mmf3-5-r-lm-wr',
@@ -823,6 +929,8 @@ export const FUJIFILM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 50,
     focalLengthMax: 50,
     maxAperture: 3.5,
+    filterThread: 62,
+    weight: 335,
   },
   {
     id: 'fujifilm-gf55mmf1-7-r-wr',
@@ -834,6 +942,8 @@ export const FUJIFILM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 55,
     focalLengthMax: 55,
     maxAperture: 1.7,
+    filterThread: 77,
+    weight: 780,
   },
   {
     id: 'fujifilm-gf63mmf2-8-r-wr',
@@ -845,6 +955,8 @@ export const FUJIFILM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 63,
     focalLengthMax: 63,
     maxAperture: 2.8,
+    filterThread: 62,
+    weight: 405,
   },
   {
     id: 'fujifilm-gf80mmf1-7-r-wr',
@@ -856,6 +968,8 @@ export const FUJIFILM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 80,
     focalLengthMax: 80,
     maxAperture: 1.7,
+    filterThread: 77,
+    weight: 795,
   },
   {
     id: 'fujifilm-gf100-200mmf5-6-r-lm-ois-wr',
@@ -867,6 +981,8 @@ export const FUJIFILM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 100,
     focalLengthMax: 200,
     maxAperture: 5.6,
+    filterThread: 67,
+    weight: 1050,
   },
   {
     id: 'fujifilm-gf110mmf2-r-lm-wr',
@@ -878,6 +994,8 @@ export const FUJIFILM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 110,
     focalLengthMax: 110,
     maxAperture: 2,
+    filterThread: 77,
+    weight: 1010,
   },
   {
     id: 'fujifilm-gf110mmf5-6-t-s-macro',
@@ -889,6 +1007,8 @@ export const FUJIFILM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 110,
     focalLengthMax: 110,
     maxAperture: 5.6,
+    filterThread: 72,
+    weight: 1255,
   },
   {
     id: 'fujifilm-gf120mmf4-r-lm-ois-wr-macro',
@@ -900,6 +1020,8 @@ export const FUJIFILM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 120,
     focalLengthMax: 120,
     maxAperture: 4,
+    filterThread: 72,
+    weight: 980,
   },
   {
     id: 'fujifilm-gf250mmf4-r-lm-ois-wr',
@@ -911,6 +1033,8 @@ export const FUJIFILM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 250,
     focalLengthMax: 250,
     maxAperture: 4,
+    filterThread: 82,
+    weight: 1425,
   },
   {
     id: 'fujifilm-gf500mmf5-6-r-lm-ois-wr',
@@ -922,5 +1046,7 @@ export const FUJIFILM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 500,
     focalLengthMax: 500,
     maxAperture: 5.6,
+    filterThread: 95,
+    weight: 1375,
   },
 ]

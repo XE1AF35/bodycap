@@ -17,8 +17,8 @@ it keeps everything in your own browser, works offline, and never needs an accou
   Lenses can also record their focal length, aperture, and filter thread, and filters their size.
 - **Model suggestions**: start typing a camera body or lens in the Model field, such as "a7 iv" or
   "24-70 2.8", and pick from the [gear catalogue](#the-gear-catalogue) to fill in the brand,
-  mount, sensor format, focal lengths, aperture, filter thread, and weight. Everything it fills in
-  stays editable, and a model it doesn't know can be typed as it is.
+  mount, sensor format, focal lengths, and aperture, and for most lenses the filter thread and
+  weight. Everything it fills in stays editable, and a model it doesn't know can be typed as it is.
 - **Statuses that follow real life**: owned, wishlist, lent out, in repair, sold, or lost. Buttons
   on each item's page lend it, take it back, sell it, or mark it lost, asking only for what that
   change needs, and the status list only offers changes that make sense.
@@ -113,11 +113,14 @@ you type never leaves your browser. It holds 469 models: 144 mirrorless camera b
 Panasonic, Sigma, and Sony. DSLRs, third-party lenses, and cine lenses aren't in it yet.
 
 It was put together by hand from the names, mounts, sensor formats, and lens specifications the
-makers publish, and copies no other database, so it's under the same MIT licence as the rest of
-Bodycap. Brand and model names belong to their owners, and Bodycap isn't connected with any of
-them. The data is in `src/core/catalogue/data/`, one file per maker, and a test checks every entry
-against the gear form's own rules, so a suggestion can never fill in something Bodycap wouldn't
-save.
+makers publish. Most lenses also have their weight and filter thread: the makers' figures as
+Wikipedia's lens lists give them, left out wherever they disagree with the maker's own. Camera
+bodies don't have weights yet. Specifications are facts rather than anyone's writing, so the
+catalogue is under the same MIT licence as the rest of Bodycap.
+
+Brand and model names belong to their owners, and Bodycap isn't connected with any of them. The data
+is in `src/core/catalogue/data/`, one file per maker, and a test checks every entry against the gear
+form's own rules, so a suggestion can never fill in something Bodycap wouldn't save.
 
 ## Coming later
 

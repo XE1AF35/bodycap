@@ -1,5 +1,8 @@
 // OM System Micro Four Thirds camera bodies and lenses. Names, mounts, and sensor formats as OM System publishes them,
 // cross-checked against reference lists and launch coverage.
+// Lens weights and filter threads are OM System's figures as Wikipedia's lens lists give them
+// (October 2026). A lens without one had no figure that could be confirmed, or takes no
+// screw-in filters.
 import type { CatalogueEntry } from '../schema'
 
 export const OM_SYSTEM_BODIES: readonly CatalogueEntry[] = [
@@ -56,6 +59,8 @@ export const OM_SYSTEM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 12,
     focalLengthMax: 40,
     maxAperture: 2.8,
+    filterThread: 62,
+    weight: 382,
   },
   {
     id: 'om-system-m-zuiko-digital-ed-40-150mm-f4-pro',
@@ -67,6 +72,8 @@ export const OM_SYSTEM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 40,
     focalLengthMax: 150,
     maxAperture: 4,
+    filterThread: 62,
+    weight: 382,
   },
   {
     id: 'om-system-m-zuiko-digital-ed-150-600mm-f5-0-6-3-is',
@@ -79,6 +86,8 @@ export const OM_SYSTEM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 600,
     maxAperture: 5,
     maxApertureTele: 6.3,
+    filterThread: 95,
+    weight: 2065,
   },
   {
     id: 'om-system-m-zuiko-digital-ed-20mm-f1-4-pro',
@@ -90,6 +99,8 @@ export const OM_SYSTEM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 20,
     focalLengthMax: 20,
     maxAperture: 1.4,
+    filterThread: 58,
+    weight: 247,
   },
   {
     id: 'om-system-m-zuiko-digital-17mm-f1-8-ii',
@@ -123,5 +134,7 @@ export const OM_SYSTEM_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 90,
     focalLengthMax: 90,
     maxAperture: 3.5,
+    filterThread: 62,
+    weight: 453,
   },
 ]

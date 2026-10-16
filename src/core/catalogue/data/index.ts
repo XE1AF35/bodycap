@@ -15,7 +15,7 @@ import { HASSELBLAD_BODIES } from './hasselblad'
 
 export const CATALOGUE: Catalogue = {
   format: CATALOGUE_FORMAT,
-  version: '2026-10-13',
+  version: '2026-10-16',
   entries: [
     ...SONY_BODIES,
     ...SONY_LENSES,

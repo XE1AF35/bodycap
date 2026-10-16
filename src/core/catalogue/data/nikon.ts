@@ -1,5 +1,8 @@
 // Nikon Z camera bodies and lenses. Names, mounts, and sensor formats as Nikon publishes them,
 // cross-checked against reference lists and launch coverage.
+// Lens weights and filter threads are Nikon's figures as Wikipedia's lens lists give them
+// (October 2026). A lens without one had no figure that could be confirmed, or takes no
+// screw-in filters.
 import type { CatalogueEntry } from '../schema'
 
 export const NIKON_BODIES: readonly CatalogueEntry[] = [
@@ -130,6 +133,7 @@ export const NIKON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 14,
     focalLengthMax: 24,
     maxAperture: 2.8,
+    weight: 650,
   },
   {
     id: 'nikon-nikkor-z-14-30mm-f-4-s',
@@ -141,6 +145,8 @@ export const NIKON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 14,
     focalLengthMax: 30,
     maxAperture: 4,
+    filterThread: 82,
+    weight: 485,
   },
   {
     id: 'nikon-nikkor-z-17-28mm-f-2-8',
@@ -152,6 +158,8 @@ export const NIKON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 17,
     focalLengthMax: 28,
     maxAperture: 2.8,
+    filterThread: 67,
+    weight: 450,
   },
   {
     id: 'nikon-nikkor-z-20mm-f-1-8-s',
@@ -163,6 +171,8 @@ export const NIKON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 20,
     focalLengthMax: 20,
     maxAperture: 1.8,
+    filterThread: 77,
+    weight: 505,
   },
   {
     id: 'nikon-nikkor-z-24mm-f-1-8-s',
@@ -174,6 +184,8 @@ export const NIKON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 24,
     focalLengthMax: 24,
     maxAperture: 1.8,
+    filterThread: 72,
+    weight: 450,
   },
   {
     id: 'nikon-nikkor-z-24-50mm-f-4-6-3',
@@ -186,6 +198,8 @@ export const NIKON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 50,
     maxAperture: 4,
     maxApertureTele: 6.3,
+    filterThread: 52,
+    weight: 195,
   },
   {
     id: 'nikon-nikkor-z-24-70mm-f-2-8-s',
@@ -197,6 +211,8 @@ export const NIKON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 24,
     focalLengthMax: 70,
     maxAperture: 2.8,
+    filterThread: 82,
+    weight: 805,
   },
   {
     id: 'nikon-nikkor-z-24-70mm-f-2-8-s-ii',
@@ -208,6 +224,8 @@ export const NIKON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 24,
     focalLengthMax: 70,
     maxAperture: 2.8,
+    filterThread: 77,
+    weight: 675,
   },
   {
     id: 'nikon-nikkor-z-24-70mm-f-4-s',
@@ -219,6 +237,8 @@ export const NIKON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 24,
     focalLengthMax: 70,
     maxAperture: 4,
+    filterThread: 72,
+    weight: 500,
   },
   {
     id: 'nikon-nikkor-z-24-120mm-f-4-s',
@@ -230,6 +250,8 @@ export const NIKON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 24,
     focalLengthMax: 120,
     maxAperture: 4,
+    filterThread: 77,
+    weight: 630,
   },
   {
     id: 'nikon-nikkor-z-24-200mm-f-4-6-3-vr',
@@ -242,6 +264,8 @@ export const NIKON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 200,
     maxAperture: 4,
     maxApertureTele: 6.3,
+    filterThread: 67,
+    weight: 570,
   },
   {
     id: 'nikon-nikkor-z-26mm-f-2-8',
@@ -253,6 +277,8 @@ export const NIKON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 26,
     focalLengthMax: 26,
     maxAperture: 2.8,
+    filterThread: 52,
+    weight: 125,
   },
   {
     id: 'nikon-nikkor-z-28mm-f-2-8',
@@ -264,6 +290,8 @@ export const NIKON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 28,
     focalLengthMax: 28,
     maxAperture: 2.8,
+    filterThread: 52,
+    weight: 155,
   },
   {
     id: 'nikon-nikkor-z-28mm-f-2-8-se',
@@ -275,6 +303,8 @@ export const NIKON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 28,
     focalLengthMax: 28,
     maxAperture: 2.8,
+    filterThread: 52,
+    weight: 160,
   },
   {
     id: 'nikon-nikkor-z-28-75mm-f-2-8',
@@ -286,6 +316,8 @@ export const NIKON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 28,
     focalLengthMax: 75,
     maxAperture: 2.8,
+    filterThread: 67,
+    weight: 565,
   },
   {
     id: 'nikon-nikkor-z-28-135mm-f-4-pz',
@@ -297,6 +329,8 @@ export const NIKON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 28,
     focalLengthMax: 135,
     maxAperture: 4,
+    filterThread: 95,
+    weight: 1210,
   },
   {
     id: 'nikon-nikkor-z-28-400mm-f-4-8-vr',
@@ -309,6 +343,8 @@ export const NIKON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 400,
     maxAperture: 4,
     maxApertureTele: 8,
+    filterThread: 77,
+    weight: 725,
   },
   {
     id: 'nikon-nikkor-z-35mm-f-1-2-s',
@@ -320,6 +356,8 @@ export const NIKON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 35,
     focalLengthMax: 35,
     maxAperture: 1.2,
+    filterThread: 82,
+    weight: 1060,
   },
   {
     id: 'nikon-nikkor-z-35mm-f-1-4',
@@ -331,6 +369,8 @@ export const NIKON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 35,
     focalLengthMax: 35,
     maxAperture: 1.4,
+    filterThread: 62,
+    weight: 415,
   },
   {
     id: 'nikon-nikkor-z-35mm-f-1-8-s',
@@ -342,6 +382,8 @@ export const NIKON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 35,
     focalLengthMax: 35,
     maxAperture: 1.8,
+    filterThread: 62,
+    weight: 370,
   },
   {
     id: 'nikon-nikkor-z-40mm-f-2',
@@ -353,6 +395,8 @@ export const NIKON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 40,
     focalLengthMax: 40,
     maxAperture: 2,
+    filterThread: 52,
+    weight: 170,
   },
   {
     id: 'nikon-nikkor-z-40mm-f-2-se',
@@ -364,6 +408,8 @@ export const NIKON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 40,
     focalLengthMax: 40,
     maxAperture: 2,
+    filterThread: 52,
+    weight: 170,
   },
   {
     id: 'nikon-nikkor-z-50mm-f-1-2-s',
@@ -375,6 +421,8 @@ export const NIKON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 50,
     focalLengthMax: 50,
     maxAperture: 1.2,
+    filterThread: 82,
+    weight: 1090,
   },
   {
     id: 'nikon-nikkor-z-50mm-f-1-4',
@@ -386,6 +434,8 @@ export const NIKON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 50,
     focalLengthMax: 50,
     maxAperture: 1.4,
+    filterThread: 62,
+    weight: 420,
   },
   {
     id: 'nikon-nikkor-z-50mm-f-1-8-s',
@@ -397,6 +447,8 @@ export const NIKON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 50,
     focalLengthMax: 50,
     maxAperture: 1.8,
+    filterThread: 62,
+    weight: 415,
   },
   {
     id: 'nikon-nikkor-z-mc-50mm-f-2-8',
@@ -408,6 +460,8 @@ export const NIKON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 50,
     focalLengthMax: 50,
     maxAperture: 2.8,
+    filterThread: 46,
+    weight: 260,
   },
   {
     id: 'nikon-nikkor-z-58mm-f-0-95-s-noct',
@@ -419,6 +473,8 @@ export const NIKON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 58,
     focalLengthMax: 58,
     maxAperture: 0.95,
+    filterThread: 82,
+    weight: 2000,
   },
   {
     id: 'nikon-nikkor-z-70-180mm-f-2-8',
@@ -430,6 +486,8 @@ export const NIKON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 70,
     focalLengthMax: 180,
     maxAperture: 2.8,
+    filterThread: 67,
+    weight: 795,
   },
   {
     id: 'nikon-nikkor-z-70-200mm-f-2-8-vr-s',
@@ -441,6 +499,8 @@ export const NIKON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 70,
     focalLengthMax: 200,
     maxAperture: 2.8,
+    filterThread: 77,
+    weight: 1360,
   },
   {
     id: 'nikon-nikkor-z-85mm-f-1-2-s',
@@ -452,6 +512,8 @@ export const NIKON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 85,
     focalLengthMax: 85,
     maxAperture: 1.2,
+    filterThread: 82,
+    weight: 1160,
   },
   {
     id: 'nikon-nikkor-z-85mm-f-1-8-s',
@@ -463,6 +525,8 @@ export const NIKON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 85,
     focalLengthMax: 85,
     maxAperture: 1.8,
+    filterThread: 67,
+    weight: 470,
   },
   {
     id: 'nikon-nikkor-z-100-400mm-f-4-5-5-6-vr-s',
@@ -475,6 +539,8 @@ export const NIKON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 400,
     maxAperture: 4.5,
     maxApertureTele: 5.6,
+    filterThread: 77,
+    weight: 1435,
   },
   {
     id: 'nikon-nikkor-z-mc-105mm-f-2-8-vr-s',
@@ -486,6 +552,8 @@ export const NIKON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 105,
     focalLengthMax: 105,
     maxAperture: 2.8,
+    filterThread: 62,
+    weight: 630,
   },
   {
     id: 'nikon-nikkor-z-135mm-f-1-8-s-plena',
@@ -497,6 +565,8 @@ export const NIKON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 135,
     focalLengthMax: 135,
     maxAperture: 1.8,
+    filterThread: 82,
+    weight: 995,
   },
   {
     id: 'nikon-nikkor-z-180-600mm-f-5-6-6-3-vr',
@@ -509,6 +579,8 @@ export const NIKON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 600,
     maxAperture: 5.6,
     maxApertureTele: 6.3,
+    filterThread: 95,
+    weight: 2140,
   },
   {
     id: 'nikon-nikkor-z-400mm-f-2-8-tc-vr-s',
@@ -520,6 +592,7 @@ export const NIKON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 400,
     focalLengthMax: 400,
     maxAperture: 2.8,
+    weight: 2950,
   },
   {
     id: 'nikon-nikkor-z-400mm-f-4-5-vr-s',
@@ -531,6 +604,8 @@ export const NIKON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 400,
     focalLengthMax: 400,
     maxAperture: 4.5,
+    filterThread: 95,
+    weight: 1245,
   },
   {
     id: 'nikon-nikkor-z-600mm-f-4-tc-vr-s',
@@ -542,6 +617,7 @@ export const NIKON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 600,
     focalLengthMax: 600,
     maxAperture: 4,
+    weight: 3260,
   },
   {
     id: 'nikon-nikkor-z-600mm-f-6-3-vr-s',
@@ -553,6 +629,8 @@ export const NIKON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 600,
     focalLengthMax: 600,
     maxAperture: 6.3,
+    filterThread: 95,
+    weight: 1470,
   },
   {
     id: 'nikon-nikkor-z-800mm-f-6-3-vr-s',
@@ -564,6 +642,7 @@ export const NIKON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 800,
     focalLengthMax: 800,
     maxAperture: 6.3,
+    weight: 2385,
   },
   {
     id: 'nikon-nikkor-z-dx-12-28mm-f-3-5-5-6-pz-vr',
@@ -576,6 +655,8 @@ export const NIKON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 28,
     maxAperture: 3.5,
     maxApertureTele: 5.6,
+    filterThread: 67,
+    weight: 205,
   },
   {
     id: 'nikon-nikkor-z-dx-16-50mm-f-3-5-6-3-vr',
@@ -588,6 +669,8 @@ export const NIKON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 50,
     maxAperture: 3.5,
     maxApertureTele: 6.3,
+    filterThread: 46,
+    weight: 135,
   },
   {
     id: 'nikon-nikkor-z-dx-18-140mm-f-3-5-6-3-vr',
@@ -600,6 +683,8 @@ export const NIKON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 140,
     maxAperture: 3.5,
     maxApertureTele: 6.3,
+    filterThread: 62,
+    weight: 315,
   },
   {
     id: 'nikon-nikkor-z-dx-24mm-f-1-7',
@@ -611,6 +696,8 @@ export const NIKON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMin: 24,
     focalLengthMax: 24,
     maxAperture: 1.7,
+    filterThread: 46,
+    weight: 135,
   },
   {
     id: 'nikon-nikkor-z-dx-50-250mm-f-4-5-6-3-vr',
@@ -623,5 +710,7 @@ export const NIKON_LENSES: readonly CatalogueEntry[] = [
     focalLengthMax: 250,
     maxAperture: 4.5,
     maxApertureTele: 6.3,
+    filterThread: 62,
+    weight: 405,
   },
 ]
