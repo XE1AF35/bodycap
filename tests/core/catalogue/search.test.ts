@@ -2,6 +2,7 @@
 // lengths and apertures, the category filter, and the order suggestions come in.
 import { describe, expect, it } from 'vitest'
 import type { CatalogueEntry } from '@/core/catalogue/schema'
+import { CATALOGUE } from '@/core/catalogue/data'
 import { createCatalogueSearch } from '@/core/catalogue/search'
 import { A7_IV, ART_35_L_MOUNT, ART_35_SONY_E, FE_28_70, FE_50_F18 } from './support'
 
@@ -187,6 +188,27 @@ describe('a lens made for several mounts', () => {
       ...mounts.map((mount) => `${FE_50_F18.id}-${mount}`),
       ...mounts.slice(0, 4).map((mount) => `${ART_35_SONY_E.id}-${mount}`),
     ])
+  })
+})
+
+describe('a lens sold under another brand', () => {
+  const search = createCatalogueSearch(CATALOGUE.entries)
+
+  it('finds the Samyang lens by its Rokinon name, once for each mount', () => {
+    const found = search('Rokinon 14mm F2.8 ED AS IF UMC', { category: 'lens' })
+    expect(found?.entries.length).toBeGreaterThan(1)
+    for (const entry of found?.entries ?? []) {
+      expect(entry).toMatchObject({ brand: 'Samyang', model: '14mm F2.8 ED AS IF UMC' })
+    }
+    expect(new Set(found?.entries.map(({ mount }) => mount)).size).toBe(found?.entries.length)
+  })
+
+  it('finds a Samyang XP lens by its Rokinon SP name', () => {
+    const found = search('rokinon sp 85', { category: 'lens' })?.entries ?? []
+    expect(found.length).toBeGreaterThan(0)
+    for (const entry of found) {
+      expect(entry).toMatchObject({ brand: 'Samyang', model: 'XP 85mm F1.2' })
+    }
   })
 })
 

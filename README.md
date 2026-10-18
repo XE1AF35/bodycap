@@ -85,24 +85,27 @@ says so if that happens.
 ## The gear catalogue
 
 The model suggestions come from a catalogue built into the app, so they work offline and what you
-type never leaves your browser. It holds 376 camera bodies and 1,303 lenses from 15 makers:
+type never leaves your browser. It holds 376 camera bodies and 1,817 lenses from 18 makers:
 mirrorless bodies from 2008 on and the makers' own mirrorless lenses, DSLRs from 2008 on for the
 Canon EF, Nikon F, Pentax K, and Sony A mounts, with Canon's, Nikon's, Pentax's, and Sony's own
-autofocus lenses for them, and Sigma's and Tamron's autofocus lenses for every mount Bodycap knows.
-A lens made for several mounts is listed once for each, and Tamron's lenses can also be found by
-their model codes, such as A036. Other third-party lenses, Minolta's A-mount lenses, and cine lenses
-aren't in it yet. Neither are fixed-lens cameras, camcorders, cine cameras, infrared versions of
-cameras, cameras on mounts Bodycap doesn't know (such as Nikon 1, Pentax Q, and Samsung NX), Canon's
-APS-H bodies, its manual-focus TS-E and MP-E lenses, older film-era kit zooms, Nikon's IX-Nikkor and
-AF-I lenses, its first AF-S super-telephotos, its F3AF lenses from the early 1980s, Pentax's DA L
-kit zooms and most of its F lenses, Sigma's lenses its site no longer has pages for, the Pentax and
-Sony A versions of a few older Sigma lenses, Tamron's lenses missing from its own lens list (such as
-its older film-era zooms), or a few rare lenses. Names, mounts, and specifications are the makers'
-own. Lens weights and filter threads are the makers' figures as Wikipedia's lens lists and articles
-give them, left out where Wikipedia and the maker disagree. Sony's A-mount, Pentax's autofocus,
-Sigma's, and Tamron's lenses take theirs from the makers' own pages and manuals, checked against
-Wikipedia where it lists them, and left out where those disagree. Many of Tamron's older DSLR lenses
-have a weight for one mount only, as Tamron gave it for one. Bodies don't have weights yet.
+autofocus lenses for them, Sigma's and Tamron's autofocus lenses for every mount Bodycap knows, and
+Samyang's, Tokina's, and Viltrox's photo lenses, manual-focus ones included. A lens made for several
+mounts is listed once for each. Tamron's lenses can also be found by their model codes, such as
+A036, and Samyang's by their Rokinon names. Laowa, Zeiss, and Voigtländer lenses, Minolta's A-mount
+lenses, and cine lenses aren't in it yet. Neither are fixed-lens cameras, camcorders, cine cameras,
+infrared versions of cameras, cameras and lenses on mounts Bodycap doesn't know (such as Nikon 1,
+Pentax Q, and Samsung NX), Canon's APS-H bodies, its manual-focus TS-E and MP-E lenses, older
+film-era kit zooms, Nikon's IX-Nikkor and AF-I lenses, its first AF-S super-telephotos, its F3AF
+lenses from the early 1980s, Pentax's DA L kit zooms and most of its F lenses, Sigma's, Samyang's,
+and Viltrox's lenses their sites no longer have pages for, the Pentax and Sony A versions of a few
+older Sigma lenses, Tamron's lenses missing from its own lens list (such as its older film-era
+zooms), Tokina's manual-focus lenses from the film era and its T-mount versions, or a few rare
+lenses. Names, mounts, and specifications are the makers' own. Lens weights and filter threads are
+the makers' figures as Wikipedia's lens lists and articles give them, left out where Wikipedia and
+the maker disagree. Sony's A-mount, Pentax's autofocus, Sigma's, Tamron's, Samyang's, Tokina's, and
+Viltrox's lenses take theirs from the makers' own pages and manuals, checked against Wikipedia where
+it lists them, and left out where those disagree. Many of Tamron's older DSLR lenses have a weight
+for one mount only, as Tamron gave it for one. Bodies don't have weights yet.
 
 Specifications are facts, so the catalogue is under the same MIT licence as the rest of Bodycap.
 Brand and model names belong to their owners, and Bodycap isn't connected with any of them.
