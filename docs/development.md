@@ -121,6 +121,6 @@ week after each release. Workflow actions are pinned to full commit SHAs.
 
 As of October 2026, the site loads 188 kB of gzipped JavaScript at first, about 320 kB across all
 its pages, and 10 kB of CSS. The code for making and reading `.zip` backups, and the gear
-catalogue, load only when they're needed; the catalogue is 23 kB in all, and its largest maker
-chunk 4.5 kB. The build fails if the first load passes 200 kB, any script loaded later passes
+catalogue, load only when they're needed; the catalogue is 29 kB in all, and its largest maker
+chunk 6.2 kB. The build fails if the first load passes 200 kB, any script loaded later passes
 40 kB, or a catalogue chunk is in the first load.

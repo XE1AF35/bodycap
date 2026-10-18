@@ -8,7 +8,7 @@ import { NIKON_BODIES, NIKON_DSLR_BODIES, NIKON_DSLR_LENSES, NIKON_LENSES } from
 import { FUJIFILM_BODIES, FUJIFILM_LENSES } from './fujifilm'
 import { PANASONIC_BODIES, PANASONIC_LENSES } from './panasonic'
 import { LEICA_BODIES } from './leica'
-import { SIGMA_BODIES } from './sigma'
+import { SIGMA_BODIES, SIGMA_LENSES } from './sigma'
 import { OLYMPUS_BODIES, OLYMPUS_LENSES } from './olympus'
 import { OM_SYSTEM_BODIES, OM_SYSTEM_LENSES } from './om-system'
 import { HASSELBLAD_BODIES } from './hasselblad'
@@ -19,7 +19,7 @@ import { SAMSUNG_BODIES } from './samsung'
 
 export const CATALOGUE: Catalogue = {
   format: CATALOGUE_FORMAT,
-  version: '2026-10-16',
+  version: '2026-10-18',
   entries: [
     ...SONY_BODIES,
     ...SONY_LENSES,
@@ -39,6 +39,7 @@ export const CATALOGUE: Catalogue = {
     ...PANASONIC_LENSES,
     ...LEICA_BODIES,
     ...SIGMA_BODIES,
+    ...SIGMA_LENSES,
     ...OLYMPUS_BODIES,
     ...OLYMPUS_LENSES,
     ...OM_SYSTEM_BODIES,
