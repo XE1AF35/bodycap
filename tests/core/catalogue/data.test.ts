@@ -100,7 +100,7 @@ describe('the catalogue data', () => {
   })
 
   it('has lenses in it', () => {
-    expect(entries.filter(({ category }) => category === 'lens').length).toBeGreaterThan(1110)
+    expect(entries.filter(({ category }) => category === 'lens').length).toBeGreaterThan(1300)
   })
 
   it('never uses an ID twice', () => {

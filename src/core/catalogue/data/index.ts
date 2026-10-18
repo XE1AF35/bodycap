@@ -9,6 +9,7 @@ import { FUJIFILM_BODIES, FUJIFILM_LENSES } from './fujifilm'
 import { PANASONIC_BODIES, PANASONIC_LENSES } from './panasonic'
 import { LEICA_BODIES } from './leica'
 import { SIGMA_BODIES, SIGMA_LENSES } from './sigma'
+import { TAMRON_LENSES } from './tamron'
 import { OLYMPUS_BODIES, OLYMPUS_LENSES } from './olympus'
 import { OM_SYSTEM_BODIES, OM_SYSTEM_LENSES } from './om-system'
 import { HASSELBLAD_BODIES } from './hasselblad'
@@ -40,6 +41,7 @@ export const CATALOGUE: Catalogue = {
     ...LEICA_BODIES,
     ...SIGMA_BODIES,
     ...SIGMA_LENSES,
+    ...TAMRON_LENSES,
     ...OLYMPUS_BODIES,
     ...OLYMPUS_LENSES,
     ...OM_SYSTEM_BODIES,
