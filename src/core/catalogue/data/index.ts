@@ -13,6 +13,10 @@ import { TAMRON_LENSES } from './tamron'
 import { SAMYANG_LENSES } from './samyang'
 import { TOKINA_LENSES } from './tokina'
 import { VILTROX_LENSES } from './viltrox'
+import { LAOWA_LENSES } from './laowa'
+import { ZEISS_LENSES } from './zeiss'
+import { VOIGTLANDER_LENSES } from './voigtlander'
+import { TTARTISAN_LENSES } from './ttartisan'
 import { OLYMPUS_BODIES, OLYMPUS_LENSES } from './olympus'
 import { OM_SYSTEM_BODIES, OM_SYSTEM_LENSES } from './om-system'
 import { HASSELBLAD_BODIES } from './hasselblad'
@@ -48,6 +52,10 @@ export const CATALOGUE: Catalogue = {
     ...SAMYANG_LENSES,
     ...TOKINA_LENSES,
     ...VILTROX_LENSES,
+    ...LAOWA_LENSES,
+    ...ZEISS_LENSES,
+    ...VOIGTLANDER_LENSES,
+    ...TTARTISAN_LENSES,
     ...OLYMPUS_BODIES,
     ...OLYMPUS_LENSES,
     ...OM_SYSTEM_BODIES,
