@@ -16,7 +16,7 @@ import type { BodycapDatabase, PhotoImageRecord, PhotoRecord } from './db'
 import { countChange, SETTING, toGear, toPhotoInfo, toRecord, toSettings } from './records'
 import { RuleError, type BackupStore, type PhotoWithBytes } from './repositories'
 
-const LISTS: readonly BackupList[] = ['gear', 'kits', 'loans', 'maintenance', 'photos']
+const LISTS: readonly BackupList[] = ['gear', 'kits', 'loans', 'maintenance', 'photos', 'shoots']
 
 export interface BackupStoreOptions {
   readonly now: () => Date
@@ -42,6 +42,7 @@ export function createBackupStore(
     db.maintenance,
     db.photos,
     db.photoImages,
+    db.shoots,
     db.settings,
   ]
 
@@ -55,6 +56,7 @@ export function createBackupStore(
       loans: await db.loans.toArray(),
       maintenance: await db.maintenance.toArray(),
       photos: photos.map(toPhotoInfo),
+      shoots: await db.shoots.toArray(),
       settings: lastUsedCurrency === undefined ? {} : { lastUsedCurrency },
     }
     return { data, photos }
@@ -109,7 +111,7 @@ export function createBackupStore(
 
     restore: (backup) =>
       db.transaction('rw', everything, async () => {
-        const { gear, kits, loans, maintenance } = backup.data
+        const { gear, kits, loans, maintenance, shoots } = backup.data
         await Promise.all([
           db.gear.clear(),
           db.kits.clear(),
@@ -117,11 +119,13 @@ export function createBackupStore(
           db.maintenance.clear(),
           db.photos.clear(),
           db.photoImages.clear(),
+          db.shoots.clear(),
         ])
         await db.gear.bulkAdd(gear.map(toRecord))
         await db.kits.bulkAdd(kits)
         await db.loans.bulkAdd(loans)
         await db.maintenance.bulkAdd(maintenance)
+        await db.shoots.bulkAdd(shoots)
         const photos = backup.storedPhotos.map((photo) => toStored(photo, photo))
         await db.photos.bulkAdd(photos.map(({ record }) => record))
         await db.photoImages.bulkAdd(photos.map(({ full }) => full))
@@ -152,6 +156,7 @@ export function createBackupStore(
         await db.kits.bulkPut(writes.kits)
         await db.loans.bulkPut(writes.loans)
         await db.maintenance.bulkPut(writes.maintenance)
+        await db.shoots.bulkPut(writes.shoots)
         await db.photos.bulkPut(photos.map(({ record }) => record))
         await db.photoImages.bulkPut(photos.map(({ full }) => full))
         await db.photos.bulkUpdate(

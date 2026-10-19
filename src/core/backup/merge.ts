@@ -63,6 +63,7 @@ export function planMerge(here: BackupData, incoming: BackupData): Result<MergeP
   const loans = mergeList(here.loans, incoming.loans)
   const maintenance = mergeList(here.maintenance, incoming.maintenance)
   const photos = mergeList(here.photos, incoming.photos)
+  const shoots = mergeList(here.shoots, incoming.shoots)
 
   // Each side has at most one loan out per item, but different loans from each side would leave an
   // item out twice. Which one is right can't be told from the data, so the person decides.
@@ -89,6 +90,7 @@ export function planMerge(here: BackupData, incoming: BackupData): Result<MergeP
       loans: loans.writes,
       maintenance: maintenance.writes,
       photos: covers.writes,
+      shoots: shoots.writes,
     },
     added: {
       gear: gear.added,
@@ -96,6 +98,7 @@ export function planMerge(here: BackupData, incoming: BackupData): Result<MergeP
       loans: loans.added,
       maintenance: maintenance.added,
       photos: photos.added,
+      shoots: shoots.added,
     },
     updated: {
       gear: gear.updated,
@@ -103,6 +106,7 @@ export function planMerge(here: BackupData, incoming: BackupData): Result<MergeP
       loans: loans.updated,
       maintenance: maintenance.updated,
       photos: photos.updated,
+      shoots: shoots.updated,
     },
     coverChanges: covers.changesHere,
     settings: lastUsedCurrency === undefined ? {} : { lastUsedCurrency },

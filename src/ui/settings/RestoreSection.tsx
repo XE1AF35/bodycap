@@ -23,7 +23,7 @@ import { Button } from '@/ui/components/ui/button'
 import { Label } from '@/ui/components/ui/label'
 import { useLive } from '@/ui/hooks/useLive'
 import { useServices } from '@/ui/services'
-import { gearAndPhotos, photoCount, recordCounts } from '@/ui/settings/words'
+import { gearShootsAndPhotos, photoCount, recordCounts } from '@/ui/settings/words'
 
 type Mode = 'replace' | 'merge'
 
@@ -35,8 +35,8 @@ const MODES: readonly (readonly [Mode, string])[] = [
 /** The day the backup was made, where the person is */
 const madeOn = (backup: Backup) => formatDate(toIsoDate(new Date(backup.exportedAt)))
 
-/** Such as "2 items and 5 photos" */
-const holds = ({ counts }: Backup) => gearAndPhotos(counts.gear, counts.photos)
+/** Such as "2 items, 1 shoot, and 5 photos" */
+const holds = ({ counts }: Backup) => gearShootsAndPhotos(counts.gear, counts.shoots, counts.photos)
 
 /** Such as "Merged the backup made on 5 Oct 2026. Added 2 items. Updated 1 kit." */
 function mergedText(backup: Backup, { added, updated }: MergeSummary): string {
@@ -61,8 +61,12 @@ export function RestoreSection() {
   const { repositories } = useServices()
   const gear = useLive(useMemo(() => repositories.gear.list(), [repositories]))
   const photos = useLive(useMemo(() => repositories.photos.count(), [repositories]))
-  const here = gear.status === 'ready' ? gear.value.length : 0
+  const shoots = useLive(useMemo(() => repositories.shoots.list(), [repositories]))
+  const gearHere = gear.status === 'ready' ? gear.value.length : 0
   const photosHere = photos.status === 'ready' ? photos.value : 0
+  const shootsHere = shoots.status === 'ready' ? shoots.value.length : 0
+  // A shoot can have no items, so there can be shoots to lose with no gear here
+  const nothingHere = gearHere === 0 && shootsHere === 0
 
   const [chosen, setChosen] = useState<RestorableBackup>()
   const [mode, setMode] = useState<Mode>('replace')
@@ -102,11 +106,10 @@ export function RestoreSection() {
     }
   }
 
-  const hereNow = gearAndPhotos(here, photosHere)
-  const replaces =
-    here === 0
-      ? "There's no gear here now, so nothing will be lost."
-      : `It replaces the ${hereNow} here now, and can't be undone, so you may want a backup of what's here first.`
+  const hereNow = gearShootsAndPhotos(gearHere, shootsHere, photosHere)
+  const replaces = nothingHere
+    ? "There's no gear here now, so nothing will be lost."
+    : `It replaces the ${hereNow} here now, and can't be undone, so you may want a backup of what's here first.`
   // A .json backup leaves photos out, which is easy to forget when restoring one
   const photosGo =
     chosen?.counts.photos === 0 && photosHere > 0
@@ -181,7 +184,7 @@ export function RestoreSection() {
               comes back.
             </p>
           )}
-          {here > 0 && <BackupButton label="Download a backup of what's here now" />}
+          {!nothingHere && <BackupButton label="Download a backup of what's here now" />}
           <AlertDialog open={confirming} onOpenChange={setConfirming}>
             <AlertDialogTrigger
               render={
@@ -198,7 +201,7 @@ export function RestoreSection() {
                 <AlertDialogHeader>
                   <AlertDialogTitle>Replace everything?</AlertDialogTitle>
                   <AlertDialogDescription>
-                    {here === 0
+                    {nothingHere
                       ? `The ${holds(chosen)} in the backup will be added.`
                       : `The ${hereNow} here now will be replaced by the ${holds(chosen)} in the backup. This can't be undone.${photosGo}`}
                   </AlertDialogDescription>

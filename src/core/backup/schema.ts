@@ -16,6 +16,7 @@ import {
   PHOTO_TYPES,
   type PhotoInfo,
 } from '../photos'
+import type { Shoot } from '../shoots'
 import { BACKUP_APP, FORMAT_VERSION, type Backup, type BackupList } from './format'
 
 // Far above the form's limits, which validateGear applies afterwards. These only stop absurd text
@@ -116,6 +117,14 @@ const photoShape = {
   thumbnailBytes: z.int().min(1).max(MAX_THUMBNAIL_BYTES),
 } satisfies Record<keyof PhotoInfo, z.ZodType>
 
+const shootShape = {
+  ...recordShape,
+  date: isoDate,
+  name: shortText,
+  gearIds: z.array(z.uuid()),
+  notes: longText.exactOptional(),
+} satisfies Record<keyof Shoot, z.ZodType>
+
 const count = z.int().min(0)
 
 export const backupSchema = z.object({
@@ -130,6 +139,7 @@ export const backupSchema = z.object({
     loans: count,
     maintenance: count,
     photos: count,
+    shoots: count,
   } satisfies Record<BackupList, z.ZodType>),
   data: z.object({
     gear: z.array(z.object(gearShape)),
@@ -137,6 +147,7 @@ export const backupSchema = z.object({
     loans: z.array(z.object(loanShape)),
     maintenance: z.array(z.object(maintenanceShape)),
     photos: z.array(z.object(photoShape)),
+    shoots: z.array(z.object(shootShape)),
     settings: z.object({ lastUsedCurrency: currency.exactOptional() }),
   }),
 }) satisfies z.ZodType<Backup>

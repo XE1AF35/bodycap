@@ -40,7 +40,15 @@ const backedUpGear: Gear[] = [
 ]
 
 const backup = createBackup(
-  { gear: backedUpGear, kits: [], loans: [], maintenance: [], photos: [], settings: {} },
+  {
+    gear: backedUpGear,
+    kits: [],
+    loans: [],
+    maintenance: [],
+    photos: [],
+    shoots: [],
+    settings: {},
+  },
   { schemaVersion: 1, appVersion: '0.1.0', exportedAt: '2026-10-05T03:00:00.000Z' },
 )
 
@@ -171,6 +179,71 @@ describe('restore', () => {
     ).toBeInTheDocument()
     expect(restore.getByText(/It replaces the 1 item here now/)).toBeInTheDocument()
     expect(await current(services.repositories.gear.list())).toMatchObject([lens])
+  })
+
+  it('counts shoots in what a backup holds, what it replaces, and what it restored', async () => {
+    const [first] = backedUpGear
+    if (first === undefined) throw new Error('No gear to take on the shoot')
+    const shoot = {
+      id: '1d2e3f4a-5b6c-4d7e-8f9a-0b1c2d3e4f5a',
+      createdAt: '2026-09-14T08:00:00.000Z',
+      updatedAt: '2026-09-14T08:00:00.000Z',
+      date: '2026-09-13',
+      name: 'Wedding at Matakana',
+      gearIds: [first.id],
+    }
+    const withShoot = createBackup({ ...backup.data, shoots: [shoot] }, backup)
+    const file = new File([JSON.stringify(withShoot)], 'bodycap-backup-2026-10-05.json', {
+      type: 'application/json',
+    })
+    const services = testServices()
+    await services.repositories.shoots.add({ date: '2026-08-01', name: 'Walk', gearIds: [] })
+    const { user } = await chooseBackup(services, file)
+    const restore = region('Restore')
+    expect(
+      await restore.findByText(`This backup was made on ${madeOn} and holds 2 items and 1 shoot.`),
+    ).toBeInTheDocument()
+    expect(restore.getByText(/It replaces the 1 item and 1 shoot here now/)).toBeInTheDocument()
+    await user.click(restore.getByRole('button', { name: 'Restore this backup' }))
+    const dialog = await screen.findByRole('alertdialog', { name: 'Replace everything?' })
+    await user.click(within(dialog).getByRole('button', { name: 'Replace everything' }))
+    expect(
+      await screen.findByText(`Restored 2 items and 1 shoot from the backup made on ${madeOn}.`),
+    ).toBeInTheDocument()
+    expect(await current(services.repositories.shoots.list())).toEqual([shoot])
+  })
+
+  it('counts shoots here even when there is no gear', async () => {
+    const services = testServices()
+    await services.repositories.shoots.add({ date: '2026-08-01', name: 'Walk', gearIds: [] })
+    const { user } = await renderSettings(services)
+    await user.upload(screen.getByLabelText('Backup file'), backupFile())
+    expect(await region('Restore').findByText(/It replaces the 1 shoot here now/)).toBeVisible()
+  })
+
+  it('counts shoots in what a merge added', async () => {
+    const services = testServices()
+    const shoot = {
+      id: '2e3f4a5b-6c7d-4e8f-9a0b-1c2d3e4f5a6b',
+      createdAt: '2026-09-14T08:00:00.000Z',
+      updatedAt: '2026-09-14T08:00:00.000Z',
+      date: '2026-09-13',
+      name: 'Walk',
+      gearIds: [],
+    }
+    const withShoot = createBackup({ ...backup.data, shoots: [shoot] }, backup)
+    const file = new File([JSON.stringify(withShoot)], 'bodycap-backup-2026-10-05.json', {
+      type: 'application/json',
+    })
+    const { user } = await chooseBackup(services, file)
+    const restore = region('Restore')
+    await user.click(await restore.findByRole('radio', { name: "Add to what's here" }))
+    await user.click(restore.getByRole('button', { name: 'Restore this backup' }))
+    const dialog = await screen.findByRole('alertdialog', { name: 'Merge this backup?' })
+    await user.click(within(dialog).getByRole('button', { name: 'Merge' }))
+    expect(
+      await screen.findByText(`Merged the backup made on ${madeOn}. Added 2 items and 1 shoot.`),
+    ).toBeInTheDocument()
   })
 
   it('replaces everything once the person confirms', async () => {

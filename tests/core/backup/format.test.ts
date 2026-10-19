@@ -37,6 +37,7 @@ describe('createBackup', () => {
           loans: [],
           maintenance: [],
           photos: [],
+          shoots: [],
           settings: { lastUsedCurrency: 'NZD' },
         },
         { schemaVersion: 1, appVersion: '0.1.0', exportedAt: '2026-10-05T03:00:00.000Z' },
@@ -47,13 +48,14 @@ describe('createBackup', () => {
       schemaVersion: 1,
       appVersion: '0.1.0',
       exportedAt: '2026-10-05T03:00:00.000Z',
-      counts: { gear: 1, kits: 0, loans: 0, maintenance: 0, photos: 0 },
+      counts: { gear: 1, kits: 0, loans: 0, maintenance: 0, photos: 0, shoots: 0 },
       data: {
         gear: [tripod],
         kits: [],
         loans: [],
         maintenance: [],
         photos: [],
+        shoots: [],
         settings: { lastUsedCurrency: 'NZD' },
       },
     })
@@ -77,11 +79,28 @@ describe('createBackup', () => {
         loans: [],
         maintenance: [],
         photos: [photo],
+        shoots: [
+          {
+            id: '3c4d5e6f-7a8b-4c9d-8e1f-2a3b4c5d6e7f',
+            createdAt: '2026-08-01T00:00:00.000Z',
+            updatedAt: '2026-08-01T00:00:00.000Z',
+            date: '2026-07-31',
+            name: 'Tongariro crossing',
+            gearIds: [tripod.id],
+          },
+        ],
         settings: {},
       },
       { schemaVersion: 2, appVersion: '0.2.0', exportedAt: '2026-10-05T03:00:00.000Z' },
     )
-    expect(backup.counts).toEqual({ gear: 1, kits: 1, loans: 0, maintenance: 0, photos: 1 })
+    expect(backup.counts).toEqual({
+      gear: 1,
+      kits: 1,
+      loans: 0,
+      maintenance: 0,
+      photos: 1,
+      shoots: 1,
+    })
   })
 })
 

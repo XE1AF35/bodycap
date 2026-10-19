@@ -1,6 +1,6 @@
 // Reading backups: the exact round trip, upgrading older formats, refusing bad or newer files, and
-// checking the contents, including that kits, loans, maintenance, and photos only point at gear in
-// the file, and that each item with photos has one cover.
+// checking the contents, including that kits, loans, maintenance, photos, and shoots only point at
+// gear in the file, and that each item with photos has one cover.
 import { describe, expect, it } from 'vitest'
 import { createBackup, FORMAT_VERSION } from '@/core/backup/format'
 import { readBackup } from '@/core/backup/read'
@@ -9,6 +9,7 @@ import type { Kit } from '@/core/kits'
 import type { Loan } from '@/core/loans'
 import type { MaintenanceRecord } from '@/core/maintenance'
 import type { PhotoInfo } from '@/core/photos'
+import type { Shoot } from '@/core/shoots'
 
 const lens: Gear = {
   id: '6f1c7a52-3b8e-4f0a-9d2c-5e4b1a7c8d90',
@@ -144,6 +145,25 @@ const adapterPhoto: PhotoInfo = {
   gearId: adapter.id,
 }
 
+const shoot: Shoot = {
+  id: '9c0d1e2f-3a4b-4c5d-8e7f-8a9b0c1d2e3f',
+  createdAt: '2026-09-14T08:00:00.000Z',
+  updatedAt: '2026-09-15T09:30:00.000Z',
+  date: '2026-09-13',
+  name: 'Wedding at Matakana',
+  gearIds: [adapter.id, lens.id],
+  notes: 'Rain all afternoon\nbut the light was lovely',
+}
+
+const emptyShoot: Shoot = {
+  id: '0d1e2f3a-4b5c-4d6e-9f8a-9b0c1d2e3f4a',
+  createdAt: '2026-10-01T08:00:00.000Z',
+  updatedAt: '2026-10-01T08:00:00.000Z',
+  date: '2026-10-01',
+  name: 'Walk with no camera',
+  gearIds: [],
+}
+
 const INFO = { schemaVersion: 1, appVersion: '0.1.0', exportedAt: '2026-10-05T03:00:00.000Z' }
 
 const backup = createBackup(
@@ -153,12 +173,13 @@ const backup = createBackup(
     loans: [loan, returnedLoan],
     maintenance: [clean, firmware],
     photos: [cover, sidePhoto, adapterPhoto],
+    shoots: [shoot, emptyShoot],
     settings: { lastUsedCurrency: 'AUD' },
   },
   INFO,
 )
 
-type List = 'gear' | 'kits' | 'loans' | 'maintenance' | 'photos'
+type List = 'gear' | 'kits' | 'loans' | 'maintenance' | 'photos' | 'shoots'
 
 /** The backup as text, with top-level fields replaced. Undefined leaves a field out. */
 const withFile = (overrides: Record<string, unknown>) => JSON.stringify({ ...backup, ...overrides })
@@ -173,8 +194,8 @@ const withList = (list: List, records: readonly unknown[]) =>
 /** A backup holding only this gear, and nothing that points at it */
 const onlyGear = (gear: readonly unknown[]) =>
   withFile({
-    counts: { gear: gear.length, kits: 0, loans: 0, maintenance: 0, photos: 0 },
-    data: { gear, kits: [], loans: [], maintenance: [], photos: [], settings: {} },
+    counts: { gear: gear.length, kits: 0, loans: 0, maintenance: 0, photos: 0, shoots: 0 },
+    data: { gear, kits: [], loans: [], maintenance: [], photos: [], shoots: [], settings: {} },
   })
 
 /** A backup holding only the lens, with some of its fields replaced */
@@ -194,13 +215,13 @@ describe('readBackup', () => {
 
   it('reads a backup with nothing in it', () => {
     const empty = createBackup(
-      { gear: [], kits: [], loans: [], maintenance: [], photos: [], settings: {} },
+      { gear: [], kits: [], loans: [], maintenance: [], photos: [], shoots: [], settings: {} },
       INFO,
     )
     expect(readBackup(JSON.stringify(empty))).toEqual({ ok: true, value: empty })
   })
 
-  it('upgrades a format 1 backup exactly, with no kits, loans, maintenance, or photos', () => {
+  it('upgrades a format 1 backup exactly, with no kits, loans, maintenance, photos, or shoots', () => {
     const formatOne = {
       app: 'bodycap',
       formatVersion: 1,
@@ -213,37 +234,60 @@ describe('readBackup', () => {
       value: {
         ...formatOne,
         formatVersion: FORMAT_VERSION,
-        counts: { gear: 2, kits: 0, loans: 0, maintenance: 0, photos: 0 },
-        data: { ...formatOne.data, kits: [], loans: [], maintenance: [], photos: [] },
+        counts: { gear: 2, kits: 0, loans: 0, maintenance: 0, photos: 0, shoots: 0 },
+        data: { ...formatOne.data, kits: [], loans: [], maintenance: [], photos: [], shoots: [] },
       },
     })
   })
 
-  it('upgrades a format 2 backup exactly, with no photos', () => {
+  /** The backup as an older format, without shoots, which format 5 added */
+  const beforeShoots = (formatVersion: number) => ({
+    ...backup,
+    formatVersion,
+    counts: { ...backup.counts, shoots: undefined },
+    data: { ...backup.data, shoots: undefined },
+  })
+
+  /** The backup as it reads once upgraded: no shoots, and nothing else changed */
+  const noShoots = {
+    ...backup,
+    counts: { ...backup.counts, shoots: 0 },
+    data: { ...backup.data, shoots: [] },
+  }
+
+  it('upgrades a format 2 backup exactly, with no photos or shoots', () => {
     // Undefined leaves the photos out of the text, as format 2 had none
-    const formatTwo = {
-      ...backup,
-      formatVersion: 2,
-      counts: { ...backup.counts, photos: undefined },
-      data: { ...backup.data, photos: undefined },
+    const formatTwo = beforeShoots(2)
+    const withoutPhotos = {
+      ...formatTwo,
+      counts: { ...formatTwo.counts, photos: undefined },
+      data: { ...formatTwo.data, photos: undefined },
     }
-    expect(JSON.stringify(formatTwo)).not.toContain('photos')
-    expect(readBackup(JSON.stringify(formatTwo))).toEqual({
+    expect(JSON.stringify(withoutPhotos)).not.toContain('photos')
+    expect(readBackup(JSON.stringify(withoutPhotos))).toEqual({
       ok: true,
       value: {
-        ...backup,
-        counts: { ...backup.counts, photos: 0 },
-        data: { ...backup.data, photos: [] },
+        ...noShoots,
+        counts: { ...noShoots.counts, photos: 0 },
+        data: { ...noShoots.data, photos: [] },
       },
     })
   })
 
   it('upgrades a format 3 backup exactly, as format 4 only adds optional fields', () => {
-    const formatThree = { ...backup, formatVersion: 3 }
-    expect(readBackup(JSON.stringify(formatThree))).toEqual({
-      ok: true,
-      value: { ...backup, formatVersion: 4 },
-    })
+    expect(readBackup(JSON.stringify(beforeShoots(3)))).toEqual({ ok: true, value: noShoots })
+  })
+
+  it('upgrades a format 4 backup exactly, adding no shoots and changing nothing else', () => {
+    const formatFour = JSON.stringify(beforeShoots(4))
+    expect(formatFour).not.toContain('shoots')
+    expect(readBackup(formatFour)).toEqual({ ok: true, value: noShoots })
+  })
+
+  // A Bodycap that reads up to format 4 refuses anything later as newer, as the test below shows
+  // for this one, so shoots are never silently dropped
+  it('stamps new backups as format 5', () => {
+    expect(backup.formatVersion).toBe(5)
   })
 
   it.each([
@@ -338,6 +382,10 @@ describe('readBackup', () => {
     ['photos', { ...cover, bytes: 10_000_001 }, 'Photo 1'],
     ['photos', { ...cover, thumbnailBytes: 1_000_001 }, 'Photo 1'],
     ['photos', { ...cover, createdAt: 'yesterday' }, 'Photo 1'],
+    ['shoots', { ...shoot, date: '2026-02-30' }, 'Shoot 1'],
+    ['shoots', { ...shoot, gearIds: [lens.id, 'the lens'] }, 'Shoot 1'],
+    ['shoots', { ...shoot, name: undefined }, 'Shoot 1'],
+    ['shoots', { ...shoot, notes: 'x'.repeat(50_001) }, 'Shoot 1'],
   ])('names the damaged record in %s', (list, record, name) => {
     expect(readBackup(withList(list, [record]))).toEqual(
       refused(`${name} in this backup is damaged, so it can't be restored.`),
@@ -356,6 +404,7 @@ describe('readBackup', () => {
     ['loans', { loans: 1 }],
     ['maintenance', { maintenance: 0 }],
     ['photos', { photos: 2 }],
+    ['shoots', { shoots: 1 }],
   ])('refuses a backup whose count of %s does not match what is in it', (_name, counts) => {
     expect(readBackup(withFile({ counts: { ...backup.counts, ...counts } }))).toEqual(INCOMPLETE)
   })
@@ -366,6 +415,7 @@ describe('readBackup', () => {
     ['loans', returnedLoan, 'loan'],
     ['maintenance', clean, 'maintenance record'],
     ['photos', cover, 'photo'],
+    ['shoots', shoot, 'shoot'],
   ])('refuses a backup with the same record twice in %s', (list, record, noun) => {
     expect(readBackup(withList(list, [record, record]))).toEqual(
       refused(`This backup has the same ${noun} twice, so it can't be restored.`),
@@ -418,6 +468,16 @@ describe('readBackup', () => {
       { ...clean, date: '2026-10-07' },
       "Maintenance record 1 in this backup has a problem: The date can't be in the future.",
     ],
+    [
+      'shoots',
+      { ...shoot, name: ' ', date: '2026-10-07' },
+      "Shoot 1 in this backup has a problem: The date can't be in the future. Enter a name for the shoot.",
+    ],
+    [
+      'shoots',
+      { ...shoot, notes: 'x'.repeat(2001) },
+      'Shoot 1 in this backup has a problem: Keep the notes to 2,000 characters or fewer.',
+    ],
   ])('refuses a record in %s the app would not save', (list, record, message) => {
     expect(readBackup(withList(list, [record]))).toEqual(refused(message))
   })
@@ -447,6 +507,12 @@ describe('readBackup', () => {
       { ...cover, gearId: MISSING },
       "Photo 1 in this backup is for gear that isn't in the backup, so it can't be restored.",
     ],
+    [
+      'a shoot listing gear that is not in the backup',
+      'shoots',
+      { ...shoot, gearIds: [lens.id, MISSING] },
+      "Shoot 1 in this backup lists gear that isn't in the backup, so it can't be restored.",
+    ],
   ])('refuses %s', (_name, list, record, message) => {
     expect(readBackup(withList(list, [record]))).toEqual(refused(message))
   })
@@ -465,6 +531,22 @@ describe('readBackup', () => {
     expect(readBackup(withList('kits', [record]))).toEqual(
       refused("Kit 1 in this backup is damaged, so it can't be restored."),
     )
+  })
+
+  it('refuses a shoot that lists the same gear twice as damaged', () => {
+    expect(readBackup(withList('shoots', [{ ...shoot, gearIds: [lens.id, lens.id] }]))).toEqual(
+      refused("Shoot 1 in this backup is damaged, so it can't be restored."),
+    )
+  })
+
+  it('accepts a shoot dated up to a day after the export, and tidies its text', () => {
+    const result = readBackup(
+      withList('shoots', [{ ...shoot, date: '2026-10-06', name: '  Wedding at Matakana ' }]),
+    )
+    expect(result).toMatchObject({
+      ok: true,
+      value: { data: { shoots: [{ ...shoot, date: '2026-10-06' }] } },
+    })
   })
 
   it.each<[string, PhotoInfo[], string]>([
@@ -503,11 +585,12 @@ describe('readBackup', () => {
       JSON.stringify({
         ...backup,
         extra: 'top level',
-        counts: { ...backup.counts, shoots: 3 },
+        counts: { ...backup.counts, trips: 3 },
         data: {
           ...backup.data,
           gear: [{ ...lens, serialKey: '1834567' }, soldBody, adapter],
-          shoots: [],
+          shoots: [{ ...shoot, location: 'Matakana' }, emptyShoot],
+          trips: [],
         },
       }),
     )

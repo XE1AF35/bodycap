@@ -50,11 +50,11 @@ test('restores a backup into an empty browser, exactly as it was @storage', asyn
   await open(fresh, '#/settings')
   const restore = fresh.getByRole('region', { name: 'Restore' })
   await restore.getByLabel('Backup file').setInputFiles(testInfo.outputPath('backup.json'))
-  await expect(restore.getByText(/holds 4 items/)).toBeVisible()
+  await expect(restore.getByText(/holds 4 items and 2 shoots/)).toBeVisible()
   await restore.getByRole('button', { name: 'Restore this backup' }).click()
   const dialog = fresh.getByRole('alertdialog', { name: 'Replace everything?' })
   await dialog.getByRole('button', { name: 'Replace everything' }).click()
-  await expect(fresh.getByText(/^Restored 4 items/)).toBeVisible()
+  await expect(fresh.getByText(/^Restored 4 items and 2 shoots/)).toBeVisible()
 
   expect(await gearNames(fresh)).toEqual(COLLECTION_NAMES)
   await open(fresh, '#/kits')
@@ -85,9 +85,8 @@ test('merges a backup into a browser with gear of its own @storage', async ({
   await restore.getByRole('button', { name: 'Restore this backup' }).click()
   const dialog = other.getByRole('alertdialog', { name: 'Merge this backup?' })
   await dialog.getByRole('button', { name: 'Merge', exact: true }).click()
-  // The list of kinds may or may not have a comma before "and", depending on the browser
   await expect(restore.getByRole('status')).toHaveText(
-    /^Merged the backup made on .+\. Added 4 items, 1 kit, 1 loan,? and 1 maintenance record\.$/,
+    /^Merged the backup made on .+\. Added 4 items, 1 kit, 1 loan, 1 maintenance record, and 2 shoots\.$/,
   )
 
   expect(await gearNames(other)).toEqual([...COLLECTION_NAMES, 'Godox V1'].sort())

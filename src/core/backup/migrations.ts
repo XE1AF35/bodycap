@@ -40,11 +40,19 @@ function addGearMeasurements(file: Readonly<Record<string, unknown>>) {
   return { ...file }
 }
 
+/** Format 5 adds the shoots log, which a format 4 file has none of */
+function addShoots(file: Readonly<Record<string, unknown>>) {
+  const { data, counts } = file
+  if (!isObject(data) || !isObject(counts)) return { ...file }
+  return { ...file, counts: { ...counts, shoots: 0 }, data: { ...data, shoots: [] } }
+}
+
 /** Step n upgrades format n to n + 1 */
 export const BACKUP_MIGRATIONS: Migrations = {
   1: addKitsLoansAndMaintenance,
   2: addPhotos,
   3: addGearMeasurements,
+  4: addShoots,
 }
 
 /** Upgrades a file in format `from` to format `to`, setting its formatVersion as it goes. */

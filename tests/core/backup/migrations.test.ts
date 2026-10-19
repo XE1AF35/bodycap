@@ -110,3 +110,31 @@ describe('format 3 to 4', () => {
     expect(migrateBackup(formatThree, 3, 4)).toEqual({ ...formatThree, formatVersion: 4 })
   })
 })
+
+describe('format 4 to 5', () => {
+  const formatFour = {
+    app: 'bodycap',
+    formatVersion: 4,
+    schemaVersion: 4,
+    appVersion: '0.4.0',
+    exportedAt: '2026-10-16T03:00:00.000Z',
+    counts: { gear: 1, kits: 0, loans: 0, maintenance: 0, photos: 0 },
+    data: { gear: [{ id: 'kept as it is' }], kits: [], loans: [], maintenance: [], photos: [] },
+  }
+
+  it('adds shoots, empty and counted as none', () => {
+    expect(migrateBackup(formatFour, 4, 5)).toEqual({
+      ...formatFour,
+      formatVersion: 5,
+      counts: { ...formatFour.counts, shoots: 0 },
+      data: { ...formatFour.data, shoots: [] },
+    })
+  })
+
+  it.each([
+    ['no data', { ...formatFour, data: undefined }],
+    ['counts that are a list', { ...formatFour, counts: [] }],
+  ])('leaves a file with %s for the checks to refuse', (_name, file) => {
+    expect(BACKUP_MIGRATIONS[4]?.(file)).toEqual(file)
+  })
+})

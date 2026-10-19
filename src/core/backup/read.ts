@@ -1,6 +1,6 @@
 // Reading a backup file someone chose. Nothing in it is trusted: it's parsed, its format is checked
 // and upgraded, every field is validated, each record goes through the same rules as its form, and
-// kits, loans, maintenance, and photos may only point at gear in the same file.
+// kits, loans, maintenance, photos, and shoots may only point at gear in the same file.
 import { z } from 'zod'
 import { isOneOf } from '../choice'
 import { addDays, type IsoDate } from '../dates'
@@ -11,6 +11,7 @@ import { toMaintenanceInput, validateMaintenance, type MaintenanceRecord } from 
 import { DEFAULT_CURRENCY } from '../money'
 import type { PhotoInfo } from '../photos'
 import { err, ok, type Result } from '../result'
+import { toShootInput, validateShoot, type Shoot } from '../shoots'
 import { BACKUP_APP, FORMAT_VERSION, type Backup, type BackupList } from './format'
 import { migrateBackup } from './migrations'
 import { backupSchema } from './schema'
@@ -27,6 +28,7 @@ const LISTS = [
   'loans',
   'maintenance',
   'photos',
+  'shoots',
 ] as const satisfies readonly BackupList[]
 
 /** How messages name one record in each list */
@@ -36,6 +38,7 @@ const RECORD_NAMES: Record<BackupList, string> = {
   loans: 'loan',
   maintenance: 'maintenance record',
   photos: 'photo',
+  shoots: 'shoot',
 }
 
 // Just enough to tell a Bodycap backup from any other file, before knowing which format it's in
@@ -83,7 +86,7 @@ function describeProblem(list: BackupList, index: number, problem: RecordProblem
     case 'rules':
       return `${where} has a problem: ${problem.problems}`
     case 'missing-gear': {
-      const points = list === 'kits' ? 'lists gear' : 'is for gear'
+      const points = list === 'kits' || list === 'shoots' ? 'lists gear' : 'is for gear'
       return `${where} ${points} that isn't in the backup, so it can't be restored.`
     }
   }
@@ -190,6 +193,20 @@ function checkPhoto(
   return gearIds.has(photo.gearId) ? ok(photo) : err({ kind: 'missing-gear' })
 }
 
+function checkShoot(
+  shoot: Shoot,
+  gearIds: ReadonlySet<string>,
+  latest: IsoDate,
+): Result<Shoot, RecordProblem> {
+  const { id, createdAt, updatedAt, gearIds: taken } = shoot
+  // The form adds each item once, so a repeat means the file has been changed or broken
+  if (new Set(taken).size !== taken.length) return err({ kind: 'damaged' })
+  if (taken.some((gearId) => !gearIds.has(gearId))) return err({ kind: 'missing-gear' })
+  const details = validateShoot(toShootInput(shoot), latest)
+  if (!details.ok) return err(breaksRules(details.error))
+  return ok({ id, createdAt, updatedAt, ...details.value })
+}
+
 /** The checks that need the whole file: counts, repeated IDs, each record's rules, and references */
 function checkContents(file: z.output<typeof backupSchema>): Result<Backup> {
   const { counts, data } = file
@@ -218,6 +235,8 @@ function checkContents(file: z.output<typeof backupSchema>): Result<Backup> {
   if (!maintenance.ok) return maintenance
   const photos = checkEach('photos', data.photos, (photo) => checkPhoto(photo, gearIds))
   if (!photos.ok) return photos
+  const shoots = checkEach('shoots', data.shoots, (shoot) => checkShoot(shoot, gearIds, latest))
+  if (!shoots.ok) return shoots
 
   // The app keeps exactly one cover for each item with photos, so anything else is damage. The
   // item's first photo in the file is named.
@@ -237,6 +256,7 @@ function checkContents(file: z.output<typeof backupSchema>): Result<Backup> {
       loans: loans.value,
       maintenance: maintenance.value,
       photos: photos.value,
+      shoots: shoots.value,
     },
   })
 }

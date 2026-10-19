@@ -3,21 +3,34 @@ import type { BackupList } from '@/core/backup/format'
 import { LOCALE } from '@/core/locale'
 
 const numbers = new Intl.NumberFormat(LOCALE)
-const lists = new Intl.ListFormat(LOCALE, { type: 'conjunction' })
 
 const counted = (count: number, one: string, many: string) =>
   `${numbers.format(count)} ${count === 1 ? one : many}`
+
+/** Such as "a and b" or "a, b, and c". By hand, as Intl's en-NZ lists leave out the Oxford comma. */
+function andList(parts: readonly string[]): string {
+  const last = parts.at(-1) ?? ''
+  if (parts.length < 2) return last
+  const rest = parts.slice(0, -1)
+  return parts.length === 2 ? `${rest.join('')} and ${last}` : `${rest.join(', ')}, and ${last}`
+}
 
 /** Such as "1 item" or "40 items" */
 export function itemCount(count: number): string {
   return counted(count, 'item', 'items')
 }
 
-/** Such as "2 items", or "2 items and 5 photos" once there are photos */
-export function gearAndPhotos(items: number, photos: number): string {
-  return photos === 0
-    ? itemCount(items)
-    : `${itemCount(items)} and ${counted(photos, 'photo', 'photos')}`
+/**
+ * Such as "2 items", "1 shoot", or "2 items, 1 shoot, and 5 photos", leaving out whatever there's
+ * none of, and saying "0 items" when there's nothing at all
+ */
+export function gearShootsAndPhotos(items: number, shoots: number, photos: number): string {
+  const parts = [
+    ...(items > 0 ? [itemCount(items)] : []),
+    ...(shoots > 0 ? [shootCount(shoots)] : []),
+    ...(photos > 0 ? [photoCount(photos)] : []),
+  ]
+  return parts.length === 0 ? itemCount(0) : andList(parts)
 }
 
 /** Such as "1 shoot" or "12 shoots" */
@@ -36,6 +49,7 @@ const KINDS: readonly (readonly [BackupList, string, string])[] = [
   ['loans', 'loan', 'loans'],
   ['maintenance', 'maintenance record', 'maintenance records'],
   ['photos', 'photo', 'photos'],
+  ['shoots', 'shoot', 'shoots'],
 ]
 
 /** Such as "2 items and 1 kit", leaving out kinds there are none of, or undefined if there are none */
@@ -43,7 +57,7 @@ export function recordCounts(counts: Readonly<Record<BackupList, number>>): stri
   const parts = KINDS.filter(([kind]) => counts[kind] > 0).map(([kind, one, many]) =>
     counted(counts[kind], one, many),
   )
-  return parts.length === 0 ? undefined : lists.format(parts)
+  return parts.length === 0 ? undefined : andList(parts)
 }
 
 export const relativeDays = new Intl.RelativeTimeFormat(LOCALE, { numeric: 'auto' })

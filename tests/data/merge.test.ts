@@ -5,6 +5,7 @@ import { createBackup, type Backup } from '@/core/backup/format'
 import type { Gear } from '@/core/gear'
 import type { Loan } from '@/core/loans'
 import type { MaintenanceRecord } from '@/core/maintenance'
+import type { Shoot } from '@/core/shoots'
 import { RuleError, type RestorableBackup } from '@/data/repositories'
 import { body, closeDatabases, current, lens, NOW, openRepositories } from './support'
 
@@ -27,7 +28,16 @@ async function here() {
 /** A .json backup holding these lists, and nothing else */
 const backupOf = (lists: Partial<Backup['data']>): RestorableBackup => ({
   ...createBackup(
-    { gear: [], kits: [], loans: [], maintenance: [], photos: [], settings: {}, ...lists },
+    {
+      gear: [],
+      kits: [],
+      loans: [],
+      maintenance: [],
+      photos: [],
+      shoots: [],
+      settings: {},
+      ...lists,
+    },
     { schemaVersion: 2, appVersion: '0.2.0', exportedAt: EXPORTED_AT },
   ),
   storedPhotos: [],
@@ -60,8 +70,8 @@ describe('backup.merge', () => {
     )
 
     expect(summary).toEqual({
-      added: { gear: 1, kits: 0, loans: 0, maintenance: 1, photos: 0 },
-      updated: { gear: 1, kits: 0, loans: 0, maintenance: 0, photos: 0 },
+      added: { gear: 1, kits: 0, loans: 0, maintenance: 1, photos: 0, shoots: 0 },
+      updated: { gear: 1, kits: 0, loans: 0, maintenance: 0, photos: 0, shoots: 0 },
     })
     expect(await current(repos.gear.get(zoom.id))).toEqual(renamedLater)
     expect(await current(repos.gear.get(camera.id))).toEqual(camera)
@@ -72,6 +82,32 @@ describe('backup.merge', () => {
       changesSinceBackup: 3,
       lastBackupAt: NOW,
     })
+  })
+
+  it('adds new shoots and takes newer copies, keeping shoots here that changed later', async () => {
+    const { repos, zoom, camera } = await here()
+    const walk = await repos.shoots.add({ date: '2026-10-02', name: 'Walk', gearIds: [zoom.id] })
+    const kept = await repos.shoots.add({ date: '2026-10-03', name: 'Kept', gearIds: [] })
+    const renamedLater: Shoot = { ...walk, name: 'Waitākere walk', updatedAt: LATER }
+    const olderKept: Shoot = { ...kept, name: 'Old name', updatedAt: '2026-01-01T00:00:00.000Z' }
+    const wedding: Shoot = {
+      id: '3b4c5d6e-7f80-4912-8a3b-4c5d6e7f8091',
+      createdAt: LATER,
+      updatedAt: LATER,
+      date: '2026-10-06',
+      name: 'Wedding',
+      gearIds: [newGear.id, camera.id],
+    }
+
+    const summary = await repos.backup.merge(
+      backupOf({ gear: [newGear], shoots: [renamedLater, olderKept, wedding] }),
+    )
+
+    expect(summary.added.shoots).toBe(1)
+    expect(summary.updated.shoots).toBe(1)
+    expect(await current(repos.shoots.get(walk.id))).toEqual(renamedLater)
+    expect(await current(repos.shoots.get(kept.id))).toEqual(kept)
+    expect(await current(repos.shoots.get(wedding.id))).toEqual(wedding)
   })
 
   it('keeps the serial index up to date for merged gear', async () => {

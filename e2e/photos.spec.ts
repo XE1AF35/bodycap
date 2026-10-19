@@ -123,11 +123,11 @@ test('restores every photo from a .zip backup into an empty browser, exactly @st
   await open(fresh, '#/settings')
   const restore = fresh.getByRole('region', { name: 'Restore' })
   await restore.getByLabel('Backup file').setInputFiles(testInfo.outputPath('backup.zip'))
-  await expect(restore.getByText(/holds 4 items and 2 photos/)).toBeVisible()
+  await expect(restore.getByText(/holds 4 items, 2 shoots, and 2 photos/)).toBeVisible()
   await restore.getByRole('button', { name: 'Restore this backup' }).click()
   const dialog = fresh.getByRole('alertdialog', { name: 'Replace everything?' })
   await dialog.getByRole('button', { name: 'Replace everything' }).click()
-  await expect(fresh.getByText(/^Restored 4 items and 2 photos/)).toBeVisible()
+  await expect(fresh.getByText(/^Restored 4 items, 2 shoots, and 2 photos/)).toBeVisible()
 
   await openItem(fresh, 'Fujifilm X-T5')
   const photos = fresh.getByRole('region', { name: 'Photos' })

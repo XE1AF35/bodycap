@@ -7,14 +7,15 @@ import type { Loan } from '../loans'
 import type { MaintenanceRecord } from '../maintenance'
 import type { CurrencyCode } from '../money'
 import type { PhotoInfo } from '../photos'
+import type { Shoot } from '../shoots'
 
 export const BACKUP_APP = 'bodycap'
 /**
  * 1: gear and settings (M1). 2: adds lens optics, kits, loans, and maintenance (M2). 3: adds photos
  * (M3), whose details are in the data and whose images only a .zip backup holds. 4: adds weight,
- * filter thread, and catalogue ID to gear.
+ * filter thread, and catalogue ID to gear. 5: adds the shoots log (M4).
  */
-export const FORMAT_VERSION = 4
+export const FORMAT_VERSION = 5
 
 /** Larger files are refused before they're read. No real backup comes close. */
 export const MAX_BACKUP_BYTES = 50 * 1024 * 1024
@@ -31,6 +32,7 @@ export interface BackupData {
   readonly maintenance: readonly MaintenanceRecord[]
   /** Empty in a .json backup, which leaves photos out */
   readonly photos: readonly PhotoInfo[]
+  readonly shoots: readonly Shoot[]
   readonly settings: BackupSettings
 }
 
@@ -64,6 +66,7 @@ export function createBackup(data: BackupData, info: BackupInfo): Backup {
       loans: data.loans.length,
       maintenance: data.maintenance.length,
       photos: data.photos.length,
+      shoots: data.shoots.length,
     },
     data,
   }

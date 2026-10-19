@@ -9,7 +9,15 @@ import type { PhotoInfo } from '@/core/photos'
 import { readBackupFile, type BackupFileSource } from '@/data/backup-file'
 
 const INFO = { schemaVersion: 3, appVersion: '0.3.0', exportedAt: '2026-10-09T03:00:00.000Z' }
-const NO_DATA = { gear: [], kits: [], loans: [], maintenance: [], photos: [], settings: {} }
+const NO_DATA = {
+  gear: [],
+  kits: [],
+  loans: [],
+  maintenance: [],
+  photos: [],
+  shoots: [],
+  settings: {},
+}
 
 const backup = createBackup(NO_DATA, INFO)
 

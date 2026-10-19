@@ -5,7 +5,7 @@ import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { strToU8, zipSync, type Zippable } from 'fflate'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { createBackup } from '@/core/backup/format'
+import { createBackup, type BackupData } from '@/core/backup/format'
 import { formatDate, toIsoDate } from '@/core/dates'
 import type { Gear, GearFields } from '@/core/gear'
 import type { NewPhoto, PhotoInfo } from '@/core/photos'
@@ -53,13 +53,21 @@ const photos = [
   photo('8b9c0d1e-2f3a-4b4c-9d6e-7f8a9b0c1d2e', false),
 ]
 
-const NO_DATA = { gear: [body], kits: [], loans: [], maintenance: [], photos: [], settings: {} }
+const NO_DATA = {
+  gear: [body],
+  kits: [],
+  loans: [],
+  maintenance: [],
+  photos: [],
+  shoots: [],
+  settings: {},
+}
 const INFO = { schemaVersion: 3, appVersion: '0.3.0', exportedAt: '2026-10-05T03:00:00.000Z' }
 const madeOn = formatDate(toIsoDate(new Date(INFO.exportedAt)))
 
-/** A .zip backup holding the body and its two photos, as Bodycap writes one */
-function zipFile() {
-  const data = createBackup({ ...NO_DATA, photos }, INFO)
+/** A .zip backup holding the body and its two photos, and any other lists, as Bodycap writes one */
+function zipFile(lists: Partial<BackupData> = {}) {
+  const data = createBackup({ ...NO_DATA, photos, ...lists }, INFO)
   const entries: Zippable = {
     'data.json': strToU8(JSON.stringify(data)),
     ...Object.fromEntries(
@@ -190,6 +198,32 @@ describe('restoring photos', () => {
       await screen.findByText(`Restored 1 item and 2 photos from the backup made on ${madeOn}.`),
     ).toBeInTheDocument()
     expect(await current(services.repositories.photos.count())).toBe(2)
+  })
+
+  it('lists shoots between the items and the photos', async () => {
+    const shoot = {
+      id: '9c0d1e2f-3a4b-4c5d-8e7f-8a9b0c1d2e3f',
+      createdAt: '2026-03-03T08:00:00.000Z',
+      updatedAt: '2026-03-03T08:00:00.000Z',
+      date: '2026-03-03',
+      name: 'Harbour at dawn',
+      gearIds: [body.id],
+    }
+    const { user } = await choose(zipFile({ shoots: [shoot] }))
+    const restore = region('Restore')
+    expect(
+      await restore.findByText(
+        `This backup was made on ${madeOn} and holds 1 item, 1 shoot, and 2 photos.`,
+      ),
+    ).toBeInTheDocument()
+    await user.click(restore.getByRole('button', { name: 'Restore this backup' }))
+    const dialog = await screen.findByRole('alertdialog', { name: 'Replace everything?' })
+    await user.click(within(dialog).getByRole('button', { name: 'Replace everything' }))
+    expect(
+      await screen.findByText(
+        `Restored 1 item, 1 shoot, and 2 photos from the backup made on ${madeOn}.`,
+      ),
+    ).toBeInTheDocument()
   })
 
   it('warns that the photos here go when a backup without photos replaces them', async () => {

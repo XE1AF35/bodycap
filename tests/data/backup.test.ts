@@ -1,5 +1,5 @@
 // Backing up and restoring on fake-indexeddb: the exact round trip of gear, kits, loans,
-// maintenance, and photos, as .json and as .zip, all-or-nothing restore and merge, and the backup
+// maintenance, shoots, and photos, as .json and as .zip, all-or-nothing restore and merge, and the backup
 // reminder's bookkeeping.
 import { IDBFactory, IDBKeyRange } from 'fake-indexeddb'
 import { afterEach, describe, expect, it } from 'vitest'
@@ -111,6 +111,13 @@ async function backedUp() {
   const loan = await source.repos.loans.lend(first, { borrower: 'Aroha', dateOut: '2026-10-01' })
   await source.repos.loans.giveBack(loan.id, '2026-10-03')
   await source.repos.maintenance.add(second, { type: 'sensor-clean', date: '2026-09-01' })
+  await source.repos.shoots.add({
+    date: '2026-09-13',
+    name: 'Wedding at Matakana',
+    gearIds: [third, first],
+    notes: 'Rain all afternoon',
+  })
+  await source.repos.shoots.add({ date: '2026-10-01', name: 'Walk', gearIds: [] })
   await source.repos.settings.setLastUsedCurrency('AUD')
   const file = await source.repos.backup.create()
   return { source, gear, file, backup: await chosen(file.text) }
@@ -122,17 +129,18 @@ describe('backup.create', () => {
     expect(file.name).toBe('bodycap-backup-2026-10-05.json')
     expect(backup).toEqual({
       app: 'bodycap',
-      formatVersion: 4,
+      formatVersion: 5,
       schemaVersion: 5,
       appVersion: '0.1.0',
       exportedAt: EXPORTED_AT,
-      counts: { gear: 3, kits: 1, loans: 1, maintenance: 1, photos: 0 },
+      counts: { gear: 3, kits: 1, loans: 1, maintenance: 1, photos: 0, shoots: 2 },
       data: {
         gear,
         kits: await source.db.kits.toArray(),
         loans: await source.db.loans.toArray(),
         maintenance: await source.db.maintenance.toArray(),
         photos: [],
+        shoots: await source.db.shoots.toArray(),
         settings: { lastUsedCurrency: 'AUD' },
       },
       storedPhotos: [],
@@ -167,7 +175,7 @@ describe('backup.restore', () => {
     const { source, backup } = await backedUp()
     const target = open()
     await target.repos.backup.restore(backup)
-    for (const table of ['gear', 'kits', 'loans', 'maintenance'] as const) {
+    for (const table of ['gear', 'kits', 'loans', 'maintenance', 'shoots'] as const) {
       expect(await target.db[table].toArray(), table).toEqual(await source.db[table].toArray())
     }
     expect(await current(target.repos.gear.list())).toEqual(await current(source.repos.gear.list()))
@@ -230,6 +238,26 @@ describe('backup.restore', () => {
     expect(await target.db.loans.toArray()).toEqual(backup.data.loans)
     expect(await target.db.maintenance.toArray()).toEqual(backup.data.maintenance)
   })
+
+  it('replaces shoots already there with those in the backup', async () => {
+    const { backup } = await backedUp()
+    const target = open()
+    await target.repos.shoots.add({ date: '2026-08-01', name: 'Old shoot', gearIds: [] })
+    await target.repos.backup.restore(backup)
+    expect(await current(target.repos.shoots.list())).toEqual(backup.data.shoots)
+  })
+
+  it('clears the shoots here when the backup has none', async () => {
+    const { backup } = await backedUp()
+    const target = open()
+    await target.repos.shoots.add({ date: '2026-08-01', name: 'Old shoot', gearIds: [] })
+    await target.repos.backup.restore({
+      ...backup,
+      counts: { ...backup.counts, shoots: 0 },
+      data: { ...backup.data, shoots: [] },
+    })
+    expect(await current(target.repos.shoots.list())).toEqual([])
+  })
 })
 
 const shrunk = (label: string): NewPhoto => ({
@@ -276,7 +304,14 @@ describe('backup.createZip', () => {
     const { source, archive, backup } = await zipped()
     expect(archive.name).toBe('bodycap-backup-2026-10-05.zip')
     expect(archive.blob.type).toBe('application/zip')
-    expect(backup.counts).toEqual({ gear: 2, kits: 0, loans: 0, maintenance: 0, photos: 3 })
+    expect(backup.counts).toEqual({
+      gear: 2,
+      kits: 0,
+      loans: 0,
+      maintenance: 0,
+      photos: 3,
+      shoots: 0,
+    })
     expect(backedUpPhotos(backup.storedPhotos)).toEqual(await storedPhotos(source.db))
   })
 
@@ -334,8 +369,8 @@ describe('restoring and merging photos', () => {
     const target = open()
     const summary = await target.repos.backup.merge(backup)
     expect(summary).toEqual({
-      added: { gear: 2, kits: 0, loans: 0, maintenance: 0, photos: 3 },
-      updated: { gear: 0, kits: 0, loans: 0, maintenance: 0, photos: 0 },
+      added: { gear: 2, kits: 0, loans: 0, maintenance: 0, photos: 3, shoots: 0 },
+      updated: { gear: 0, kits: 0, loans: 0, maintenance: 0, photos: 0, shoots: 0 },
     })
     expect(await storedPhotos(target.db)).toEqual(backedUpPhotos(backup.storedPhotos))
     expect(await current(target.repos.settings.get())).toMatchObject({ changesSinceBackup: 5 })

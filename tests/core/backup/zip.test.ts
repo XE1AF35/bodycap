@@ -103,7 +103,16 @@ describe('readZipBackup', () => {
 
   const backupOf = (data: Partial<BackupData>) =>
     createBackup(
-      { gear: [], kits: [], loans: [], maintenance: [], photos: [], settings: {}, ...data },
+      {
+        gear: [],
+        kits: [],
+        loans: [],
+        maintenance: [],
+        photos: [],
+        shoots: [],
+        settings: {},
+        ...data,
+      },
       { schemaVersion: 3, appVersion: '0.3.0', exportedAt: '2026-10-09T03:00:00.000Z' },
     )
   const backup = backupOf({ gear: [body], photos: [stored] })

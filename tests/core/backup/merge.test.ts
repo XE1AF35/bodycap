@@ -9,6 +9,7 @@ import type { Kit } from '@/core/kits'
 import type { Loan } from '@/core/loans'
 import type { MaintenanceRecord } from '@/core/maintenance'
 import type { PhotoInfo } from '@/core/photos'
+import type { Shoot } from '@/core/shoots'
 
 const EARLY = '2026-10-01T00:00:00.000Z'
 const LATE = '2026-10-05T00:00:00.000Z'
@@ -66,17 +67,34 @@ const photo = (id: string, fields: Partial<PhotoInfo> = {}): PhotoInfo => ({
   ...fields,
 })
 
+const shoot = (id: string, updatedAt = EARLY, name = 'Matakana'): Shoot => ({
+  id,
+  createdAt: EARLY,
+  updatedAt,
+  date: '2026-09-13',
+  name,
+  gearIds: ['g1'],
+})
+
 const data = (lists: Partial<BackupData> = {}): BackupData => ({
   gear: [gear('g1')],
   kits: [],
   loans: [],
   maintenance: [],
   photos: [],
+  shoots: [],
   settings: {},
   ...lists,
 })
 
-const NONE: Record<BackupList, number> = { gear: 0, kits: 0, loans: 0, maintenance: 0, photos: 0 }
+const NONE: Record<BackupList, number> = {
+  gear: 0,
+  kits: 0,
+  loans: 0,
+  maintenance: 0,
+  photos: 0,
+  shoots: 0,
+}
 
 describe('planMerge', () => {
   it('adds what only the backup has, and leaves what only this browser has alone', () => {
@@ -85,7 +103,14 @@ describe('planMerge', () => {
     expect(planMerge(here, incoming)).toEqual({
       ok: true,
       value: {
-        writes: { gear: [gear('g3')], kits: [], loans: [], maintenance: [], photos: [] },
+        writes: {
+          gear: [gear('g3')],
+          kits: [],
+          loans: [],
+          maintenance: [],
+          photos: [],
+          shoots: [],
+        },
         added: { ...NONE, gear: 1 },
         updated: NONE,
         coverChanges: [],
@@ -153,6 +178,11 @@ describe('planMerge', () => {
       { photos: [photo('p1', { isCover: true }), photo('p2')] },
       { photos: [photo('p1', { isCover: true, updatedAt: LATE }), photo('p3')] },
     ],
+    [
+      'shoots',
+      { shoots: [shoot('s1'), shoot('s2')] },
+      { shoots: [shoot('s1', LATE, 'Matakana wedding'), shoot('s3')] },
+    ],
   ])('merges %s the same way', (list, hereLists, backupLists) => {
     const plan = planMerge(data(hereLists), data(backupLists))
     expect(plan.ok).toBe(true)
@@ -161,6 +191,15 @@ describe('planMerge', () => {
     expect(plan.value.writes[list]).toEqual(incoming)
     expect(plan.value.added[list]).toBe(1)
     expect(plan.value.updated[list]).toBe(1)
+  })
+
+  it('keeps the copy of a shoot here when it changed later than the backup copy', () => {
+    const here = data({ shoots: [shoot('s1', LATE, 'Renamed here')] })
+    const incoming = data({ shoots: [shoot('s1', EARLY)] })
+    expect(planMerge(here, incoming)).toMatchObject({
+      ok: true,
+      value: { writes: { shoots: [] }, added: NONE, updated: NONE },
+    })
   })
 
   it.each<[string, BackupData['settings'], BackupData['settings'], BackupData['settings']]>([
