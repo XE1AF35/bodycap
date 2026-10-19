@@ -1,8 +1,9 @@
-// Shoots: checking a shoot as typed, filling the form back from a saved one, taking an item off a
-// shoot, listing shoots newest first, and counting this year's.
+// Shoots: checking a shoot as typed, filling the form back from a saved one, adding a kit's items
+// to a shoot, taking an item off a shoot, listing shoots newest first, and counting this year's.
 import { describe, expect, it } from 'vitest'
 import { err, ok } from '@/core/result'
 import {
+  addToShoot,
   emptyShootInput,
   newestFirst,
   removeFromShoot,
@@ -80,6 +81,21 @@ describe('validateShoot', () => {
 
   it('starts a blank form on today, with no items', () => {
     expect(emptyShootInput(TODAY)).toEqual({ date: TODAY, name: '', gearIds: [], notes: '' })
+  })
+})
+
+describe('addToShoot', () => {
+  const shoot: ShootFields = { date: TODAY, name: 'Wedding', gearIds: ['a', 'b'] }
+
+  it('adds the items not already on the shoot to the end, in the order given', () => {
+    expect(addToShoot(shoot, ['c', 'b', 'd', 'c'])).toEqual({
+      ...shoot,
+      gearIds: ['a', 'b', 'c', 'd'],
+    })
+  })
+
+  it('leaves the shoot as it was when every item is already on it', () => {
+    expect(addToShoot(shoot, ['b', 'a'])).toEqual(shoot)
   })
 })
 

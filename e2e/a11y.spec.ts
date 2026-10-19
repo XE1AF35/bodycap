@@ -270,6 +270,39 @@ const SCREENS: readonly Screen[] = [
     },
   },
   {
+    name: 'shoot page',
+    seed: SAMPLE_COLLECTION,
+    show: async (page) => {
+      await at(page, '#/shoots', 'Shoots')
+      await page.getByRole('link', { name: 'Street, Cuba Street' }).click()
+      await expect(
+        page.getByRole('heading', { level: 1, name: 'Street, Cuba Street' }),
+      ).toBeVisible()
+    },
+  },
+  {
+    name: 'edit a shoot dialog with a kit added',
+    seed: SAMPLE_COLLECTION,
+    show: async (page) => {
+      await at(page, '#/shoots', 'Shoots')
+      await page.getByRole('link', { name: 'Street, Cuba Street' }).click()
+      await openDialog(page, 'Edit', 'Edit Street, Cuba Street')
+      await page.getByRole('combobox', { name: 'Kit' }).selectOption({ label: 'Wedding kit' })
+      await page.getByRole('button', { name: 'Add its items' }).click()
+      await expect(page.getByText('Added 2 items from Wedding kit.')).toBeVisible()
+    },
+  },
+  {
+    name: 'delete a shoot confirmation',
+    seed: SAMPLE_COLLECTION,
+    show: async (page) => {
+      await at(page, '#/shoots', 'Shoots')
+      await page.getByRole('link', { name: 'Street, Cuba Street' }).click()
+      await page.getByRole('button', { name: 'Delete' }).click()
+      await expect(page.getByRole('alertdialog')).toBeVisible()
+    },
+  },
+  {
     name: 'dashboard with an overdue loan',
     seed: SAMPLE_COLLECTION,
     show: async (page) => {

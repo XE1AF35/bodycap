@@ -68,6 +68,14 @@ export function validateShoot(input: ShootInput, today: IsoDate): Result<ShootFi
   })
 }
 
+/** Adds items to the end of a shoot, such as everything in a kit, skipping any already on it */
+export function addToShoot<T extends Pick<ShootFields, 'gearIds'>>(
+  shoot: T,
+  gearIds: readonly string[],
+): T {
+  return { ...shoot, gearIds: [...new Set([...shoot.gearIds, ...gearIds])] }
+}
+
 /** Takes an item off a shoot */
 export function removeFromShoot<T extends ShootFields>(shoot: T, gearId: string): T {
   return { ...shoot, gearIds: shoot.gearIds.filter((id) => id !== gearId) }

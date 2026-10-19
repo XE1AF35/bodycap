@@ -1,4 +1,6 @@
-// The shoots log: every shoot, newest first, with how many were logged this year.
+// The shoots log: every shoot, newest first and linked to its page, with how many were logged this
+// year.
+import { Link } from '@tanstack/react-router'
 import { useMemo, useState } from 'react'
 import { formatDate, toIsoDate } from '@/core/dates'
 import { newestFirst, shootsThisYear } from '@/core/shoots'
@@ -43,7 +45,13 @@ export function ShootsPage() {
           <ul aria-label="Your shoots" className="grid gap-3">
             {sorted.map((shoot) => (
               <li key={shoot.id} className="grid gap-1 rounded-lg border border-border bg-card p-4">
-                <p className="font-medium">{shoot.name}</p>
+                <Link
+                  to="/shoots/$shootId"
+                  params={{ shootId: shoot.id }}
+                  className="justify-self-start font-medium underline-offset-4 hover:underline"
+                >
+                  {shoot.name}
+                </Link>
                 <p className="flex flex-wrap gap-x-4 text-sm text-muted-foreground">
                   <span>{formatDate(shoot.date)}</span>
                   <span>

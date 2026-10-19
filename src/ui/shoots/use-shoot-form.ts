@@ -2,7 +2,13 @@
 // with the shoot rules.
 import { useState } from 'react'
 import type { IsoDate } from '@/core/dates'
-import { validateShoot, type ShootErrors, type ShootFields, type ShootInput } from '@/core/shoots'
+import {
+  addToShoot,
+  validateShoot,
+  type ShootErrors,
+  type ShootFields,
+  type ShootInput,
+} from '@/core/shoots'
 import { focusFirst } from '@/ui/gear/status/change-props'
 
 const FIELDS = ['date', 'name', 'notes'] as const
@@ -29,6 +35,10 @@ export function useShootForm(idPrefix: string, initial: () => ShootInput) {
     gearIds: new Set(input.gearIds) as ReadonlySet<string>,
     setGearIds: (chosen: ReadonlySet<string>) => {
       setInput((previous) => ({ ...previous, gearIds: [...chosen] }))
+    },
+    /** Ticks more items, such as a kit's, after those already ticked */
+    addGearIds: (gearIds: readonly string[]) => {
+      setInput((previous) => addToShoot(previous, gearIds))
     },
     /** The shoot's fields, or nothing after showing what to fix and moving focus there */
     check: (today: IsoDate): ShootFields | undefined => {

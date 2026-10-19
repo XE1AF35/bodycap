@@ -107,9 +107,9 @@ export function packingProgress(
   return { packed: kit.packedGearIds.length, total: kit.gearIds.length }
 }
 
-/** The kit's gear in the kit's order, leaving out anything no longer there */
+/** The kit's gear in the kit's order, leaving out anything no longer there. A shoot's items work the same way. */
 export function kitGear<G extends { readonly id: string }>(
-  kit: KitFields,
+  kit: Pick<KitFields, 'gearIds'>,
   gear: readonly G[],
 ): G[] {
   const byId = new Map(gear.map((item) => [item.id, item]))
