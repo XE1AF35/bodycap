@@ -1,11 +1,12 @@
 // Shoots: checking a shoot as typed, filling the form back from a saved one, taking an item off a
-// shoot, and listing shoots newest first.
+// shoot, listing shoots newest first, and counting this year's.
 import { describe, expect, it } from 'vitest'
 import { err, ok } from '@/core/result'
 import {
   emptyShootInput,
   newestFirst,
   removeFromShoot,
+  shootsThisYear,
   toShootInput,
   validateShoot,
   type Shoot,
@@ -126,5 +127,18 @@ describe('newestFirst', () => {
     ]
     newestFirst(shoots)
     expect(shoots.map(({ id }) => id)).toEqual(['a', 'b'])
+  })
+})
+
+describe('shootsThisYear', () => {
+  const on = (date: string): ShootFields => ({ date, name: date, gearIds: [] })
+
+  it('counts the shoots from 1 January to today, and none from other years', () => {
+    const shoots = ['2025-12-31', '2026-01-01', '2026-06-30', TODAY, '2024-10-16'].map(on)
+    expect(shootsThisYear(shoots, TODAY)).toBe(3)
+  })
+
+  it('counts none when there are no shoots', () => {
+    expect(shootsThisYear([], TODAY)).toBe(0)
   })
 })

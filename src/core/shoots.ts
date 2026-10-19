@@ -79,3 +79,9 @@ export function newestFirst<T extends Shoot>(shoots: readonly T[]): T[] {
   // Dates and ISO timestamps sort correctly as plain strings
   return [...shoots].sort((a, b) => (key(a) === key(b) ? 0 : key(a) < key(b) ? 1 : -1))
 }
+
+/** How many shoots are in today's calendar year */
+export function shootsThisYear(shoots: readonly ShootFields[], today: IsoDate): number {
+  const year = today.slice(0, 4)
+  return shoots.filter(({ date }) => date.startsWith(`${year}-`)).length
+}

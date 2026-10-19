@@ -74,6 +74,7 @@ export interface Seed {
   readonly kits?: readonly Record<string, unknown>[]
   readonly loans?: readonly Record<string, unknown>[]
   readonly maintenance?: readonly Record<string, unknown>[]
+  readonly shoots?: readonly Record<string, unknown>[]
 }
 
 /**
@@ -91,6 +92,7 @@ export async function seed(page: Page, tables: Seed): Promise<void> {
     kits: stamp(tables.kits),
     loans: stamp(tables.loans),
     maintenance: stamp(tables.maintenance),
+    shoots: stamp(tables.shoots),
   }
   await page.evaluate(async (byTable) => {
     const db = await new Promise<IDBDatabase>((resolve, reject) => {
@@ -159,8 +161,8 @@ const BACKPACK = '9d4a6c21-5e7b-4f80-b3c2-1a8e6d5f4b37'
 
 /**
  * Gear with everything M2 added: the X-T5 out on an overdue loan, with a sensor clean logged, and
- * a wedding kit used as a packing checklist, with the X-T5 packed. The X-T5's serial, purchase
- * dates, and warranty give the stats something to show, and sharing something to leave out.
+ * a wedding kit used as a packing checklist, with the X-T5 packed, and two shoots logged. The
+ * X-T5's serial, purchase dates, and warranty give the stats something to show, and sharing something to leave out.
  */
 export const SAMPLE_COLLECTION: Seed = {
   gear: [
@@ -231,6 +233,10 @@ export const SAMPLE_COLLECTION: Seed = {
       cost: { amountMinor: 8900, currency: 'NZD' },
       provider: 'Camera Clinic',
     },
+  ],
+  shoots: [
+    { date: daysFromToday(-30), name: 'Wedding, Arrowtown', gearIds: [X_T5, XF_33, BACKPACK] },
+    { date: daysFromToday(-90), name: 'Street, Cuba Street', gearIds: [X_T5], notes: 'Rain.' },
   ],
 }
 

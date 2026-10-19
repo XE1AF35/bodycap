@@ -69,11 +69,11 @@ split into two files.
 - **UI tests** render the whole app in jsdom with Testing Library.
 - **End-to-end tests** run in Playwright against the built site, with its real base path, security
   policy, and service worker: adding gear, picking a lens from the model suggestions, and packing
-  a kit with only a keyboard, lending and returning, logging maintenance, search, a backup restored
+  a kit and logging a shoot with only a keyboard, lending and returning, logging maintenance, search, a backup restored
   into an empty browser and merged into another, a photo with a GPS location stored without it, a
   `.zip` backup with photos restored into an empty browser byte for byte, the CSV file, the
   insurance list in print, a kit shared into another browser's wishlist, offline use, the install
-  manifest, focus outlines, layouts that must fit on a phone, and axe accessibility checks against
+  manifest, focus outlines, layouts that must fit on a phone (the header among them), and axe accessibility checks against
   WCAG 2.2 AA on every screen and the main dialogs in both themes. Every test fails on a console
   error or a security policy violation. CI runs them in Chromium; locally, WebKit also runs the
   storage and offline tests.

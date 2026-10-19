@@ -1,15 +1,12 @@
 // Adding gear to a kit: a searchable list of gear not in it yet. Sold and lost gear is left out,
-// since it can't be packed. Ticks survive a search, so items can be gathered from several.
+// since it can't be packed.
 import { Plus } from 'lucide-react'
 import { useState } from 'react'
 import type { Gear } from '@/core/gear'
 import { addToKit, type Kit } from '@/core/kits'
-import { filterAndSortGear } from '@/core/search'
 import { RuleError } from '@/data/repositories'
 import { Button } from '@/ui/components/ui/button'
-import { Input } from '@/ui/components/ui/input'
-import { Label } from '@/ui/components/ui/label'
-import { gearName } from '@/ui/gear/labels'
+import { GearChecklist } from '@/ui/gear/GearChecklist'
 import { FormDialog } from '@/ui/gear/status/FormDialog'
 import { useServices } from '@/ui/services'
 
@@ -20,12 +17,10 @@ interface AddGearDialogProps {
 
 function GearPicker({ kit, gear, onClose }: AddGearDialogProps & { readonly onClose: () => void }) {
   const { repositories } = useServices()
-  const [text, setText] = useState('')
   const [chosen, setChosen] = useState<ReadonlySet<string>>(() => new Set())
   const inKit = new Set(kit.gearIds)
-  const candidates = filterAndSortGear(
-    gear.filter(({ id, status }) => !inKit.has(id) && status !== 'sold' && status !== 'lost'),
-    { text },
+  const packable = gear.filter(
+    ({ id, status }) => !inKit.has(id) && status !== 'sold' && status !== 'lost',
   )
 
   return (
@@ -39,44 +34,14 @@ function GearPicker({ kit, gear, onClose }: AddGearDialogProps & { readonly onCl
         onClose()
       }}
     >
-      <div className="grid gap-1.5">
-        <Label htmlFor="kit-picker-search">Search</Label>
-        <Input
-          id="kit-picker-search"
-          type="search"
-          value={text}
-          onChange={(event) => {
-            setText(event.target.value)
-          }}
-        />
-      </div>
-      {candidates.length === 0 ? (
-        <p className="text-sm text-muted-foreground">Nothing else to add.</p>
-      ) : (
-        <fieldset>
-          <legend className="sr-only">Gear to add</legend>
-          <ul className="grid max-h-72 gap-1 overflow-y-auto">
-            {candidates.map((item) => (
-              <li key={item.id}>
-                <label className="flex items-center gap-3 rounded-md px-1 py-1.5 hover:bg-muted">
-                  <input
-                    type="checkbox"
-                    className="size-4 accent-primary"
-                    checked={chosen.has(item.id)}
-                    onChange={(event) => {
-                      const next = new Set(chosen)
-                      if (event.target.checked) next.add(item.id)
-                      else next.delete(item.id)
-                      setChosen(next)
-                    }}
-                  />
-                  {gearName(item)}
-                </label>
-              </li>
-            ))}
-          </ul>
-        </fieldset>
-      )}
+      <GearChecklist
+        idPrefix="kit-picker"
+        legend="Gear to add"
+        gear={packable}
+        chosen={chosen}
+        onChange={setChosen}
+        emptyText="Nothing else to add."
+      />
     </FormDialog>
   )
 }

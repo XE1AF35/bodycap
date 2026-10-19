@@ -245,6 +245,31 @@ const SCREENS: readonly Screen[] = [
     },
   },
   {
+    name: 'empty shoots list',
+    show: async (page) => {
+      await at(page, '#/shoots', 'Shoots')
+      await expect(page.getByText('No shoots yet.')).toBeVisible()
+    },
+  },
+  {
+    name: 'shoots list',
+    seed: SAMPLE_COLLECTION,
+    show: async (page) => {
+      await at(page, '#/shoots', 'Shoots')
+      await expect(page.getByRole('list', { name: 'Your shoots' })).toBeVisible()
+    },
+  },
+  {
+    name: 'log a shoot dialog with errors',
+    seed: SAMPLE_COLLECTION,
+    show: async (page) => {
+      await at(page, '#/shoots', 'Shoots')
+      await openDialog(page, 'Log a shoot', 'Log a shoot')
+      await page.getByRole('button', { name: 'Save' }).click()
+      await expect(page.getByText('Enter a name for the shoot.')).toBeVisible()
+    },
+  },
+  {
     name: 'dashboard with an overdue loan',
     seed: SAMPLE_COLLECTION,
     show: async (page) => {

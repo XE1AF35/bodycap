@@ -20,6 +20,11 @@ export function gearAndPhotos(items: number, photos: number): string {
     : `${itemCount(items)} and ${counted(photos, 'photo', 'photos')}`
 }
 
+/** Such as "1 shoot" or "12 shoots" */
+export function shootCount(count: number): string {
+  return counted(count, 'shoot', 'shoots')
+}
+
 /** Such as "1 photo" or "5 photos" */
 export function photoCount(count: number): string {
   return counted(count, 'photo', 'photos')

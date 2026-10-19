@@ -57,6 +57,12 @@ const kitRoute = createRoute({
   component: lazyRouteComponent(() => import('@/ui/pages/KitPage'), 'KitPage'),
 })
 
+const shootsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: 'shoots',
+  component: lazyRouteComponent(() => import('@/ui/pages/ShootsPage'), 'ShootsPage'),
+})
+
 const systemRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: 'system',
@@ -91,6 +97,7 @@ const routeTree = rootRoute.addChildren([
   editGearRoute,
   kitsRoute,
   kitRoute,
+  shootsRoute,
   systemRoute,
   sharedKitRoute,
   insuranceRoute,
