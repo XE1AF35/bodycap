@@ -60,6 +60,18 @@ describe('maintenance repository', () => {
     expect(await current(repos.maintenance.forGear(camera.id))).toEqual([record])
   })
 
+  it("lists every item's records together", async () => {
+    const { repos } = openRepositories()
+    const camera = await repos.gear.add(body)
+    const zoom = await repos.gear.add(lens)
+    const sensorClean = await repos.maintenance.add(camera.id, clean)
+    const repair = await repos.maintenance.add(zoom.id, { type: 'repair', date: '2026-09-01' })
+    expect(await current(repos.maintenance.list())).toEqual(
+      expect.arrayContaining([sensorClean, repair]),
+    )
+    expect(await current(repos.maintenance.list())).toHaveLength(2)
+  })
+
   it('removes a record, and does nothing for one already gone', async () => {
     const { repos } = openRepositories()
     const item = await repos.gear.add(body)

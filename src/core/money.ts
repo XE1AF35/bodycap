@@ -120,8 +120,16 @@ export function sumByCurrency(
   for (const { amountMinor, currency } of amounts) {
     totals.set(currency, (totals.get(currency) ?? 0) + amountMinor)
   }
-  const rank = (currency: CurrencyCode) => (currency === first ? 0 : 1)
+  const order = currencyOrder(first)
   return [...totals]
     .map(([currency, amountMinor]) => ({ amountMinor, currency }))
-    .sort((a, b) => rank(a.currency) - rank(b.currency) || a.currency.localeCompare(b.currency))
+    .sort((a, b) => order(a.currency, b.currency))
+}
+
+/** Sorts currencies with `first` leading and the rest in alphabetical order */
+export function currencyOrder(
+  first: CurrencyCode = DEFAULT_CURRENCY,
+): (a: CurrencyCode, b: CurrencyCode) => number {
+  const rank = (currency: CurrencyCode) => (currency === first ? 0 : 1)
+  return (a, b) => rank(a) - rank(b) || a.localeCompare(b)
 }

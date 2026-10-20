@@ -303,6 +303,30 @@ const SCREENS: readonly Screen[] = [
     },
   },
   {
+    name: 'empty money page',
+    show: async (page) => {
+      await at(page, '#/money', 'Money')
+      await expect(page.getByText('Nothing bought yet.')).toBeVisible()
+    },
+  },
+  {
+    name: 'money page',
+    seed: SAMPLE_COLLECTION,
+    show: async (page) => {
+      await at(page, '#/money', 'Money')
+      await expect(page.getByRole('table', { name: 'Spend by year in NZD' })).toBeVisible()
+    },
+  },
+  {
+    name: 'money page on a phone',
+    seed: SAMPLE_COLLECTION,
+    show: async (page) => {
+      await onPhone(page)
+      await at(page, '#/money', 'Money')
+      await expect(page.getByRole('figure', { name: 'Net spend by year in NZD' })).toBeVisible()
+    },
+  },
+  {
     name: 'dashboard with an overdue loan',
     seed: SAMPLE_COLLECTION,
     show: async (page) => {

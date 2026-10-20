@@ -35,6 +35,8 @@ export default defineConfig([
     rules: {
       // Raised from a warning: user text must always render as text, never as HTML
       '@eslint-react/dom-no-dangerously-set-innerhtml': 'error',
+      // A labelled region that scrolls sideways needs a tab stop so keyboards can scroll it too
+      'jsx-a11y-x/no-noninteractive-tabindex': ['error', { roles: ['tabpanel', 'region'] }],
     },
   },
 

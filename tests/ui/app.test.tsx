@@ -20,6 +20,7 @@ describe('app shell', () => {
     ['/gear', 'Gear', 'Gear'],
     ['/kits', 'Kits', 'Kits'],
     ['/shoots', 'Shoots', 'Shoots'],
+    ['/money', 'Money', 'Money'],
     ['/system', 'System', 'System map'],
     ['/settings', 'Settings', 'Settings'],
   ])('marks %s as the current page, and titles the window after it', async (path, link, title) => {

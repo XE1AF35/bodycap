@@ -15,7 +15,15 @@ for (const width of [640, 720, 1280]) {
     await page.setViewportSize({ width, height: 900 })
     await open(page)
     const links = page.getByRole('navigation', { name: 'Main' }).getByRole('link')
-    await expect(links).toHaveText(['Dashboard', 'Gear', 'Kits', 'Shoots', 'System', 'Settings'])
+    await expect(links).toHaveText([
+      'Dashboard',
+      'Gear',
+      'Kits',
+      'Shoots',
+      'Money',
+      'System',
+      'Settings',
+    ])
     const tops = await links.evaluateAll((elements) =>
       elements.map((element) => element.getBoundingClientRect().top),
     )

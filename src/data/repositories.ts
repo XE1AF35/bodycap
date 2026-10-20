@@ -87,6 +87,8 @@ export interface LoanRepository {
 }
 
 export interface MaintenanceRepository {
+  /** Every item's records, in no particular order */
+  list(): Live<readonly MaintenanceRecord[]>
   forGear(gearId: string): Live<readonly MaintenanceRecord[]>
   /** Saves a record for an item. Rejects with GearNotFoundError if the item is gone. */
   add(gearId: string, details: MaintenanceDetails): Promise<MaintenanceRecord>

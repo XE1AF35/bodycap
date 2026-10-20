@@ -16,6 +16,8 @@ export function createMaintenanceRepository(
   { now, newId }: MaintenanceRepositoryOptions,
 ): MaintenanceRepository {
   return {
+    list: () => live(() => db.maintenance.toArray()),
+
     forGear: (gearId) => live(() => db.maintenance.where('gearId').equals(gearId).toArray()),
 
     add: (gearId, details) =>

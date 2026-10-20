@@ -17,6 +17,7 @@ const PAGES = [
   { to: '/gear', label: 'Gear', exact: false },
   { to: '/kits', label: 'Kits', exact: false },
   { to: '/shoots', label: 'Shoots', exact: false },
+  { to: '/money', label: 'Money', exact: false },
   { to: '/system', label: 'System', exact: false },
   { to: '/settings', label: 'Settings', exact: false },
 ] as const
@@ -73,7 +74,7 @@ export function SiteHeader() {
                     onClick={() => {
                       setMenuOpen(false)
                     }}
-                    className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground aria-[current=page]:font-medium aria-[current=page]:text-foreground"
+                    className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground aria-[current=page]:font-medium aria-[current=page]:text-foreground sm:px-2 md:px-3"
                   >
                     {({ isActive }) => (
                       <>
