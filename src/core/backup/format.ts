@@ -13,7 +13,7 @@ export const BACKUP_APP = 'bodycap'
 /**
  * 1: gear and settings (M1). 2: adds lens optics, kits, loans, and maintenance (M2). 3: adds photos
  * (M3), whose details are in the data and whose images only a .zip backup holds. 4: adds weight,
- * filter thread, and catalogue ID to gear. 5: adds the shoots log (M4).
+ * filter thread, and catalogue ID to gear. 5: adds the shoots log and each item's own estimate (M4).
  */
 export const FORMAT_VERSION = 5
 

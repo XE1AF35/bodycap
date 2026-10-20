@@ -5,7 +5,7 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { fillFromCatalogue, keepCatalogueLink, type LinkedModel } from '@/core/catalogue/fill'
 import type { CatalogueEntry } from '@/core/catalogue/schema'
 import { isOneOf } from '@/core/choice'
-import { toIsoDate } from '@/core/dates'
+import { formatDate, toIsoDate } from '@/core/dates'
 import {
   applicableFields,
   CATEGORIES,
@@ -77,6 +77,7 @@ const ORDER: readonly Field[] = [
   'purchasePrice',
   'whereBought',
   'condition',
+  'ownEstimate',
   'status',
   'currentLocation',
   'saleDate',
@@ -206,7 +207,9 @@ export function GearForm({ initial, saved, onSave, cancel }: GearFormProps) {
     error: errors[field],
   })
 
-  const text = (field: Exclude<Field, 'adapterAutofocus' | `${string}Price` | 'insuredValue'>) => ({
+  const text = (
+    field: Exclude<Field, 'adapterAutofocus' | `${string}Price` | 'insuredValue' | 'ownEstimate'>,
+  ) => ({
     ...props(field),
     value: input[field],
     onChange: (value: string) => {
@@ -239,8 +242,22 @@ export function GearForm({ initial, saved, onSave, cancel }: GearFormProps) {
     return message === undefined ? [] : [{ id: fieldId(field), message }]
   })
 
+  // The own estimate is always in the purchase currency, and dated when it or that currency changes
+  const ownEstimate = { ...input.ownEstimate, currency: input.purchasePrice.currency }
+  const estimateChanged =
+    ownEstimate.amount.trim() !== start.ownEstimate.amount.trim() ||
+    ownEstimate.currency !== start.ownEstimate.currency
+  const estimateSetOn =
+    !estimateChanged && input.ownEstimateDate !== '' ? formatDate(input.ownEstimateDate) : undefined
+
   async function submit() {
-    const result = validateGear(keepCatalogueLink(input, linked), toIsoDate(new Date()))
+    const today = toIsoDate(new Date())
+    const checked = {
+      ...keepCatalogueLink(input, linked),
+      ownEstimate,
+      ownEstimateDate: estimateChanged ? today : input.ownEstimateDate,
+    }
+    const result = validateGear(checked, today)
     if (!result.ok) {
       setErrors(result.error)
       setFailedSaves((count) => count + 1)
@@ -417,6 +434,21 @@ export function GearForm({ initial, saved, onSave, cancel }: GearFormProps) {
           emptyLabel="Not set"
           choices={choices(CONDITIONS, CONDITION_LABELS)}
         />
+        {applies.has('ownEstimate') && (
+          <TextField
+            {...props('ownEstimate')}
+            error={errors.ownEstimate ?? errors.ownEstimateDate}
+            kind="number"
+            value={input.ownEstimate.amount}
+            onChange={(amount) => {
+              set('ownEstimate', { ...input.ownEstimate, amount })
+            }}
+            hint={[
+              `What you think it's worth now, in ${ownEstimate.currency}. Leave it blank to use Bodycap's.`,
+              estimateSetOn === undefined ? '' : ` Set on ${estimateSetOn}.`,
+            ].join('')}
+          />
+        )}
       </fieldset>
 
       <fieldset className="grid gap-4">

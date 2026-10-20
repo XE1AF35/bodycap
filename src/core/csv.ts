@@ -67,6 +67,9 @@ const GEAR_COLUMNS: readonly (readonly [string, (item: Gear) => string])[] = [
   ['Last changed', (item) => item.updatedAt],
   ['ID', (item) => item.id],
   ['Catalogue ID', (item) => text(item.catalogueId)],
+  ['Own estimate', (item) => amount(item.ownEstimate)],
+  ['Own estimate currency', (item) => text(item.ownEstimate?.currency)],
+  ['Own estimate set', (item) => text(item.ownEstimateDate)],
 ]
 
 /** Every field of every item, one row each in the order given, under a header row */

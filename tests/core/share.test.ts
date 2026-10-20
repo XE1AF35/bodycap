@@ -39,6 +39,8 @@ const lens: Gear = {
   currentLocation: 'Studio shelf',
   warrantyExpiry: '2028-03-01',
   insuredValue: { amountMinor: 250000, currency: 'USD' },
+  ownEstimate: { amountMinor: 333300, currency: 'NZD' },
+  ownEstimateDate: '2026-09-15',
   notes: 'Bought with the hood',
 }
 
@@ -211,6 +213,8 @@ describe('shareKitLink and openSharedKit', () => {
     ['purchase dates', '2026-03-01'],
     ['warranty dates', '2028-03-01'],
     ['insured values', '250000'],
+    ['own estimates', '333300'],
+    ['the dates of own estimates', '2026-09-15'],
     ['sale details', '2026-09-01'],
     ['condition', 'excellent'],
     ['status', 'lent-out'],

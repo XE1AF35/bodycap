@@ -32,6 +32,8 @@ export const FIELD_LABELS: Record<keyof GearFields, string> = {
   currentLocation: 'Location',
   warrantyExpiry: 'Warranty ends',
   insuredValue: 'Insured value',
+  ownEstimate: 'Your own estimate',
+  ownEstimateDate: 'Own estimate set',
   saleDate: 'Sale date',
   salePrice: 'Sale price',
   lostDate: 'Date lost',

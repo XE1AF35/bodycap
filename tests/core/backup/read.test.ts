@@ -31,6 +31,8 @@ const lens: Gear = {
   purchasePrice: { amountMinor: 389900, currency: 'NZD' },
   status: 'owned',
   warrantyExpiry: '2028-03-01',
+  ownEstimate: { amountMinor: 350000, currency: 'NZD' },
+  ownEstimateDate: '2026-09-15',
   notes: 'Bought with the hood\nand a spare cap',
 }
 
@@ -578,6 +580,18 @@ describe('readBackup', () => {
   it('drops lens optics from gear that is not a lens', () => {
     const result = readBackup(onlyGear([{ ...soldBody, focalLengthMin: 23, focalLengthMax: 23 }]))
     expect(result).toEqual({ ok: true, value: JSON.parse(onlyGear([soldBody])) as unknown })
+  })
+
+  it('refuses own estimates that break the gear rules', () => {
+    const noDate: Gear = { ...lens, ownEstimateDate: undefined } as unknown as Gear
+    for (const item of [
+      noDate,
+      { ...lens, ownEstimate: { amountMinor: 350000, currency: 'USD' } },
+      { ...lens, ownEstimateDate: '2026-11-01' },
+    ]) {
+      const file = createBackup({ ...backup.data, gear: [item, soldBody, adapter] }, INFO)
+      expect(readBackup(JSON.stringify(file)).ok).toBe(false)
+    }
   })
 
   it('drops keys it does not know', () => {

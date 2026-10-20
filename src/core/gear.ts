@@ -132,6 +132,10 @@ export interface GearFields extends LensOptics {
   readonly currentLocation?: string
   readonly warrantyExpiry?: IsoDate
   readonly insuredValue?: Money
+  /** Held items: what you think it's worth now, in the purchase currency */
+  readonly ownEstimate?: Money
+  /** The date the own estimate was set */
+  readonly ownEstimateDate?: IsoDate
   readonly saleDate?: IsoDate
   readonly salePrice?: Money
   readonly lostDate?: IsoDate
@@ -177,6 +181,10 @@ export interface GearInput extends OpticsInput {
   readonly currentLocation: string
   readonly warrantyExpiry: string
   readonly insuredValue: MoneyInput
+  /** The form always gives it in the purchase price's currency */
+  readonly ownEstimate: MoneyInput
+  /** Set when the own estimate changes, and never typed */
+  readonly ownEstimateDate: string
   readonly saleDate: string
   readonly salePrice: MoneyInput
   readonly lostDate: string
@@ -211,6 +219,9 @@ const BY_CATEGORY: Partial<Record<Category, readonly OptionalField[]>> = {
   'mount-adapter': ['adapterFrom', 'adapterTo', 'adapterAutofocus'],
 }
 
+// What you think something is worth only matters while you have it
+const WHILE_HELD: readonly OptionalField[] = ['ownEstimate', 'ownEstimateDate']
+
 const BY_STATUS: Partial<Record<Status, readonly OptionalField[]>> = {
   sold: ['saleDate', 'salePrice'],
   lost: ['lostDate'],
@@ -226,6 +237,7 @@ export function applicableFields(category: Category, status: Status): ReadonlySe
     ...(status === 'wishlist' ? [] : ONCE_BOUGHT),
     ...(BY_CATEGORY[category] ?? []),
     ...(BY_STATUS[status] ?? []),
+    ...(isHeld(status) ? WHILE_HELD : []),
   ])
 }
 
@@ -251,8 +263,8 @@ const TEXT_NAMES: Record<TextField, string> = {
   notes: 'the notes',
 }
 
-type DateField = 'purchaseDate' | 'warrantyExpiry' | 'saleDate' | 'lostDate'
-type MoneyField = 'purchasePrice' | 'insuredValue' | 'salePrice'
+type DateField = 'purchaseDate' | 'warrantyExpiry' | 'saleDate' | 'lostDate' | 'ownEstimateDate'
+type MoneyField = 'purchasePrice' | 'insuredValue' | 'salePrice' | 'ownEstimate'
 type ChoiceField =
   'mount' | 'sensorFormat' | 'lensCoverage' | 'adapterFrom' | 'adapterTo' | 'condition'
 
@@ -404,6 +416,10 @@ export function validateGear(input: GearInput, today: IsoDate): Result<GearField
   const purchasePrice = money('purchasePrice')
   const insuredValue = money('insuredValue')
   const salePrice = money('salePrice')
+  const ownEstimate = money('ownEstimate')
+  if (ownEstimate !== undefined && ownEstimate.currency !== input.purchasePrice.currency) {
+    errors.ownEstimate = 'Give your own estimate in the purchase currency.'
+  }
 
   // Valid dates compare correctly as plain YYYY-MM-DD strings
   const purchaseDate = date('purchaseDate')
@@ -425,6 +441,17 @@ export function validateGear(input: GearInput, today: IsoDate): Result<GearField
       errors.saleDate = "The sale date can't be before the purchase date."
     }
     if (salePrice === undefined) errors.salePrice ??= 'Enter what it sold for.'
+  }
+
+  // The date goes with an amount, and is dropped without one
+  const estimated = applies.has('ownEstimate') && input.ownEstimate.amount.trim() !== ''
+  const ownEstimateDate = estimated ? date('ownEstimateDate') : undefined
+  if (estimated) {
+    if (ownEstimateDate === undefined) {
+      errors.ownEstimateDate ??= 'Enter the date you set your own estimate.'
+    } else if (ownEstimateDate > today) {
+      errors.ownEstimateDate = "The date of your own estimate can't be in the future."
+    }
   }
 
   // Lenses only. The optics rules live with the optics, and report problems the same way.
@@ -472,6 +499,10 @@ export function validateGear(input: GearInput, today: IsoDate): Result<GearField
   if (currentLocation !== undefined) fields.currentLocation = currentLocation
   if (warrantyExpiry !== undefined) fields.warrantyExpiry = warrantyExpiry
   if (insuredValue !== undefined) fields.insuredValue = insuredValue
+  if (ownEstimate !== undefined && ownEstimateDate !== undefined) {
+    fields.ownEstimate = ownEstimate
+    fields.ownEstimateDate = ownEstimateDate
+  }
   if (saleDate !== undefined) fields.saleDate = saleDate
   if (salePrice !== undefined) fields.salePrice = salePrice
   if (lostDate !== undefined) fields.lostDate = lostDate
@@ -509,6 +540,8 @@ export function emptyGearInput(currency: CurrencyCode = DEFAULT_CURRENCY): GearI
     currentLocation: '',
     warrantyExpiry: '',
     insuredValue: noAmount,
+    ownEstimate: noAmount,
+    ownEstimateDate: '',
     saleDate: '',
     salePrice: noAmount,
     lostDate: '',
@@ -521,8 +554,13 @@ export function toGearInput(
   fields: GearFields,
   currency: CurrencyCode = DEFAULT_CURRENCY,
 ): GearInput {
-  const amount = (money?: Money): MoneyInput =>
-    money ? { amount: toAmountInput(money), currency: money.currency } : { amount: '', currency }
+  // An own estimate is in the purchase currency, so with no price yet it sets that currency
+  const purchaseCurrency =
+    fields.purchasePrice?.currency ?? fields.ownEstimate?.currency ?? currency
+  const amount = (money?: Money, empty = currency): MoneyInput =>
+    money
+      ? { amount: toAmountInput(money), currency: money.currency }
+      : { amount: '', currency: empty }
   return {
     category: fields.category,
     brand: fields.brand,
@@ -540,13 +578,15 @@ export function toGearInput(
     adapterAutofocus: fields.adapterAutofocus ?? false,
     ...toOpticsInput(fields),
     purchaseDate: fields.purchaseDate ?? '',
-    purchasePrice: amount(fields.purchasePrice),
+    purchasePrice: amount(fields.purchasePrice, purchaseCurrency),
     whereBought: fields.whereBought ?? '',
     condition: fields.condition ?? '',
     status: fields.status,
     currentLocation: fields.currentLocation ?? '',
     warrantyExpiry: fields.warrantyExpiry ?? '',
     insuredValue: amount(fields.insuredValue),
+    ownEstimate: amount(fields.ownEstimate, purchaseCurrency),
+    ownEstimateDate: fields.ownEstimateDate ?? '',
     saleDate: fields.saleDate ?? '',
     salePrice: amount(fields.salePrice),
     lostDate: fields.lostDate ?? '',

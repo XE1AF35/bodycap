@@ -66,6 +66,14 @@ describe('applicableFields', () => {
     ['purchaseDate', 'lens', 'wishlist', false],
     ['warrantyExpiry', 'lens', 'wishlist', false],
     ['insuredValue', 'lens', 'wishlist', false],
+    ['ownEstimate', 'lens', 'owned', true],
+    ['ownEstimate', 'bag', 'lent-out', true],
+    ['ownEstimate', 'lens', 'in-repair', true],
+    ['ownEstimate', 'lens', 'sold', false],
+    ['ownEstimate', 'lens', 'lost', false],
+    ['ownEstimate', 'lens', 'wishlist', false],
+    ['ownEstimateDate', 'lens', 'owned', true],
+    ['ownEstimateDate', 'lens', 'sold', false],
     ['purchasePrice', 'lens', 'wishlist', true],
     ['notes', 'other', 'lost', true],
     ['focalLengthMin', 'lens', 'owned', true],
@@ -446,6 +454,74 @@ describe('validateGear', () => {
   })
 })
 
+describe('validateGear for your own estimate', () => {
+  it('keeps the amount in the purchase currency, with the date it was set', () => {
+    expect(
+      validateGear(
+        input({
+          purchasePrice: { amount: '1500', currency: 'USD' },
+          ownEstimate: { amount: '1,200', currency: 'USD' },
+          ownEstimateDate: '2026-10-01',
+        }),
+        TODAY,
+      ),
+    ).toMatchObject({
+      ok: true,
+      value: {
+        ownEstimate: { amountMinor: 120000, currency: 'USD' },
+        ownEstimateDate: '2026-10-01',
+      },
+    })
+  })
+
+  it('can be given for an item with no purchase price', () => {
+    expect(
+      validateGear(input({ ownEstimate: nzd('80'), ownEstimateDate: '2026-10-01' }), TODAY),
+    ).toMatchObject({ ok: true, value: { ownEstimate: { amountMinor: 8000, currency: 'NZD' } } })
+  })
+
+  it.each<[Partial<GearInput>, keyof GearInput, string]>([
+    [{ ownEstimate: nzd('-1') }, 'ownEstimate', "Amounts can't be negative."],
+    [
+      { ownEstimate: nzd('lots') },
+      'ownEstimate',
+      'Enter the amount in numbers, for example 1,299.50.',
+    ],
+    [
+      { purchasePrice: nzd('900'), ownEstimate: { amount: '800', currency: 'USD' } },
+      'ownEstimate',
+      'Give your own estimate in the purchase currency.',
+    ],
+    [{ ownEstimateDate: '' }, 'ownEstimateDate', 'Enter the date you set your own estimate.'],
+    [{ ownEstimateDate: '2026-02-30' }, 'ownEstimateDate', 'Enter a real date.'],
+    [
+      { ownEstimateDate: '2026-10-06' },
+      'ownEstimateDate',
+      "The date of your own estimate can't be in the future.",
+    ],
+  ])('reports %o on %s', (overrides, field, message) => {
+    const result = validateGear(
+      input({ ownEstimate: nzd('500'), ownEstimateDate: '2026-10-01', ...overrides }),
+      TODAY,
+    )
+    expect(result).toEqual({ ok: false, error: { [field]: message } })
+  })
+
+  it('drops a date with no amount, and both once the item is no longer held', () => {
+    const clean = { category: 'lens', brand: 'Sony', model: 'FE 24-70mm F2.8 GM II' }
+    expect(validateGear(input({ ownEstimateDate: '2026-10-01' }), TODAY)).toEqual({
+      ok: true,
+      value: { ...clean, status: 'owned' },
+    })
+    expect(
+      validateGear(
+        input({ status: 'lost', lostDate: '2026-10-01', ownEstimate: nzd('-1') }),
+        TODAY,
+      ),
+    ).toEqual({ ok: true, value: { ...clean, status: 'lost', lostDate: '2026-10-01' } })
+  })
+})
+
 describe('toGearInput', () => {
   const body: GearFields = {
     category: 'camera-body',
@@ -535,6 +611,25 @@ describe('toGearInput', () => {
         filterThread: 40.5,
         purchasePrice: { amountMinor: 4500, currency: 'JPY' },
         status: 'owned',
+      },
+    ],
+    [
+      'a bag with your own estimate in another currency and no purchase price',
+      {
+        category: 'bag',
+        brand: 'Peak Design',
+        model: 'Everyday Backpack 20L',
+        status: 'owned',
+        ownEstimate: { amountMinor: 18000, currency: 'AUD' },
+        ownEstimateDate: '2026-09-30',
+      },
+    ],
+    [
+      'a body with your own estimate',
+      {
+        ...body,
+        ownEstimate: { amountMinor: 300000, currency: 'NZD' },
+        ownEstimateDate: '2026-10-05',
       },
     ],
   ]

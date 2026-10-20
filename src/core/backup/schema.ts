@@ -66,6 +66,8 @@ export const gearShape = {
   currentLocation: shortText.exactOptional(),
   warrantyExpiry: isoDate.exactOptional(),
   insuredValue: money.exactOptional(),
+  ownEstimate: money.exactOptional(),
+  ownEstimateDate: isoDate.exactOptional(),
   saleDate: isoDate.exactOptional(),
   salePrice: money.exactOptional(),
   lostDate: isoDate.exactOptional(),

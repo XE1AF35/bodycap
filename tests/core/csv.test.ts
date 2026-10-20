@@ -79,6 +79,8 @@ const lens: Gear = {
   currentLocation: 'Studio',
   warrantyExpiry: '2028-03-01',
   insuredValue: { amountMinor: 400000, currency: 'NZD' },
+  ownEstimate: { amountMinor: 310000, currency: 'NZD' },
+  ownEstimateDate: '2026-09-15',
   notes: 'Bought with the hood\nand a spare cap',
 }
 
@@ -134,6 +136,9 @@ const HEADER = [
   'Last changed',
   'ID',
   'Catalogue ID',
+  'Own estimate',
+  'Own estimate currency',
+  'Own estimate set',
 ]
 
 /** One row as written, from its cells */
@@ -187,6 +192,9 @@ describe('gearCsv', () => {
         '2026-06-11T22:45:10.250Z',
         lens.id,
         'sony-fe-24-70mm-f2-8-gm-ii',
+        '3100.00',
+        'NZD',
+        '2026-09-15',
       ]),
     )
   })
@@ -216,6 +224,8 @@ describe('gearCsv', () => {
     expect(cells?.[HEADER.indexOf('Weight (g)')]).toBe('1370')
     expect(cells?.[HEADER.indexOf('Filter thread (mm)')]).toBe('')
     expect(cells?.[HEADER.indexOf('Catalogue ID')]).toBe('')
+    expect(cells?.[HEADER.indexOf('Own estimate')]).toBe('')
+    expect(cells?.[HEADER.indexOf('Own estimate set')]).toBe('')
   })
 
   it('writes autofocus as No when an adapter has none', () => {

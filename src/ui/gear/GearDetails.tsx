@@ -1,8 +1,10 @@
 // Everything recorded about an item, in the same groups as the form, each as a spec readout. Details
 // never filled in are left out, and so is a group with nothing in it. On wide screens the groups
 // flow down two columns, so the reading order stays the same as the page's.
+import { useState } from 'react'
 import { formatDate, toIsoDate, type IsoDate } from '@/core/dates'
-import { CATEGORY_LABELS, CONDITION_LABELS, type Gear, type GearFields } from '@/core/gear'
+import { estimateValue } from '@/core/estimate'
+import { CATEGORY_LABELS, CONDITION_LABELS, isHeld, type Gear, type GearFields } from '@/core/gear'
 import { LOCALE } from '@/core/locale'
 import { formatMoney, type Money } from '@/core/money'
 import { MOUNT_LABELS, SENSOR_FORMAT_LABELS } from '@/core/mounts'
@@ -40,7 +42,24 @@ const dataRow = (field: keyof GearFields, value: string | undefined): ReadoutRow
   data: true,
 })
 
+/** What the item is probably worth now, and where the figure comes from, while you have it */
+function estimatedValue(item: Gear, today: IsoDate) {
+  const estimate = isHeld(item.status) ? estimateValue(item, today) : undefined
+  if (estimate === undefined) return undefined
+  return (
+    <>
+      <span className="font-mono tabular-nums">{formatMoney(estimate.value)}</span>
+      <span className="block text-sm text-muted-foreground">
+        {estimate.source === 'own'
+          ? `Your own estimate, set ${formatDate(estimate.setOn)}`
+          : 'Worked out from its price and age'}
+      </span>
+    </>
+  )
+}
+
 export function GearDetails({ item }: { readonly item: Gear }) {
+  const [today] = useState(() => toIsoDate(new Date()))
   const mount = (value: Gear['mount']) => (value === undefined ? undefined : MOUNT_LABELS[value])
   const format = (value: Gear['sensorFormat']) =>
     value === undefined ? undefined : SENSOR_FORMAT_LABELS[value]
@@ -74,6 +93,7 @@ export function GearDetails({ item }: { readonly item: Gear }) {
         rows={[
           dataRow('purchaseDate', date(item.purchaseDate)),
           dataRow('purchasePrice', money(item.purchasePrice)),
+          { label: 'Estimated value', value: estimatedValue(item, today) },
           row('whereBought', item.whereBought),
           row(
             'condition',
