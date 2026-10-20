@@ -54,6 +54,8 @@ export interface ShootRepository {
   /** Every shoot, in no particular order, since the log sorts them itself */
   list(): Live<readonly Shoot[]>
   get(id: string): Live<Shoot | undefined>
+  /** The shoots an item was on */
+  withGear(gearId: string): Live<readonly Shoot[]>
   /** Logs a shoot, giving it an ID and timestamps. Rejects with GearNotFoundError if an item is gone. */
   add(fields: ShootFields): Promise<Shoot>
   /**

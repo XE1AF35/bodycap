@@ -54,6 +54,7 @@ describe('gear detail', () => {
       screen.getAllByRole('heading', { level: 2 }).map((heading) => heading.textContent),
     ).toEqual([
       'Photos',
+      'Usage',
       'Works with your cameras',
       'Basics',
       'Purchase',

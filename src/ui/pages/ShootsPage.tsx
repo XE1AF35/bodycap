@@ -1,5 +1,5 @@
 // The shoots log: every shoot, newest first and linked to its page, with how many were logged this
-// year.
+// year, and the held gear unused in the past year.
 import { Link } from '@tanstack/react-router'
 import { useMemo, useState } from 'react'
 import { formatDate, toIsoDate } from '@/core/dates'
@@ -8,6 +8,7 @@ import { EmptyState } from '@/ui/components/EmptyState'
 import { Page } from '@/ui/components/Page'
 import { useLive } from '@/ui/hooks/useLive'
 import { ShootDialog } from '@/ui/shoots/ShootDialog'
+import { UnusedGear } from '@/ui/shoots/UnusedGear'
 import { useServices } from '@/ui/services'
 import { itemCount, shootCount } from '@/ui/settings/words'
 
@@ -61,6 +62,7 @@ export function ShootsPage() {
               </li>
             ))}
           </ul>
+          <UnusedGear shoots={sorted} today={today} />
         </>
       )}
     </Page>

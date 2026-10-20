@@ -127,4 +127,20 @@ describe('shoot repository', () => {
     await repos.gear.update(lost, { ...body, status: 'lost', lostDate: '2026-10-06' })
     expect(await current(repos.shoots.get(shoot.id))).toEqual(shoot)
   })
+
+  it('finds the shoots an item was on, each once', async () => {
+    const { repos, ids } = await withGear()
+    const [lensId = '', bodyId = ''] = ids
+    const both = await repos.shoots.add({ date: '2026-10-01', name: 'Coast', gearIds: ids })
+    const lensOnly = await repos.shoots.add({
+      date: '2026-10-02',
+      name: 'Birds',
+      gearIds: [lensId],
+    })
+    expect(await current(repos.shoots.withGear(lensId))).toEqual(
+      expect.arrayContaining([both, lensOnly]),
+    )
+    expect(await current(repos.shoots.withGear(lensId))).toHaveLength(2)
+    expect(await current(repos.shoots.withGear(bodyId))).toEqual([both])
+  })
 })

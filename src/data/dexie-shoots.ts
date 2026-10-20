@@ -20,6 +20,9 @@ export function createShootRepository(
 
     get: (id) => live(() => db.shoots.get(id)),
 
+    withGear: (gearId) =>
+      live(() => db.shoots.where('gearIds').equals(gearId).distinct().toArray()),
+
     add: (fields) =>
       db.transaction('rw', [db.shoots, db.gear, db.settings], async () => {
         await checkGearExists(db, fields.gearIds)

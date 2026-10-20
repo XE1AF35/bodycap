@@ -21,6 +21,7 @@ import { StatusActions } from '@/ui/gear/status/StatusActions'
 import { gearName, mountText } from '@/ui/gear/labels'
 import { useLive } from '@/ui/hooks/useLive'
 import { useServices } from '@/ui/services'
+import { ItemUsage } from '@/ui/shoots/ItemUsage'
 
 function BackToGear() {
   return (
@@ -114,6 +115,7 @@ export function GearDetailPage() {
         <ItemPhotos item={item} />
         <ItemLoans item={item} />
         <ItemKits item={item} />
+        <ItemUsage item={item} />
         <CompatibilityPanel item={item} />
         <GearDetails item={item} />
         <ItemMaintenance item={item} />
