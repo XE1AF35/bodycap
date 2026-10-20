@@ -68,15 +68,16 @@ split into two files.
   upgrade a database seeded at an earlier version.
 - **UI tests** render the whole app in jsdom with Testing Library.
 - **End-to-end tests** run in Playwright against the built site, with its real base path, security
-  policy, and service worker: adding gear, picking a lens from the model suggestions, and packing
-  a kit and logging a shoot with only a keyboard, lending and returning, logging maintenance, search, a backup restored
-  into an empty browser and merged into another, a photo with a GPS location stored without it, a
-  `.zip` backup with photos restored into an empty browser byte for byte, the CSV file, the
-  insurance list in print, a kit shared into another browser's wishlist, offline use, the install
-  manifest, focus outlines, layouts that must fit on a phone (the header among them), and axe accessibility checks against
-  WCAG 2.2 AA on every screen and the main dialogs in both themes. Every test fails on a console
-  error or a security policy violation. CI runs them in Chromium; locally, WebKit also runs the
-  storage and offline tests.
+  policy, and service worker: adding gear, picking a lens from the model suggestions, and packing a
+  kit and logging a shoot with only a keyboard, lending and returning, logging maintenance, a shoot
+  showing in an item's usage, and that item's cost and estimated value on the Money page, search, a
+  backup restored into an empty browser and merged into another, a photo with a GPS location stored
+  without it, a `.zip` backup with photos restored into an empty browser byte for byte, the CSV
+  file, the insurance list in print, a kit shared into another browser's wishlist, offline use, the
+  install manifest, focus outlines, layouts that must fit on a phone (the header among them), and
+  axe accessibility checks against WCAG 2.2 AA on every screen and the main dialogs in both themes.
+  Every test fails on a console error or a security policy violation. CI runs them in Chromium;
+  locally, WebKit also runs the storage and offline tests.
 
 ## Security
 
@@ -119,7 +120,7 @@ pnpm only installs versions that have been public for at least a day, refuses pa
 publishing trust has dropped, and runs no install scripts. Dependabot suggests updates weekly, a
 week after each release. Workflow actions are pinned to full commit SHAs.
 
-As of October 2026, the site loads 188 kB of gzipped JavaScript at first, about 320 kB across all
+As of October 2026, the site loads 189 kB of gzipped JavaScript at first, about 365 kB across all
 its pages, and 10 kB of CSS. The code for making and reading `.zip` backups, and the gear
 catalogue, load only when they're needed; the catalogue is 52 kB in all, and its largest maker
 chunk 6.2 kB. The build fails if the first load passes 200 kB, any script loaded later passes

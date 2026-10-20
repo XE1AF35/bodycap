@@ -23,6 +23,12 @@ your own browser, it works offline, and it never needs an account.
 - **Loans**: who has what, how to reach them, when it's due back, and each item's loan history.
 - **Photos**, up to 12 per item, shrunk in your browser.
 - **Maintenance**: sensor cleans, firmware updates, and repairs, with their costs and who did them.
+- **Shoots**: log each shoot and the gear you took, adding a whole kit at once, then see how often
+  each item has been used and which bodies, lenses, flashes, and drones haven't been on a logged
+  shoot in a year.
+- **Money**: what your gear cost each calendar year, from purchases, maintenance, and sales, and an
+  estimate of what the gear you have is worth now, worked out from its price and age or given by
+  you.
 - **What fits what**: whether each lens fits each body as it is, crops to APS-C, needs an adapter,
   or doesn't fit, and a system map of the focal lengths you cover and what each adapter unlocks.
 - **Search and filters** by category, status, and mount, kept in the address so you can bookmark
@@ -40,10 +46,10 @@ Your gear is stored in your browser on your device and never sent anywhere. Ther
 analytics, or tracking. GitHub, which hosts the site, sees the usual requests for its pages and
 update checks, as any website's host does, but never your gear.
 
-**Back up regularly.** In Settings, Back up now saves everything in one file: a `.json` file, or a
-`.zip` once you have photos (a smaller `.json` without them is also offered). Keep it somewhere
-other than your device, such as cloud storage or a USB drive. The dashboard reminds you when one is
-due, every two weeks unless you choose a week or a month.
+**Back up regularly.** In Settings, Back up now saves everything, shoots included, in one file: a
+`.json` file, or a `.zip` once you have photos (a smaller `.json` without them is also offered).
+Keep it somewhere other than your device, such as cloud storage or a USB drive. The dashboard
+reminds you when one is due, every two weeks unless you choose a week or a month.
 
 Restore takes either kind of file, shows what it holds, and changes nothing until you confirm. It
 can replace what's there, or add the backup to it, such as to merge two devices' gear. Adding never
@@ -55,8 +61,8 @@ information, so keep backup files as safely as your own.
 
 **Photos** are redrawn in your browser before they're saved, which leaves behind everything else in
 the original file, such as where it was taken and the camera's serial number. The CSV file and the
-insurance list are for reading and printing: they leave out kits, loans, maintenance, and photos,
-and can't be restored.
+insurance list are for reading and printing: they leave out kits, loans, maintenance, shoots, and
+photos, and can't be restored.
 
 **Shared kit links** say what each item is, never whose: no serial numbers, and nothing about where
 or when it was bought, where it's kept, or its warranty or insurance. Prices and notes go in only if

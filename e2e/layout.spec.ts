@@ -1,6 +1,6 @@
 // Layouts that must fit, from a laptop down to a phone: the header's links stay on one row, the
-// system map's strips stay inside their cards, and the dashboard's stats tables never
-// scroll sideways.
+// system map's strips stay inside their cards, the dashboard's stats tables never scroll sideways,
+// and nor do the shoots, shoot, and money pages on a phone.
 import { expect, open, SAMPLE_COLLECTION, SAMPLE_SYSTEM, seed, test } from './fixtures'
 
 const SIZES = [
@@ -73,3 +73,25 @@ for (const [size, width] of SIZES) {
     expect(scrolling).toBe(0)
   })
 }
+
+for (const [name, route, heading] of [
+  ['the shoots page', '#/shoots', 'Shoots'],
+  ['the money page', '#/money', 'Money'],
+] as const) {
+  test(`fits ${name} on a phone without scrolling sideways`, async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 })
+    await seed(page, SAMPLE_COLLECTION)
+    await open(page, route)
+    await expect(page.getByRole('heading', { level: 1, name: heading })).toBeVisible()
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(390)
+  })
+}
+
+test("fits a shoot's page on a phone without scrolling sideways", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await seed(page, SAMPLE_COLLECTION)
+  await open(page, '#/shoots')
+  await page.getByRole('link', { name: 'Wedding, Arrowtown' }).click()
+  await expect(page.getByRole('heading', { level: 1, name: 'Wedding, Arrowtown' })).toBeVisible()
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(390)
+})
